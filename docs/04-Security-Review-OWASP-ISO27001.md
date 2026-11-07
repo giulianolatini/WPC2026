@@ -256,7 +256,7 @@ Il repository non è un SGSI: fornisce input ed evidenze per l'organizzazione ch
 | 9.1 | Monitoraggio | Health check, audit log, spend log | Metriche e revisioni periodiche |
 | 9.2 | Audit interno | Review PR (codex, agy, PO) | Includi gateway e BYOK nel programma di audit |
 | 9.3 | Riesame della direzione | [Review-Perplexity.md](Review-Perplexity.md) | Porta i rischi residui (§10) al riesame |
-| 10.1 | Miglioramento continuo | ADR *Superseded* (D-013, D-014, D-024) | — |
+| 10.1 | Miglioramento continuo | ADR sostituiti: D-004 → D-013, D-006 → D-014, D-023 → D-024 | — |
 | 10.2 | Non conformità e azioni correttive | §9 (AZ-01…AZ-10 chiuse) | Registra e chiudi le azioni con evidenza |
 
 **ISO/IEC 42001:2023.** Vale anche per chi *usa* sistemi AI. Non è richiesta dalla 27001; si integra con la stessa struttura e aggiunge l'AI system impact assessment. Citala come riferimento se l'AI non è il core business ([S-149](Sources.md#s-149), P-10).
