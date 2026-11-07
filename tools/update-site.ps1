@@ -12,7 +12,7 @@ $PyFonts = @('--with', 'fonttools==4.67.*', '--with', 'brotli==1.2.*')
 $Cache = Join-Path $Root '.cache\nerd-fonts'      # nel repo, ignorata da git
 
 if ($Check) {
-    uv run --no-project @PyMd python tools/build_site.py --check
+    uv run --no-project --python 3.12 @PyMd python tools/build_site.py --check
     exit $LASTEXITCODE
 }
 
@@ -29,10 +29,10 @@ if ($Fonts) {
         # Ogni zip si estrae in una cartella propria: i file scaricati sono dati non fidati.
         Expand-Archive -Path $zip -DestinationPath $dest -Force
     }
-    uv run --no-project @PyFonts python -I tools/fonts.py $Cache
+    uv run --no-project --python 3.12 @PyFonts python -I tools/fonts.py $Cache
     if ($LASTEXITCODE) { exit $LASTEXITCODE }
 }
 
-uv run --no-project @PyMd python -I tools/build_site.py
+uv run --no-project --python 3.12 @PyMd python -I tools/build_site.py
 if ($LASTEXITCODE) { exit $LASTEXITCODE }
 Write-Output 'Apri site\index.html nel browser (funziona anche offline, da file://).'

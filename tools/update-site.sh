@@ -23,22 +23,22 @@ for a in "$@"; do
 done
 
 if [ "$check" = 1 ]; then
-  exec uv run --no-project "${PY_MD[@]}" python tools/build_site.py --check
+  exec uv run --no-project --python 3.12 "${PY_MD[@]}" python tools/build_site.py --check
 fi
 
 if [ "$fonts" = 1 ]; then
-  release="$(uv run --no-project python -c 'import json;print(json.load(open("tools/fonts.json"))["release"])')"
+  release="$(uv run --no-project --python 3.12 python -c 'import json;print(json.load(open("tools/fonts.json"))["release"])')"
   mkdir -p "$CACHE"
   # Ogni zip si estrae in una cartella propria: i file scaricati sono dati non fidati.
-  for zip in $(uv run --no-project python -c 'import json;print(" ".join(f["zip"] for f in json.load(open("tools/fonts.json"))["families"]))'); do
+  for zip in $(uv run --no-project --python 3.12 python -c 'import json;print(" ".join(f["zip"] for f in json.load(open("tools/fonts.json"))["families"]))'); do
     name="${zip%.zip}"
     echo "Scarico $zip"
     curl -fsSL --retry 2 -o "$CACHE/$zip" "$release$zip"
     rm -rf "${CACHE:?}/$name" && mkdir -p "$CACHE/$name"
     unzip -q -o "$CACHE/$zip" -d "$CACHE/$name"
   done
-  uv run --no-project "${PY_FONTS[@]}" python -I tools/fonts.py "$CACHE"
+  uv run --no-project --python 3.12 "${PY_FONTS[@]}" python -I tools/fonts.py "$CACHE"
 fi
 
-uv run --no-project "${PY_MD[@]}" python -I tools/build_site.py
+uv run --no-project --python 3.12 "${PY_MD[@]}" python -I tools/build_site.py
 echo "Apri site/index.html nel browser (funziona anche offline, da file://)."
