@@ -37,8 +37,15 @@ model_list:
     litellm_params:
       model: openrouter/openai/gpt-oss-120b
       api_key: os.environ/OPENROUTER_API_KEY
+      # AZ-06: provider routing di OpenRouter: niente provider che conservano i dati, niente fallback
+      # ⚠️ verifica i nomi dei campi su openrouter.ai/docs (provider routing) — docs/Sources.md#s-151
+      extra_body:
+        provider:
+          data_collection: deny
+          allow_fallbacks: false
 
   # --- Hugging Face Inference Providers: huggingface/<provider>/<org>/<model> (docs/Sources.md#s-027, #s-047)
+  # AZ-06: provider di inferenza fissato (groq), non scelto in automatico
   - model_name: hf-gpt-oss
     litellm_params:
       model: huggingface/groq/openai/gpt-oss-120b
@@ -47,9 +54,16 @@ model_list:
 litellm_settings:
   # Scarta i parametri non supportati da un provider invece di restituire errore.
   drop_params: true
+  # AZ-09: non inviare il contenuto di prompt e risposte ai callback di logging ⚠️ (verifica nella doc logging)
+  turn_off_message_logging: true
 
 general_settings:
   # Tutte le chiamate devono presentare questa chiave (o una virtual key nel profilo esteso).
   master_key: os.environ/LITELLM_MASTER_KEY
   # Hardening (docs/Decisions.md#d-018, docs/Sources.md#s-108)
+  # AZ-04: blocca il login UI con UI_USERNAME/UI_PASSWORD/master key.
+  # Profilo esteso: crea PRIMA un proxy_admin con scripts/bootstrap-admin.sh (l'API accetta sempre la master key).
   disable_env_credential_login: true
+  # AZ-05: limiti di richiesta e upload
+  max_request_size_mb: 20
+  allowed_file_extensions: []      # lista vuota = nessun upload di file (la demo non ne usa)
