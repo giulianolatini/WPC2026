@@ -12,7 +12,13 @@
 
   /* ------------------------------------------------------------ stato */
   let state = { current: null, sessions: {} };   // caricato e validato all'avvio (loadState)
-  const save = () => { const s = cur(); if (s) s.updatedAt = new Date().toISOString(); WPC.store(KEY, state); };
+  // R4-codex-02: se il browser non salva, un avviso fisso chiede l'export JSON (le evidenze restano solo in memoria).
+  const save = () => {
+    const s = cur(); if (s) s.updatedAt = new Date().toISOString();
+    const ok = WPC.store(KEY, state);
+    const w = document.getElementById('storage-warning'); if (w) w.classList.toggle('hidden', ok);
+    return ok;
+  };
   const cur = () => state.sessions[state.current];
 
   function newSession() {
@@ -29,7 +35,9 @@
     const p = (navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || '';
     return /win/i.test(p) ? 'windows' : /mac/i.test(p) ? 'macos' : 'debian';
   }
-  const stepState = id => (cur().steps[id] ||= { status: '', checks: [], output: '', note: '', at: '', commands: '' });
+  // checks ha sempre una voce booleana per ogni casella del passo, come in sanitizeSession() (R4-agy-05)
+  const emptyChecks = id => Array.from({ length: (RB.phases.flatMap(p => p.steps).find(s => s.id === id) || {}).checks || 0 }, () => false);
+  const stepState = id => (cur().steps[id] ||= { status: '', checks: emptyChecks(id), output: '', note: '', at: '', commands: '' });
 
   /* ------------------------------------------------------------ parametri */
   function paramValue(p, s = cur()) {
@@ -53,17 +61,22 @@
   // Ogni sostituzione è idempotente: redact(redact(x)) === redact(x).
   const SECRET_NAME = '(?:[A-Za-z0-9_-]*?(?:password|passwd|secret|token|api[_-]?key|master[_-]?key|salt[_-]?key|private[_-]?key|access[_-]?key)|key)';
   const REDACT = [
+    // prima le intestazioni: "Bearer sk-…" diventa "Bearer [REDATTO]" una volta sola (idempotente, R4-agy-01)
+    [/(Bearer\s+)[A-Za-z0-9._~+\/\-]{8,}=*/gi, '$1[REDATTO]'],
+    [/(x-api-key:\s*)[^\s\[]\S*/gi, '$1[REDATTO]'],
     [/\b(sk-(?:ant-|or-|proj-)?)[A-Za-z0-9_\-]{8,}/g, '$1[REDATTO]'],
     [/\bhf_[A-Za-z0-9]{10,}/g, 'hf_[REDATTO]'],
     [/\bAIza[0-9A-Za-z_\-]{20,}/g, 'AIza[REDATTO]'],
-    [/(Bearer\s+)[A-Za-z0-9._~+\/\-]{8,}=*/gi, '$1[REDATTO]'],
-    [/(x-api-key:\s*)\S+/gi, '$1[REDATTO]'],
+    [/\b(gh[pousr]_|github_pat_)[A-Za-z0-9_]{16,}/g, '$1[REDATTO]'],
     // JSON: "POSTGRES_PASSWORD": "valore", "key": "valore"
     [new RegExp('("' + SECRET_NAME + '"\\s*:\\s*)"(?:[^"\\\\]|\\\\.)*"', 'gi'), '$1"[REDATTO]"'],
-    // CHIAVE=valore, CHIAVE: valore, anche con valore tra virgolette e spazi
-    // anche nomi con trattino: x-litellm-api-key: …, api-key: …, client-secret: … (R2-agy-04)
-    [/\b((?:[A-Za-z][A-Za-z0-9_-]*[_-])?(?:API[_-]?KEY|MASTER[_-]?KEY|SALT[_-]?KEY|ACCESS[_-]?KEY|PRIVATE[_-]?KEY|TOKEN|PASSWORD|PASSWD|SECRET)\s*[=:]\s*)(?:"[^"\n]*"|'[^'\n]*'|[^\s"',}]+)/gi, '$1[REDATTO]'],
-    [/(postgres(?:ql)?:\/\/[^:\s\/]+:)[^@\s]+@/gi, '$1[REDATTO]@']
+    // CHIAVE=valore e Intestazione: valore, con o senza separatore prima del nome (PGPASSWORD, APIKEY,
+    // x-litellm-api-key, client-secret); valore tra virgolette o fino al primo spazio
+    [/\b((?:[A-Za-z][A-Za-z0-9_-]*?)?(?:API[_-]?KEY|MASTER[_-]?KEY|SALT[_-]?KEY|ACCESS[_-]?KEY|PRIVATE[_-]?KEY|TOKEN|PASSWORD|PASSWD|SECRET)\s*[=:]\s*)(?:"[^"\n]*"|'[^'\n]*'|[^\s"']+)/gi, '$1[REDATTO]'],
+    // SQL: CREATE ROLE … PASSWORD '…'
+    [/(\bPASSWORD\s+)'[^'\n]*'/gi, "$1'[REDATTO]'"],
+    // URL con password: postgresql://utente:password@, anche postgresql+asyncpg://
+    [/(postgres(?:ql)?(?:\+[\w-]+)?:\/\/[^:\s\/@]+:)[^@\s]+@/gi, '$1[REDATTO]@']
   ];
   function redact(text) { let t = text || ''; for (const [re, rep] of REDACT) t = t.replace(re, rep); return t; }
 
@@ -75,16 +88,30 @@
   const ID_RE = /^s[a-z0-9]{1,20}$/;
   const isoOr = (v, d) => (typeof v === 'string' && !isNaN(Date.parse(v))) ? new Date(v).toISOString() : d;
   const str = (v, max) => (typeof v === 'string' ? v : '').slice(0, max);
-  // Un parametro entra tra virgolette doppie nei comandi bash e PowerShell: lì "$" e "`" espandono ancora.
-  // Unica espansione ammessa: $HOME all'inizio (codex review P2, R2-agy-03). Niente $( ${ $VAR, backtick,
-  // virgolette, parentesi, ; | & < > o a capo.
+  // Valori ammessi per tipo di parametro (colonna Tipo del runbook). Un parametro entra nei comandi bash e
+  // PowerShell: un valore libero può aggiungere argomenti (es. LITELLM_PORT="4000 --next https://…", R4-codex-01)
+  // o espandere codice tra virgolette doppie ($( ), backtick). Unica espansione ammessa: $HOME all'inizio di un path.
+  const PARAM_TYPES = {
+    port: v => /^(?:[1-9]\d{0,3}|[1-5]\d{4}|6[0-4]\d{3}|65[0-4]\d{2}|655[0-2]\d|6553[0-5])$/.test(v),
+    major: v => /^[1-9]\d{0,2}$/.test(v),
+    version: v => /^[0-9A-Za-z][0-9A-Za-z._-]{0,40}$/.test(v),
+    name: v => /^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$/.test(v),
+    email: v => /^[A-Za-z0-9._%+-]{1,64}@[A-Za-z0-9.-]{1,190}\.[A-Za-z]{2,24}$/.test(v),
+    path: v => {
+      const rest = v.replace(/^\$HOME(?=$|[\\/])/, '');
+      return !/[$`"'()\n\r;|&<>]/.test(rest) && !/^-/.test(v) && !/\\$/.test(v);
+    }
+  };
+  const PARAM_BY_NAME = Object.fromEntries(RB.params.map(p => [p.name, p]));
   function cleanParam(name, v) {
     v = str(v, 300).trim();
     if (!v) return '';
-    const rest = v.replace(/^\$HOME(?=$|[\\/])/, '');
-    if (/[$`"'()\n\r;|&<>]/.test(rest) || redact(v) !== v || redact(name + '=' + v) !== name + '=' + v) return null;
+    const p = PARAM_BY_NAME[name];
+    const ok = p && (PARAM_TYPES[p.type] || PARAM_TYPES.path)(v);
+    if (!ok || redact(v) !== v || redact(name + '=' + v) !== name + '=' + v) return null;
     return v;
   }
+
   // Comandi registrati (localStorage o JSON importato). Un comando resta se corrisponde a un blocco del
   // runbook con parametri validi (anche se contiene nomi come POSTGRES_PASSWORD: S-202, S-404, S-501),
   // oppure se la redazione non lo cambia (es. runbook di una versione precedente). Altrimenti la lista
@@ -118,8 +145,8 @@
     const pick = (v, allowed, d) => allowed.includes(v) ? v : d;
     const s = {
       id: raw.id,
-      name: str(raw.name, 120).trim() || 'Sessione importata',
-      operator: str(raw.operator, 120),
+      name: redact(str(raw.name, 120)).trim() || 'Sessione importata',
+      operator: redact(str(raw.operator, 120)),
       os: pick(raw.os, Object.keys(RB.osLabels), 'debian'),
       path: pick(raw.path, ['docker', 'uv'], 'docker'),
       profile: pick(raw.profile, ['minimal', 'extended'], 'minimal'),
@@ -181,7 +208,7 @@
   function renderParams() {
     const s = cur();
     $('#params').innerHTML = RB.params.map(p => `
-      <label class="field" title="${esc(p.description)}"><span>${esc(p.name)} — ${esc(p.description.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1'))}</span>
+      <label class="field" title="${esc(p.description)}"><span>${esc(p.name)} <small>(${esc(p.type)})</small> — ${esc(p.description.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1'))}</span>
       <input type="text" class="mono" data-param="${esc(p.name)}" value="${esc(s.params[p.name] ?? '')}" placeholder="${esc(s.os === 'windows' ? p.defaultWindows : p.default)}"></label>`).join('');
   }
 
@@ -299,7 +326,9 @@
         });
       });
       el.querySelectorAll('input[data-check]').forEach(cb => cb.addEventListener('change', () => {
-        stepState(id).checks[+cb.dataset.check] = cb.checked; save();
+        const ss = stepState(id), base = emptyChecks(id);
+        ss.checks = base.map((_, i) => ss.checks[i] === true);
+        ss.checks[+cb.dataset.check] = cb.checked; save();
       }));
     });
   }
@@ -308,7 +337,15 @@
   const currentCommands = (st, s = cur()) => st.blocks.filter(x => x.type === 'code' && visibleBlock(x, s)).map(x => ({ lang: x.lang, code: resolve(x.code, s) }));
   const isStale = (st, ss, s = cur()) => Array.isArray(ss.commands) && ss.commands.length > 0 && JSON.stringify(ss.commands) !== JSON.stringify(currentCommands(st, s));
 
+  // Un campo modificato si salva all'evento change (perdita del focus). Prima di un export, e quando la pagina
+  // si chiude o va in background, il campo attivo si salva subito (R4-agy-02). Ritorna undefined.
+  function flushActive() {
+    const a = document.activeElement;
+    if (a && a.matches && a.matches('textarea[data-f], #s-name, #s-operator, #params input')) a.dispatchEvent(new Event('change', { bubbles: true }));
+  }
   function bindGlobal() {
+    window.addEventListener('pagehide', flushActive);
+    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') flushActive(); });
     $('#session-select').addEventListener('change', e => { state.current = e.target.value; save(); renderAll(); });
     $('#session-new').addEventListener('click', () => { newSession(); renderAll(); WPC.toast('Nuova sessione creata'); });
     $('#session-delete').addEventListener('click', () => {
@@ -317,21 +354,22 @@
       state.current = Object.keys(state.sessions)[0] || null;
       if (!state.current) newSession(); save(); renderAll();
     });
-    $('#s-name').addEventListener('change', e => { cur().name = e.target.value || cur().name; save(); renderSessionBar(); });
-    $('#s-operator').addEventListener('change', e => { cur().operator = e.target.value; save(); });
+    // nome e operatore passano dalla redazione come output e note (R4-agy-02)
+    $('#s-name').addEventListener('change', e => { cur().name = redact(e.target.value).trim() || cur().name; save(); renderSessionBar(); });
+    $('#s-operator').addEventListener('change', e => { e.target.value = cur().operator = redact(e.target.value); save(); });
     ['os', 'path', 'profile'].forEach(k => $('#s-' + k).addEventListener('change', e => { cur()[k] = e.target.value; save(); renderParams(); renderPhases(); }));
     $('#params').addEventListener('change', e => {
       const name = e.target.dataset.param; if (!name) return;
       const v = cleanParam(name, e.target.value);
       if (v === null) {
         e.target.value = cur().params[name] ?? '';   // torna al valore accettato: campo, comandi ed evidenze restano coerenti
-        WPC.toast('Valore rifiutato: niente segreti, virgolette, $( ), backtick o ; | & < >. Solo $HOME all\'inizio.');
+        WPC.toast('Valore rifiutato per il tipo «' + (PARAM_BY_NAME[name] || {}).type + '»: vedi le regole del runbook.');
         return;
       }
       cur().params[name] = v; save(); renderPhases();   // aggiorna comandi e testo dei passi
     });
-    $('#export-md').addEventListener('click', () => download(fileBase() + '.md', exportMarkdown(), 'text/markdown'));
-    $('#export-json').addEventListener('click', () => download(fileBase() + '.json', JSON.stringify({ format: 'wpc2026-runbook-session', version: 1, runbook: RB.version + '·' + RB.hash, session: cur() }, null, 2), 'application/json'));
+    $('#export-md').addEventListener('click', () => flushActive() || download(fileBase() + '.md', exportMarkdown(), 'text/markdown'));
+    $('#export-json').addEventListener('click', () => flushActive() || download(fileBase() + '.json', JSON.stringify({ format: 'wpc2026-runbook-session', version: 1, runbook: RB.version + '·' + RB.hash, session: cur() }, null, 2), 'application/json'));
     $('#import-json').addEventListener('click', () => $('#import-file').click());
     $('#import-file').addEventListener('change', async e => {
       const f = e.target.files[0]; e.target.value = ''; if (!f) return;
