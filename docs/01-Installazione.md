@@ -411,6 +411,12 @@ docker compose -f compose.extended.yaml up -d
 ADMIN_EMAIL=tu@example.com ./scripts/bootstrap-admin.sh
 ```
 
+```powershell
+.\scripts\Bootstrap-Admin.ps1 -AdminEmail tu@example.com      # Windows, PowerShell 7
+```
+
+> La password deve avere almeno 12 caratteri con maiuscole, minuscole, cifre e simboli: gli script la controllano prima di creare l'utente. Se la creazione riesce ma l'impostazione della password fallisce, ripeti con `RESUME=1` (bash) o `-Resume` (PowerShell).
+
 - [ ] Apri l'Admin UI: `http://localhost:4000/ui` e accedi con email e password del `proxy_admin`.
 
 > Se rimani senza accesso: con la master key togli `disable_env_credential_login` da `config.yaml`, riavvia, crea l'utente, rimetti l'opzione e riavvia ([S-148](Sources.md#s-148)). Un `proxy_admin` di emergenza può accedere da `/fallback/login`.
