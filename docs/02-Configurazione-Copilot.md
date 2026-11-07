@@ -355,8 +355,8 @@ curl -s https://openrouter.ai/api/v1/models | head -c 600
   "apiType": "chat-completions",
   "models": [
     {
-      "id": "openai/gpt-oss-120b:fastest",
-      "name": "HF · gpt-oss-120b (fastest)",
+      "id": "openai/gpt-oss-120b:groq",
+      "name": "HF · gpt-oss-120b (groq)",
       "url": "https://router.huggingface.co/v1/chat/completions",
       "toolCalling": true,
       "vision": false,
@@ -367,7 +367,7 @@ curl -s https://openrouter.ai/api/v1/models | head -c 600
 }
 ```
 
-Il suffisso dell'ID sceglie il provider di inferenza: `:fastest` (default), `:cheapest`, `:preferred`, oppure `:<provider>` (es. `:groq`) ([S-047](Sources.md#s-047)).
+Il suffisso dell'ID sceglie il provider di inferenza: `:fastest` (default), `:cheapest`, `:preferred`, oppure `:<provider>` (es. `:groq`) ([S-047](Sources.md#s-047)). L'esempio fissa `:groq`: così sai quale provider tratta i dati ([04 AZ-06](04-Security-Review-OWASP-ISO27001.md#9-azioni)).
 
 ### 3.6 Riepilogo della configurazione nativa
 
@@ -626,6 +626,13 @@ specify init --here --force --integration copilot
 | `--integration-options="--commands"` | Layout a comandi (agents + prompt files) al posto delle skill |
 
 > L'opzione `--ai` non esiste più: è stata rimossa nella 0.10.0. Usa `--integration` ([S-084](Sources.md#s-084), P-07).
+
+- [ ] Prima del primo commit, controlla i file generati ([04 AZ-10](04-Security-Review-OWASP-ISO27001.md#9-azioni)). Gli script in `.specify/scripts/` e le skill sono eseguiti dall'agente:
+
+```bash
+git status --short
+git diff --stat
+```
 
 Gli script vanno in `.specify/scripts/bash/`, `.specify/scripts/powershell/` o `.specify/scripts/python/` ([S-081](Sources.md#s-081)).
 **File generati per Copilot** ([S-083](Sources.md#s-083)):

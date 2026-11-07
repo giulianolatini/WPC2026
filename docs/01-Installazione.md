@@ -300,6 +300,18 @@ OPENROUTER_API_KEY=sk-or-...
 HF_TOKEN=hf_...
 ```
 
+- [ ] Limita i permessi di `.env` al solo proprietario ([04 AZ-01](04-Security-Review-OWASP-ISO27001.md#9-azioni)):
+
+```bash
+chmod 600 .env
+```
+
+```powershell
+icacls .env /inheritance:r /grant:r "${env:USERNAME}:R"
+```
+
+> Gli script di avvio rifiutano un `.env` leggibile da altri utenti e lo leggono come coppie `CHIAVE=valore`, senza eseguirlo ([`service/load-env.sh`](../examples/litellm/service/load-env.sh)).
+
 > **Sicurezza.** Non fare commit del file `.env`. Il `.gitignore` del repo lo esclude.
 > Il token Hugging Face deve essere *fine-grained* con il permesso *Make calls to Inference Providers* ([S-047](Sources.md#s-047)).
 > `LITELLM_MASTER_KEY` è anche la password `admin` dell'Admin UI ([S-020](Sources.md#s-020)).
@@ -322,7 +334,13 @@ Nel 2026 LiteLLM ha avuto due compromissioni della release ([S-104](Sources.md#s
 Regole del progetto ([D-018](Decisions.md#d-018)):
 
 - [ ] Usa sempre una versione fissata (`v1.108.2`). Non usare `latest`, `main-latest`, `main-stable`.
-- [ ] Per l'uso in team fissa anche il digest e verifica la firma cosign con la chiave del 2026-10-23 ([S-104](Sources.md#s-104), [S-109](Sources.md#s-109)).
+- [ ] Per l'uso in team fissa anche il digest e verifica la firma cosign con la chiave del 2026-10-23 ([S-104](Sources.md#s-104), [S-109](Sources.md#s-109)). Lo script controlla l'impronta della chiave, verifica la firma e stampa i digest da copiare in `.env`:
+
+```bash
+./scripts/pin-images.sh        # richiede docker e cosign
+```
+
+- [ ] Gli esempi usano l'immagine `litellm-non_root` ([S-109](Sources.md#s-109)). ⚠️ Lo script fallisce se il tag `v1.108.2` non esiste per questa immagine: in quel caso usa il tag LTS indicato dalle release note.
 - [ ] Se hai installato `1.82.7`, `1.82.8` o `1.107.0`, considera rubate tutte le credenziali dell'host e ruotale ([S-104](Sources.md#s-104)).
 
 ### 5.1 Profilo minimo (senza database)
@@ -335,9 +353,10 @@ Il profilo minimo usa solo `config.yaml` e la master key. Non ha Admin UI per i 
 cd ~/wpc2026-litellm
 docker run -d --name litellm \
   --env-file .env \
+  --security-opt no-new-privileges:true --cap-drop ALL \
   -v "$(pwd)/config.yaml:/app/config.yaml:ro" \
   -p 127.0.0.1:4000:4000 \
-  ghcr.io/berriai/litellm:v1.108.2 \
+  ghcr.io/berriai/litellm-non_root:v1.108.2 \
   --config /app/config.yaml
 ```
 
@@ -363,7 +382,15 @@ Il profilo esteso aggiunge PostgreSQL. PostgreSQL contiene modelli, chiavi e spe
 docker compose -f compose.extended.yaml up -d
 ```
 
-- [ ] Apri l'Admin UI: `http://localhost:4000/ui` (utente `admin`, password = `LITELLM_MASTER_KEY`) ([S-020](Sources.md#s-020)).
+- [ ] Crea il primo amministratore. `config.yaml` blocca il login UI con la master key (`disable_env_credential_login: true`), ma l'API accetta sempre la master key ([S-148](Sources.md#s-148)):
+
+```bash
+ADMIN_EMAIL=tu@example.com ./scripts/bootstrap-admin.sh
+```
+
+- [ ] Apri l'Admin UI: `http://localhost:4000/ui` e accedi con email e password del `proxy_admin`.
+
+> Se rimani senza accesso: con la master key togli `disable_env_credential_login` da `config.yaml`, riavvia, crea l'utente, rimetti l'opzione e riavvia ([S-148](Sources.md#s-148)). Un `proxy_admin` di emergenza può accedere da `/fallback/login`.
 
 File: [`examples/litellm/compose.extended.yaml`](../examples/litellm/compose.extended.yaml).
 
@@ -394,12 +421,11 @@ uv tool install 'litellm[proxy]==1.108.2'
 
 > Non usare `pip install` su un Python vecchio: `pip` può installare una release vecchia. LiteLLM ≥ 1.84.0 richiede Python ≥ 3.10; `uv` installa un Python compatibile ([S-021](Sources.md#s-021)).
 
-- [ ] Verifica l'avvio in primo piano:
+- [ ] Verifica l'avvio in primo piano. Lo script legge `.env` in modo sicuro e usa `--host 127.0.0.1`:
 
 ```bash
 cd ~/wpc2026-litellm
-set -a; . ./.env; set +a
-litellm --config config.yaml --host 127.0.0.1 --port 4000
+./service/start-litellm.sh
 ```
 
 > Il default di `--host` è `0.0.0.0`: il proxy è raggiungibile da tutta la rete locale. Usa sempre `--host 127.0.0.1` ([S-118](Sources.md#s-118)).
@@ -425,6 +451,7 @@ cp ~/wpc2026-litellm/service/litellm.service ~/.config/systemd/user/
 systemctl --user daemon-reload
 systemctl --user enable --now litellm.service
 systemctl --user status litellm.service
+systemd-analyze --user security litellm.service   # valuta le direttive di hardening
 ```
 
 - [ ] (Opzionale) Avvia il servizio anche senza login: `sudo loginctl enable-linger $USER`.
@@ -443,6 +470,7 @@ launchctl print gui/$(id -u)/com.wpc2026.litellm | head -20
 ```
 
 - [ ] Per arrestare: `launchctl bootout gui/$(id -u)/com.wpc2026.litellm`.
+- [ ] Log: `~/Library/Logs/wpc2026-litellm.log` (permessi solo utente).
 
 ### 6.4 Servizio su Windows (Task Scheduler)
 
