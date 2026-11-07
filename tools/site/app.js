@@ -75,6 +75,14 @@
     if (/["'`\n\r;|&<>]/.test(v) || redact(v) !== v || redact(name + '=' + v) !== name + '=' + v) return null;
     return v;
   }
+  // Comandi importati: restano solo se la redazione non li cambia. Un comando legittimo può contenere
+  // un nome come POSTGRES_PASSWORD (es. in un grep): in quel caso si usano i comandi attuali (S-404, S-501).
+  function importCommands(st, cmds, s) {
+    if (!Array.isArray(cmds)) return '';
+    const list = cmds.slice(0, 20).filter(c => c && typeof c.code === 'string')
+      .map(c => ({ lang: /^[\w-]{1,20}$/.test(c.lang) ? c.lang : 'plaintext', code: c.code.slice(0, 20000) }));
+    return list.every(c => redact(c.code) === c.code) ? list : currentCommands(st, s);
+  }
   function sanitizeSession(raw) {
     if (!raw || typeof raw !== 'object' || !ID_RE.test(raw.id)) throw new Error('id');
     const now = new Date().toISOString();
@@ -106,10 +114,7 @@
         output: noOut ? '' : redact(str(x.output, 100000)),
         note: redact(str(x.note, 10000)),
         at: status ? isoOr(x.at, '') : '',
-        commands: status && Array.isArray(x.commands)
-          ? x.commands.slice(0, 20).filter(c => c && typeof c.code === 'string')
-              .map(c => ({ lang: /^[\w-]{1,20}$/.test(c.lang) ? c.lang : 'plaintext', code: redact(c.code.slice(0, 20000)) }))
-          : ''
+        commands: status ? importCommands(st, x.commands, s) : ''
       };
     }
     return s;
