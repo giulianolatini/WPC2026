@@ -29,6 +29,7 @@ Get-Content $envFile | Where-Object { $_ -match '^\s*[A-Za-z_][A-Za-z0-9_]*=' } 
     $value = $value.Trim().Trim('"').Trim("'")
     [Environment]::SetEnvironmentVariable($name.Trim(), $value, 'Process')
 }
+if (-not $env:LITELLM_MASTER_KEY) { Write-Error 'LITELLM_MASTER_KEY vuota in .env'; exit 1 }   # fail-closed (R-agy-01)
 & "$HOME\.local\bin\litellm.exe" --config (Join-Path $WpcDir 'config.yaml') --host 127.0.0.1 --port $Port
 # R-codex-05: propaga il codice di uscita, così Task Scheduler vede il fallimento e applica RestartCount.
 exit $LASTEXITCODE

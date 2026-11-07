@@ -9,4 +9,5 @@ cd "$WPC_DIR"
 # shellcheck source=load-env.sh
 . "$WPC_DIR/service/load-env.sh"
 load_env_file "$WPC_DIR/.env"               # AZ-01, AZ-08: niente '. ./.env'
+: "${LITELLM_MASTER_KEY:?LITELLM_MASTER_KEY vuota in .env}"   # fail-closed (R-agy-01)
 exec "$HOME/.local/bin/litellm" --config "$WPC_DIR/config.yaml" --host 127.0.0.1 --port "$LITELLM_PORT"
