@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="it" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="generator" content="tools/build_site.py — non modificare a mano">
+<title>Sources — WPC2026</title>
+<link rel="stylesheet" href="../assets/fonts.css">
+<link rel="stylesheet" href="../assets/vendor/highlight/github.min.css" id="hl-light">
+<link rel="stylesheet" href="../assets/vendor/highlight/github-dark.min.css" id="hl-dark" disabled>
+<link rel="stylesheet" href="../assets/styles.css">
+
+<script>try{var p=JSON.parse(localStorage.getItem('wpc2026.prefs')||'{}');var t=p.theme||'auto';if(t==='auto')t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body>
+<div class="topbar">
+  <h1><a href="../index.html" style="color:inherit;text-decoration:none">WPC2026</a> <span class="ver">Sources</span></h1>
+  <label>Tema <select id="pref-theme"><option value="auto">automatico</option><option value="light">chiaro</option><option value="dark">scuro</option></select></label>
+  <label>Testo <select id="pref-body"></select></label>
+  <label>Codice <select id="pref-code"></select></label>
+</div>
+<nav class="docnav"><a href="../index.html">← Runbook</a><ul><li><a href="01-Installazione.html">01-Installazione</a></li><li><a href="02-Configurazione-Copilot.html">02-Configurazione-Copilot</a></li><li><a href="03-Security-Best-Practices.html">03-Security-Best-Practices</a></li><li><a href="04-Security-Review-OWASP-ISO27001.html">04-Security-Review-OWASP-ISO27001</a></li><li><a href="Decisions.html">Decisions</a></li><li><a href="Sources.html">Sources</a></li><li><a href="Review-Perplexity.html">Review-Perplexity</a></li></ul></nav><article class="doc"><h1 id="sources--fonti-documentali">Sources — Fonti documentali</h1>
+<p>Questo file contiene l'elenco delle fonti documentali del repository.
+Ogni fonte ha un identificativo stabile (<code>S-NNN</code>) e un'ancora.
+Gli altri documenti puntano alla fonte con un link del tipo <code>Sources.md#s-001</code>.</p>
+<p><strong>Regole d'uso</strong></p>
+<ul>
+<li>Usa sempre il link all'ancora, non l'URL diretto, nei documenti in <code>docs/</code>.</li>
+<li>Non cambia l'identificativo di una fonte. Se una fonte non è più valida, segna lo stato <code>Obsoleta</code> e aggiungi una nuova fonte.</li>
+<li>La colonna <strong>Verifica</strong> indica la data di consultazione. Il simbolo ⚠️ indica un contenuto non verificato completamente.</li>
+</ul>
+<p><strong>Tag di tipologia</strong>: <code>[PRIMARY]</code> documentazione ufficiale del prodotto; <code>[VENDOR-DOC]</code> documentazione di vendor di terze parti; <code>[OPINION]</code> articolo secondario.</p>
+<p><strong>Verifica</strong>: data di consultazione diretta. <code>P-NN</code> indica una fonte trovata dalla review Perplexity (<a href="Review-Perplexity.html">Review-Perplexity.md</a>) e non riletta dall'assistente.</p>
+<hr />
+<h2 id="visual-studio-code-e-github-copilot">Visual Studio Code e GitHub Copilot</h2>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Titolo</th>
+<th>Tipo</th>
+<th>Verifica</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a id="s-001"></a>S-001</td>
+<td><a href="https://code.visualstudio.com/docs/copilot/customization/language-models">VS Code — Bring your own language model key (Language models)</a></td>
+<td>PRIMARY</td>
+<td>2026-11-07</td>
+</tr>
+<tr>
+<td><a id="s-002"></a>S-002</td>
+<td><a href="https://code.visualstudio.com/docs/copilot/customization/overview">VS Code — Customize AI in Visual Studio Code (overview)</a></td>
+<td>PRIMARY</td>
+<td>2026-11-07</td>
+</tr>
+<tr>
+<td><a id="s-003"></a>S-003</td>
+<td><a href="https://code.visualstudio.com/docs/copilot/customization/custom-instructions">VS Code — Custom instructions</a></td>
+<td>PRIMARY</td>
+<td>2026-11-07</td>
+</tr>
+<tr>
+<td><a id="s-004"></a>S-004</td>
+<td><a href="https://code.visualstudio.com/docs/copilot/customization/agent-skills">VS Code — Agent Skills</a></td>
+<td>PRIMARY</td>
+<td>2026-11-07</td>
+</tr>
+<tr>
+<td><a id="s-005"></a>S-005</td>
+<td><a href="https://code.visualstudio.com/docs/copilot/customization/mcp-servers">VS Code — MCP servers</a></td>
+<td>PRIMARY</td>
+<td>2026-11-07</td>
+</tr>
+<tr>
+<td><a id="s-006"></a>S-006</td>
+<td><a href="https://code.visualstudio.com/docs/copilot/customization/hooks">VS Code — Hooks</a></td>
+<td>PRIMARY</td>
+<td>2026-11-07</td>
+</tr>
+<tr>
+<td><a id="s-007"></a>S-007</td>
+<td><a href="https://code.visualstudio.com/docs/copilot/customization/custom-agents">VS Code — Custom agents</a></td>
+<td>PRIMARY</td>
+<td>2026-11-07</td>
+</tr>
+<tr>
+<td><a id="s-008"></a>S-008</td>
+<td><a href="https://code.visualstudio.com/docs/copilot/agents/overview">VS Code — Agents overview</a></td>
+<td>PRIMARY</td>
+<td>2026-11-07</td>
+</tr>
+<tr>
+<td><a id="s-009"></a>S-009</td>
+<td><a href="https://code.visualstudio.com/docs/setup/linux">VS Code — Visual Studio Code on Linux</a></td>
+<td>PRIMARY</td>
+<td>2026-11-07</td>
+</tr>
+<tr>
+<td><a id="s-010"></a>S-010</td>
+<td><a href="https://code.visualstudio.com/docs/setup/windows">VS Code — Visual Studio Code on Windows</a></td>
+<td>PRIMARY</td>
+<td>2026-11-07</td>
+</tr>
+<tr>
+<td><a id="s-011"></a>S-011</td>
+<td><a href="https://code.visualstudio.com/docs/setup/mac">VS Code — Visual Studio Code on macOS</a></td>
+<td>PRIMARY</td>
+<td>2026-11-07</td>
+</tr>
+<tr>
+<td><a id="s-012"></a>S-012</td>
+<td><a href="https://learn.microsoft.com/windows/package-manager/winget/install">Microsoft Learn — install command (winget)</a></td>
+<td>PRIMARY</td>
+<td>2026-11-07</td>
+</tr>
+<tr>
+<td><a id="s-013"></a>S-013</td>
+<td><a href="https://learn.microsoft.com/windows/dev-environment/python">Microsoft Learn — Set up your Python development environment on Windows (<code>winget install Microsoft.VisualStudioCode</code>)</a></td>
+<td>PRIMARY</td>
+<td>2026-11-07</td>
+</tr>
+<tr>
+<td><a id="s-014"></a>S-014</td>
+<td><a href="https://formulae.brew.sh/cask/visual-studio-code">Homebrew Formulae — cask <code>visual-studio-code</code></a></td>
+<td>VENDOR-DOC</td>
+<td>2026-11-07</td>
+</tr>
+<tr>
+<td><a id="s-015"></a>S-015</td>
+<td><a href="https://docs.github.com/en/copilot/concepts/models/bring-your-own-key">GitHub Docs — Bring your own key (BYOK)</a></td>
+<td>PRIMARY</td>
+<td>2026-11-07</td>
+</tr>
+<tr>
+<td><a id="s-016"></a>S-016</td>
+<td><a href="https://docs.github.com/en/copilot/how-tos/administer-copilot/manage-for-organization/manage-policies">GitHub Docs — Managing policies and features for GitHub Copilot in your organization</a></td>
+<td>PRIMARY</td>
+<td>2026-11-07</td>
+</tr>
+<tr>
+<td><a id="s-017"></a>S-017</td>
+<td><a href="https://docs.github.com/en/get-started/using-github/github-flow">GitHub Docs — GitHub flow</a></td>
+<td>PRIMARY</td>
+<td>2026-11-07 ⚠️</td>
+</tr>
+<tr>
+<td><a id="s-018"></a>S-018</td>
+<td><a href="https://github.blog/changelog/2026-04-22-bring-your-own-language-model-key-in-vs-code-now-available/">GitHub Changelog — Bring your own language model key in VS Code now available (2026-04-22)</a></td>
+<td>PRIMARY</td>
+<td>2026-11-07</td>
+</tr>
+<tr>
+<td><a id="s-019"></a>S-019</td>
+<td><a href="https://docs.github.com/en/copilot/how-tos/administer-copilot/manage-for-enterprise/enable-custom-models">GitHub Docs — Enabling custom models for GitHub Copilot in your enterprise</a></td>
+<td>PRIMARY</td>
+<td>P-02</td>
+</tr>
+<tr>
+<td><a id="s-068"></a>S-068</td>
+<td><a href="https://code.visualstudio.com/docs/agents/run/agent-harnesses">VS Code — Choose an agent harness</a></td>
+<td>PRIMARY</td>
+<td>2026-11-07</td>
+</tr>
+<tr>
+<td><a id="s-069"></a>S-069</td>
+<td><a href="https://code.visualstudio.com/docs/agents/reference/custom-instructions-reference">VS Code — Custom instructions reference</a></td>
+<td>PRIMARY</td>
+<td>2026-11-07</td>
+</tr>
+<tr>
+<td><a id="s-070"></a>S-070</td>
+<td><a href="https://code.visualstudio.com/updates/v1_122">VS Code — Release notes 1.122 (Custom Endpoint in Stable, provider built-in)</a></td>
+<td>PRIMARY</td>
+<td>P-01</td>
+</tr>
+<tr>
+<td><a id="s-071"></a>S-071</td>
+<td><a href="https://code.visualstudio.com/docs/agent-customization/language-models">VS Code — AI language models (nuovo percorso agent-customization)</a></td>
+<td>PRIMARY</td>
+<td>2026-11-07</td>
+</tr>
+<tr>
+<td><a id="s-072"></a>S-072</td>
+<td><a href="https://code.visualstudio.com/docs/agents/reference/custom-agent-file-reference">VS Code — Custom agent file reference</a></td>
+<td>PRIMARY</td>
+<td>P-03</td>
+</tr>
+<tr>
+<td><a id="s-073"></a>S-073</td>
+<td><a href="https://docs.github.com/en/copilot/reference/hooks-reference">GitHub Docs — GitHub Copilot hooks reference</a></td>
+<td>PRIMARY</td>
+<td>P-03</td>
+</tr>
+<tr>
+<td><a id="s-074"></a>S-074</td>
+<td><a href="https://github.com/microsoft/vscode/issues/329089">microsoft/vscode issue #329089 — percorso di <code>chatLanguageModels.json</code> e profili</a></td>
+<td>PRIMARY</td>
+<td>P-01</td>
+</tr>
+<tr>
+<td><a id="s-075"></a>S-075</td>
+<td><a href="https://github.com/microsoft/vscode/issues/342875">microsoft/vscode issue #342875 — formato <code>vendor/id</code> dei modelli di utilità</a></td>
+<td>PRIMARY</td>
+<td>P-01</td>
+</tr>
+<tr>
+<td><a id="s-076"></a>S-076</td>
+<td><a href="https://github.com/microsoft/vscode/issues/326797">microsoft/vscode issue #326797 — Plan/Agent con <code>customendpoint</code></a></td>
+<td>PRIMARY</td>
+<td>P-08</td>
+</tr>
+<tr>
+<td><a id="s-077"></a>S-077</td>
+<td><a href="https://github.com/microsoft/vscode/issues/332085">microsoft/vscode issue #332085 — BYOK custom endpoint non selezionabile (WSL/SSH/Dev Container)</a></td>
+<td>PRIMARY</td>
+<td>P-08</td>
+</tr>
+<tr>
+<td><a id="s-100"></a>S-100</td>
+<td><a href="https://github.blog/changelog/2026-06-01-updates-to-github-copilot-billing-and-plans/">GitHub Changelog — Updates to GitHub Copilot billing and plans (2026-06-01)</a></td>
+<td>PRIMARY</td>
+<td>P-02</td>
+</tr>
+<tr>
+<td><a id="s-101"></a>S-101</td>
+<td><a href="https://docs.github.com/en/copilot/reference/supported-surfaces-for-policies">GitHub Docs — Supported surfaces for GitHub Copilot policies</a></td>
+<td>PRIMARY</td>
+<td>P-02</td>
+</tr>
+</tbody>
+</table>
+<h2 id="litellm">LiteLLM</h2>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Titolo</th>
+<th>Tipo</th>
+<th>Verifica</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a id="s-020"></a>S-020</td>
+<td><a href="https://docs.litellm.ai/docs/proxy/docker_quick_start">LiteLLM — Docker quick start</a></td>
+<td>PRIMARY</td>
+<td>2026-11-07</td>
+</tr>
+<tr>
+<td><a id="s-021"></a>S-021</td>
+<td><a href="https://docs.litellm.ai/docs/proxy/quick_start">LiteLLM — CLI quick start (uv tool install)</a></td>
+<td>PRIMARY</td>
+<td>2026-11-07</td>
+</tr>
+<tr>
+<td><a id="s-022"></a>S-022</td>
+<td><a href="https://docs.litellm.ai/docs/proxy/configs">LiteLLM — Proxy config.yaml</a></td>
+<td>PRIMARY</td>
+<td>2026-11-07</td>
+</tr>
+<tr>
+<td><a id="s-023"></a>S-023</td>
+<td><a href="https://docs.litellm.ai/docs/proxy/deploy">LiteLLM — Production deployment (image, health, DATABASE_URL)</a></td>
+<td>PRIMARY</td>
+<td>2026-11-07</td>
+</tr>
+<tr>
+<td><a id="s-024"></a>S-024</td>
+<td><a href="https://docs.litellm.ai/docs/providers/anthropic">LiteLLM — Provider Anthropic</a></td>
+<td>PRIMARY</td>
+<td>2026-11-07</td>
+</tr>
+<tr>
+<td><a id="s-025"></a>S-025</td>
+<td><a href="https://docs.litellm.ai/docs/providers/gemini">LiteLLM — Provider Gemini (Google AI Studio)</a></td>
+<td>PRIMARY</td>
+<td>2026-11-07</td>
+</tr>
+<tr>
+<td><a id="s-026"></a>S-026</td>
+<td><a href="https://docs.litellm.ai/docs/providers/openrouter">LiteLLM — Provider OpenRouter</a></td>
+<td>PRIMARY</td>
+<td>2026-11-07</td>
+</tr>
+<tr>
+<td><a id="s-027"></a>S-027</td>
+<td><a href="https://docs.litellm.ai/docs/providers/huggingface">LiteLLM — Provider Hugging Face</a></td>
+<td>PRIMARY</td>
+<td>2026-11-07</td>
+</tr>
+<tr>
+<td><a id="s-028"></a>S-028</td>
+<td><a href="https://docs.litellm.ai/docs/anthropic_unified">LiteLLM — <code>/v1/messages</code> (Anthropic unified format)</a></td>
+<td>PRIMARY</td>
+<td>2026-11-07</td>
+</tr>
+<tr>
+<td><a id="s-029"></a>S-029</td>
+<td><a href="https://docs.litellm.ai/docs/response_api">LiteLLM — <code>/v1/responses</code> (OpenAI Responses API)</a></td>
+<td>PRIMARY</td>
+<td>2026-11-07</td>
+</tr>
+<tr>
+<td><a id="s-030"></a>S-030</td>
+<td><a href="https://docs.litellm.ai/docs/proxy/prod">LiteLLM — Production checklist</a></td>
+<td>PRIMARY</td>
+<td>⚠️ non consultata</td>
+</tr>
+<tr>
+<td><a id="s-104"></a>S-104</td>
+<td><a href="https://docs.litellm.ai/blog/security-incident-oct-21-2026">LiteLLM — Incident: release v1.107.0 (2026-10-21)</a></td>
+<td>PRIMARY</td>
+<td>2026-11-07</td>
+</tr>
+<tr>
+<td><a id="s-105"></a>S-105</td>
+<td><a href="https://docs.litellm.ai/blog/security-update-march-2026">LiteLLM — Security Update: supply chain incident (marzo 2026, 1.82.7/1.82.8)</a></td>
+<td>PRIMARY</td>
+<td>P-04</td>
+</tr>
+<tr>
+<td><a id="s-106"></a>S-106</td>
+<td><a href="https://nvd.nist.gov/vuln/detail/CVE-2026-114612">NVD — CVE-2026-114612 (LiteLLM, CVSS 9.9)</a></td>
+<td>PRIMARY</td>
+<td>P-08</td>
+</tr>
+<tr>
+<td><a id="s-107"></a>S-107</td>
+<td><a href="https://research.checkpoint.com/2026/when-llm-gateways-go-wrong-findings-from-litellm/">Check Point Research — When LLM Gateways Go Wrong: Findings from LiteLLM</a></td>
+<td>OPINION</td>
+<td>P-08</td>
+</tr>
+<tr>
+<td><a id="s-108"></a>S-108</td>
+<td><a href="https://docs.litellm.ai/docs/proxy/security_best_practices">LiteLLM — Security Best Practices</a></td>
+<td>PRIMARY</td>
+<td>P-08</td>
+</tr>
+<tr>
+<td><a id="s-109"></a>S-109</td>
+<td><a href="https://docs.litellm.ai/docs/proxy/docker_image_security">LiteLLM — Docker Image Security Guide (cosign)</a></td>
+<td>PRIMARY</td>
+<td>P-04</td>
+</tr>
+<tr>
+<td><a id="s-110"></a>S-110</td>
+<td><a href="https://docs.litellm.ai/docs/reasoning_content">LiteLLM — Thinking / Reasoning Content</a></td>
+<td>PRIMARY</td>
+<td>2026-11-07</td>
+</tr>
+<tr>
+<td><a id="s-111"></a>S-111</td>
+<td><a href="https://github.com/BerriAI/litellm/issues/35775">BerriAI/litellm issue #35775 — incompatibilità con la discovery dei modelli di VS Code</a></td>
+<td>PRIMARY</td>
+<td>P-08</td>
+</tr>
+<tr>
+<td><a id="s-117"></a>S-117</td>
+<td><a href="https://docs.litellm.ai/docs/proxy/health">LiteLLM — Health Checks</a></td>
+<td>PRIMARY</td>
+<td>P-04</td>
+</tr>
+<tr>
+<td><a id="s-118"></a>S-118</td>
+<td><a href="https://docs.litellm.ai/docs/proxy/cli">LiteLLM — CLI Arguments (<code>--host</code>, <code>--port</code>)</a></td>
+<td>PRIMARY</td>
+<td>P-04</td>
+</tr>
+<tr>
+<td><a id="s-119"></a>S-119</td>
+<td><a href="https://docs.litellm.ai/release_notes/v1.108.2/v1-108-2">LiteLLM — Release notes v1.108.2 (LTS)</a></td>
+<td>PRIMARY</td>
+<td>P-04</td>
+</tr>
+<tr>
+<td><a id="s-120"></a>S-120</td>
+<td><a href="https://docs.litellm.ai/docs/providers/openai/responses_api">LiteLLM — OpenAI Responses API provider (<code>openai/responses/</code>)</a></td>
+<td>PRIMARY</td>
+<td>P-05</td>
+</tr>
+<tr>
+<td><a id="s-031"></a>S-031</td>
+<td><a href="https://docs.litellm.ai/docs/proxy/virtual_keys">LiteLLM — Virtual keys</a></td>
+<td>PRIMARY</td>
+<td>⚠️ non consultata</td>
+</tr>
+</tbody>
+</table>
+<h2 id="provider-llm">Provider LLM</h2>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Titolo</th>
+<th>Tipo</th>
+<th>Verifica</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a id="s-040"></a>S-040</td>
+<td><a href="https://platform.claude.com/docs/en/about-claude/models/overview">Anthropic — Models overview</a></td>
+<td>PRIMARY</td>
+<td>2026-11-07</td>
+</tr>
+<tr>
+<td><a id="s-041"></a>S-041</td>
+<td><a href="https://platform.claude.com/docs/en/api/messages">Anthropic — Messages API reference</a></td>
+<td>PRIMARY</td>
+<td>P-05</td>
+</tr>
+<tr>
+<td><a id="s-116"></a>S-116</td>
+<td><a href="https://platform.claude.com/docs/en/api/versioning">Anthropic — API versions (<code>2026-10-21</code>)</a></td>
+<td>PRIMARY</td>
+<td>2026-11-07</td>
+</tr>
+<tr>
+<td><a id="s-042"></a>S-042</td>
+<td><a href="https://learn.chatgpt.com/docs/models">OpenAI — Codex models (redirect da developers.openai.com/codex/models)</a></td>
+<td>PRIMARY</td>
+<td>2026-11-07 ⚠️</td>
+</tr>
+<tr>
+<td><a id="s-043"></a>S-043</td>
+<td><a href="https://developers.openai.com/api/reference/resources/responses">OpenAI — Responses API reference</a></td>
+<td>PRIMARY</td>
+<td>P-05</td>
+</tr>
+<tr>
+<td><a id="s-102"></a>S-102</td>
+<td><a href="https://developers.openai.com/api/docs/models/all">OpenAI — All models (stato dei modelli Codex)</a></td>
+<td>PRIMARY</td>
+<td>P-05</td>
+</tr>
+<tr>
+<td><a id="s-044"></a>S-044</td>
+<td><a href="https://ai.google.dev/gemini-api/docs/models">Google — Gemini API models</a></td>
+<td>PRIMARY</td>
+<td>2026-11-07</td>
+</tr>
+<tr>
+<td><a id="s-103"></a>S-103</td>
+<td><a href="https://ai.google.dev/gemini-api/docs/models/gemini-4-argon">Google — Gemini 4 Argon</a></td>
+<td>PRIMARY</td>
+<td>2026-11-07</td>
+</tr>
+<tr>
+<td><a id="s-045"></a>S-045</td>
+<td><a href="https://ai.google.dev/gemini-api/docs/openai">Google — Gemini API OpenAI compatibility</a></td>
+<td>PRIMARY</td>
+<td>2026-11-07</td>
+</tr>
+<tr>
+<td><a id="s-046"></a>S-046</td>
+<td><a href="https://openrouter.ai/docs/quickstart">OpenRouter — Quickstart</a></td>
+<td>PRIMARY</td>
+<td>P-05</td>
+</tr>
+<tr>
+<td><a id="s-121"></a>S-121</td>
+<td><a href="https://openrouter.ai/docs/app-attribution">OpenRouter — App Attribution (<code>HTTP-Referer</code>, <code>X-OpenRouter-Title</code>)</a></td>
+<td>PRIMARY</td>
+<td>P-05</td>
+</tr>
+<tr>
+<td><a id="s-047"></a>S-047</td>
+<td><a href="https://huggingface.co/docs/inference-providers/index">Hugging Face — Inference Providers (router OpenAI-compatible)</a></td>
+<td>PRIMARY</td>
+<td>2026-11-07</td>
+</tr>
+<tr>
+<td><a id="s-048"></a>S-048</td>
+<td><a href="https://huggingface.co/docs/inference-providers/guides/vscode">Hugging Face — Use Inference Providers with GitHub Copilot Chat in VS Code</a></td>
+<td>PRIMARY</td>
+<td>2026-11-07</td>
+</tr>
+<tr>
+<td><a id="s-049"></a>S-049</td>
+<td><a href="https://github.com/huggingface/huggingface-vscode-chat">Hugging Face — repository <code>huggingface-vscode-chat</code></a></td>
+<td>PRIMARY</td>
+<td>2026-11-07</td>
+</tr>
+</tbody>
+</table>
+<h2 id="strumenti-di-base-uv-docker">Strumenti di base (uv, Docker)</h2>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Titolo</th>
+<th>Tipo</th>
+<th>Verifica</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a id="s-060"></a>S-060</td>
+<td><a href="https://docs.astral.sh/uv/getting-started/installation/">Astral — Installing uv</a></td>
+<td>PRIMARY</td>
+<td>2026-11-07</td>
+</tr>
+<tr>
+<td><a id="s-061"></a>S-061</td>
+<td><a href="https://docs.docker.com/engine/install/ubuntu/">Docker — Install Docker Engine on Ubuntu</a></td>
+<td>PRIMARY</td>
+<td>2026-11-07</td>
+</tr>
+<tr>
+<td><a id="s-062"></a>S-062</td>
+<td><a href="https://docs.docker.com/engine/install/debian/">Docker — Install Docker Engine on Debian</a></td>
+<td>PRIMARY</td>
+<td>P-06</td>
+</tr>
+<tr>
+<td><a id="s-063"></a>S-063</td>
+<td><a href="https://docs.docker.com/engine/install/linux-postinstall/">Docker — Linux post-installation steps</a></td>
+<td>PRIMARY</td>
+<td>⚠️ non consultata</td>
+</tr>
+<tr>
+<td><a id="s-064"></a>S-064</td>
+<td><a href="https://en.opensuse.org/Docker">openSUSE Wiki — Docker</a></td>
+<td>PRIMARY</td>
+<td>2026-11-07</td>
+</tr>
+<tr>
+<td><a id="s-065"></a>S-065</td>
+<td><a href="https://formulae.brew.sh/cask/docker-desktop">Homebrew Formulae — cask <code>docker-desktop</code></a></td>
+<td>VENDOR-DOC</td>
+<td>2026-11-07</td>
+</tr>
+<tr>
+<td><a id="s-066"></a>S-066</td>
+<td><a href="https://docs.docker.com/desktop/setup/install/windows-install/">Docker — Install Docker Desktop on Windows</a></td>
+<td>PRIMARY</td>
+<td>P-06</td>
+</tr>
+<tr>
+<td><a id="s-067"></a>S-067</td>
+<td><a href="https://news.opensuse.org/2025/04/30/leap-16-enters-beta/">openSUSE News — Leap 16 Enters Beta (YaST → Agama, Cockpit, Myrlyn)</a></td>
+<td>PRIMARY</td>
+<td>P-06</td>
+</tr>
+<tr>
+<td><a id="s-122"></a>S-122</td>
+<td><a href="https://formulae.brew.sh/formula/uv">Homebrew Formulae — formula <code>uv</code></a></td>
+<td>VENDOR-DOC</td>
+<td>P-06</td>
+</tr>
+</tbody>
+</table>
+<h2 id="github-spec-kit">GitHub Spec Kit</h2>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Titolo</th>
+<th>Tipo</th>
+<th>Verifica</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a id="s-080"></a>S-080</td>
+<td><a href="https://github.com/github/spec-kit">GitHub — Spec Kit (repository)</a></td>
+<td>PRIMARY</td>
+<td>2026-11-07</td>
+</tr>
+<tr>
+<td><a id="s-081"></a>S-081</td>
+<td><a href="https://github.github.io/spec-kit/installation.html">GitHub — Spec Kit Installation</a></td>
+<td>PRIMARY</td>
+<td>2026-11-07</td>
+</tr>
+<tr>
+<td><a id="s-082"></a>S-082</td>
+<td><a href="https://github.github.io/spec-kit/integrations/cli.html">GitHub — Spec Kit integrations CLI reference</a></td>
+<td>PRIMARY</td>
+<td>P-07</td>
+</tr>
+<tr>
+<td><a id="s-083"></a>S-083</td>
+<td><a href="https://github.github.io/spec-kit/integrations/copilot.html">GitHub — Spec Kit: integrazione GitHub Copilot (layout skills/commands)</a></td>
+<td>PRIMARY</td>
+<td>2026-11-07</td>
+</tr>
+<tr>
+<td><a id="s-084"></a>S-084</td>
+<td><a href="https://github.github.com/spec-kit/reference/core.html">GitHub — Spec Kit Core Commands (<code>specify check</code>)</a></td>
+<td>PRIMARY</td>
+<td>2026-11-07 (<code>github.github.com</code> è il dominio Pages di GitHub; verificato)</td>
+</tr>
+<tr>
+<td><a id="s-085"></a>S-085</td>
+<td><a href="https://github.com/github/spec-kit/releases">GitHub — Spec Kit Releases (v1.3.2)</a></td>
+<td>PRIMARY</td>
+<td>P-07</td>
+</tr>
+</tbody>
+</table>
+<h2 id="gateway-alternativi">Gateway alternativi</h2>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Titolo</th>
+<th>Tipo</th>
+<th>Verifica</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a id="s-112"></a>S-112</td>
+<td><a href="https://portkey.ai/docs/product/ai-gateway/universal-api">Portkey — Universal API</a></td>
+<td>VENDOR-DOC</td>
+<td>P-08</td>
+</tr>
+<tr>
+<td><a id="s-113"></a>S-113</td>
+<td><a href="https://developers.cloudflare.com/ai-gateway/usage/rest-api/">Cloudflare AI Gateway — REST API</a></td>
+<td>VENDOR-DOC</td>
+<td>P-08</td>
+</tr>
+<tr>
+<td><a id="s-114"></a>S-114</td>
+<td><a href="https://github.com/microsoft/GitHub-Copilot-BYOK-with-APIM">Microsoft — GitHub-Copilot-BYOK-with-APIM (APIM + Foundry)</a></td>
+<td>VENDOR-DOC</td>
+<td>P-08</td>
+</tr>
+<tr>
+<td><a id="s-115"></a>S-115</td>
+<td><a href="https://openrouter.ai/docs/guides/features/guardrails">OpenRouter — Guardrails (budget, allowlist, ZDR)</a></td>
+<td>VENDOR-DOC</td>
+<td>P-08</td>
+</tr>
+</tbody>
+</table>
+<h2 id="security">Security</h2>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Titolo</th>
+<th>Tipo</th>
+<th>Verifica</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a id="s-130"></a>S-130</td>
+<td><a href="https://code.visualstudio.com/docs/copilot/security">VS Code — Security considerations for AI in VS Code</a></td>
+<td>PRIMARY</td>
+<td>2026-11-07</td>
+</tr>
+<tr>
+<td><a id="s-131"></a>S-131</td>
+<td><a href="https://code.visualstudio.com/docs/enterprise/manage-ai-settings">VS Code — Manage AI settings in enterprise environments</a></td>
+<td>PRIMARY</td>
+<td>2026-11-07</td>
+</tr>
+<tr>
+<td><a id="s-132"></a>S-132</td>
+<td><a href="https://code.visualstudio.com/docs/enterprise/policies">VS Code — Enterprise policy reference</a></td>
+<td>PRIMARY</td>
+<td>⚠️ non consultata</td>
+</tr>
+<tr>
+<td><a id="s-133"></a>S-133</td>
+<td><a href="https://code.visualstudio.com/docs/editing/workspaces/workspace-trust">VS Code — Workspace Trust</a></td>
+<td>PRIMARY</td>
+<td>2026-11-07</td>
+</tr>
+<tr>
+<td><a id="s-134"></a>S-134</td>
+<td><a href="https://docs.github.com/en/copilot/how-tos/configure-content-exclusion/exclude-content-from-copilot">GitHub Docs — Excluding content from GitHub Copilot</a></td>
+<td>PRIMARY</td>
+<td>2026-11-07</td>
+</tr>
+<tr>
+<td><a id="s-137"></a>S-137</td>
+<td><a href="https://genai.owasp.org/llm-top-10/">OWASP — Top 10 for LLM Applications 2025 (edizione precedente)</a></td>
+<td>PRIMARY</td>
+<td>2026-11-07</td>
+</tr>
+<tr>
+<td><a id="s-138"></a>S-138</td>
+<td><a href="https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/">OWASP — Top 10 for Agentic Applications for 2026</a></td>
+<td>PRIMARY</td>
+<td>P-10 (titoli dal PDF ufficiale)</td>
+</tr>
+<tr>
+<td><a id="s-139"></a>S-139</td>
+<td><a href="https://owasp.org/www-project-mcp-top-10/">OWASP — MCP Top 10</a></td>
+<td>PRIMARY</td>
+<td>⚠️ non consultata</td>
+</tr>
+<tr>
+<td><a id="s-140"></a>S-140</td>
+<td><a href="https://www.iso.org/standard/27001">ISO — ISO/IEC 27001:2022 Information security management systems — Requirements</a></td>
+<td>PRIMARY</td>
+<td>2026-11-07 (solo scheda; testo della norma non riprodotto)</td>
+</tr>
+<tr>
+<td><a id="s-141"></a>S-141</td>
+<td><a href="https://www.iso.org/standard/88435.html">ISO — ISO/IEC 27001:2022/Amd 1:2024 (Climate action changes)</a></td>
+<td>PRIMARY</td>
+<td>⚠️ non consultata</td>
+</tr>
+<tr>
+<td><a id="s-142"></a>S-142</td>
+<td><a href="https://code.visualstudio.com/docs/configure/extensions/extension-runtime-security">VS Code — Extension runtime security</a></td>
+<td>PRIMARY</td>
+<td>⚠️ non consultata</td>
+</tr>
+<tr>
+<td><a id="s-144"></a>S-144</td>
+<td><a href="https://www.freedesktop.org/software/systemd/man/latest/systemd.exec.html">freedesktop.org — systemd.exec (sandboxing options)</a></td>
+<td>PRIMARY</td>
+<td>⚠️ non consultata</td>
+</tr>
+<tr>
+<td><a id="s-145"></a>S-145</td>
+<td><a href="https://code.visualstudio.com/docs/agents/run/agent-sandboxing">VS Code — Sandbox Copilot agent sessions</a></td>
+<td>PRIMARY</td>
+<td>2026-11-07</td>
+</tr>
+<tr>
+<td><a id="s-146"></a>S-146</td>
+<td><a href="https://genai.owasp.org/resource/owasp-genai-llm-top-10-2026/">OWASP — GenAI LLM Top 10 2026 (2026-08-03)</a></td>
+<td>PRIMARY</td>
+<td>2026-11-07</td>
+</tr>
+<tr>
+<td><a id="s-147"></a>S-147</td>
+<td><a href="https://github.com/GenAI-Security-Project/GenAI-LLM-Top10">OWASP — repository GenAI-LLM-Top10 (elenco 2026)</a></td>
+<td>PRIMARY</td>
+<td>2026-11-07</td>
+</tr>
+<tr>
+<td><a id="s-148"></a>S-148</td>
+<td><a href="https://docs.litellm.ai/docs/proxy/ui">LiteLLM — Admin UI Quick Start (primo proxy_admin, break-glass)</a></td>
+<td>PRIMARY</td>
+<td>2026-11-07</td>
+</tr>
+<tr>
+<td><a id="s-149"></a>S-149</td>
+<td><a href="https://www.iso.org/standard/42001">ISO — ISO/IEC 42001:2023 AI management systems</a></td>
+<td>PRIMARY</td>
+<td>P-10</td>
+</tr>
+<tr>
+<td><a id="s-150"></a>S-150</td>
+<td><a href="https://www.iso.org/standard/27000">ISO — ISO/IEC 27000:2026</a></td>
+<td>PRIMARY</td>
+<td>P-10</td>
+</tr>
+<tr>
+<td><a id="s-151"></a>S-151</td>
+<td><a href="https://openrouter.ai/docs/guides/routing/provider-selection">OpenRouter — Provider routing (<code>provider.data_collection</code>, <code>allow_fallbacks</code>)</a></td>
+<td>PRIMARY</td>
+<td>⚠️ non consultata</td>
+</tr>
+</tbody>
+</table>
+<h2 id="sito-offline-runbook-font-evidenze">Sito offline (runbook, font, evidenze)</h2>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Titolo</th>
+<th>Tipo</th>
+<th>Verifica</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a id="s-152"></a>S-152</td>
+<td><a href="https://github.com/ryanoasis/nerd-fonts/releases">Nerd Fonts — release (zip delle famiglie)</a></td>
+<td>PRIMARY</td>
+<td>2026-11-07 (download diretto da provare sul Mac del PO)</td>
+</tr>
+<tr>
+<td><a id="s-153"></a>S-153</td>
+<td><a href="https://github.com/ryanoasis/nerd-fonts">Nerd Fonts — repository e cartella <code>patched-fonts/</code> (licenze per famiglia)</a></td>
+<td>PRIMARY</td>
+<td>2026-11-07</td>
+</tr>
+<tr>
+<td><a id="s-154"></a>S-154</td>
+<td><a href="https://github.com/highlightjs/cdn-release">highlight.js 11.12.0 — CDN assets (file locali del sito)</a></td>
+<td>PRIMARY</td>
+<td>2026-11-07</td>
+</tr>
+<tr>
+<td><a id="s-155"></a>S-155</td>
+<td><a href="https://python-markdown.github.io/">Python-Markdown — documentazione ed estensioni</a></td>
+<td>PRIMARY</td>
+<td>2026-11-07</td>
+</tr>
+<tr>
+<td><a id="s-156"></a>S-156</td>
+<td><a href="https://fonttools.readthedocs.io/en/latest/ttLib/woff2.html">fontTools — conversione in WOFF2 (<code>flavor="woff2"</code>)</a></td>
+<td>PRIMARY</td>
+<td>2026-11-07</td>
+</tr>
+<tr>
+<td><a id="s-157"></a>S-157</td>
+<td><a href="https://developer.mozilla.org/docs/Web/API/Window/localStorage">MDN — Window.localStorage</a></td>
+<td>VENDOR-DOC</td>
+<td>2026-11-07</td>
+</tr>
+</tbody>
+</table>
+<h2 id="metodo-decisioni-e-scrittura">Metodo (decisioni e scrittura)</h2>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Titolo</th>
+<th>Tipo</th>
+<th>Verifica</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a id="s-090"></a>S-090</td>
+<td><a href="https://cognitect.com/blog/2011/11/15/documenting-architecture-decisions">M. Nygard — Documenting Architecture Decisions (2011)</a></td>
+<td>PRIMARY</td>
+<td>2026-11-07</td>
+</tr>
+<tr>
+<td><a id="s-091"></a>S-091</td>
+<td><a href="https://learn.microsoft.com/azure/well-architected/architect-role/architecture-decision-record">Microsoft Learn — Maintain an architecture decision record (ADR)</a></td>
+<td>VENDOR-DOC</td>
+<td>2026-11-07</td>
+</tr>
+<tr>
+<td><a id="s-092"></a>S-092</td>
+<td><a href="https://www.asd-ste100.org/">ASD-STE100 Simplified Technical English — sito ufficiale</a></td>
+<td>PRIMARY</td>
+<td>⚠️ riferimento all'indice dello standard, testo non riprodotto</td>
+</tr>
+</tbody>
+</table></article>
+<script type="application/json" id="fonts-data">[
+  {
+    "id": "blexmono",
+    "label": "BlexMono Nerd Font (IBM Plex Mono)",
+    "mono": true,
+    "body": false
+  },
+  {
+    "id": "firacode",
+    "label": "FiraCode Nerd Font",
+    "mono": true,
+    "body": false
+  },
+  {
+    "id": "monoid",
+    "label": "Monoid Nerd Font",
+    "mono": true,
+    "body": false
+  },
+  {
+    "id": "opendyslexic",
+    "label": "OpenDyslexic Nerd Font",
+    "mono": true,
+    "body": true
+  },
+  {
+    "id": "saucecodepro",
+    "label": "SauceCodePro Nerd Font (Source Code Pro)",
+    "mono": true,
+    "body": false
+  }
+]</script>
+<script src="../assets/vendor/highlight/highlight.min.js"></script>
+<script src="../assets/vendor/highlight/languages/bash.min.js"></script>
+<script src="../assets/vendor/highlight/languages/powershell.min.js"></script>
+<script src="../assets/vendor/highlight/languages/yaml.min.js"></script>
+<script src="../assets/vendor/highlight/languages/json.min.js"></script>
+<script src="../assets/vendor/highlight/languages/ini.min.js"></script>
+<script src="../assets/vendor/highlight/languages/dockerfile.min.js"></script>
+<script src="../assets/vendor/highlight/languages/plaintext.min.js"></script>
+<script src="../assets/common.js"></script>
+<script src="../assets/doc.js"></script>
+</body>
+</html>
