@@ -276,7 +276,7 @@ Set-Location "{{WPC_DIR}}"; docker compose -f compose.extended.yaml up -d; docke
 <!-- step: os=all path=uv profile=all -->
 
 ```bash os=all
-uv tool install 'litellm[proxy]=={{LITELLM_VERSION}}'
+uv tool install "litellm[proxy]=={{LITELLM_VERSION}}"
 ```
 
 **Esito atteso:** `litellm --version` mostra `{{LITELLM_VERSION}}`. Non usare le versioni `1.82.7`, `1.82.8`, `1.107.0` ([S-104](../Sources.md#s-104)).
