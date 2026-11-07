@@ -36,7 +36,9 @@ Il formato segue il template ADR di Nygard, con una sezione **Razionale** esplic
 | [D-020](#d-020) | 2026-11-07 | Tabella breve delle alternative a LiteLLM | Accepted |
 | [D-021](#d-021) | 2026-11-07 | `anthropic-version: 2026-10-21` negli esempi | Accepted |
 | [D-022](#d-022) | 2026-11-07 | Documento di best practice di sicurezza | Accepted |
-| [D-023](#d-023) | 2026-11-07 | Security review con OWASP e ISO/IEC 27001 | Accepted |
+| [D-023](#d-023) | 2026-11-07 | Security review con OWASP e ISO/IEC 27001 | Superseded by D-024 |
+| [D-024](#d-024) | 2026-11-07 | OWASP LLM Top 10 edizione 2026 | Proposed |
+| [D-025](#d-025) | 2026-11-07 | Applicazione delle azioni AZ-01…AZ-10 | Accepted |
 
 ---
 
@@ -455,7 +457,7 @@ Il formato segue il template ADR di Nygard, con una sezione **Razionale** esplic
 <a id="d-023"></a>
 ## D-023 — Security review con OWASP e ISO/IEC 27001
 
-- **Data:** 2026-11-07 — **Stato:** Accepted — **Decisore:** PO
+- **Data:** 2026-11-07 — **Stato:** Superseded by [D-024](#d-024) — **Decisore:** PO
 
 **Contesto.** Le configurazioni di esempio vanno analizzate con framework riconosciuti, utili anche per un audit.
 
@@ -468,3 +470,40 @@ Il formato segue il template ADR di Nygard, con una sezione **Razionale** esplic
 **Conseguenze.** I rilievi `F-NN` producono azioni `AZ-NN`. Le azioni che cambiano gli esempi richiedono l'approvazione del PO. Il testo della norma ISO non è riprodotto: il documento cita solo numero e titolo dei controlli.
 
 **Fonti.** [S-137](Sources.md#s-137), [S-138](Sources.md#s-138), [S-140](Sources.md#s-140), [S-141](Sources.md#s-141).
+
+
+---
+
+<a id="d-024"></a>
+## D-024 — OWASP LLM Top 10 edizione 2026
+
+- **Data:** 2026-11-07 — **Stato:** Proposed — **Decisore:** assistente, conferma PO — **Sostituisce:** [D-023](#d-023) (solo l'edizione OWASP LLM)
+
+**Contesto.** D-023 usa l'OWASP Top 10 for LLM Applications 2025. La review P-10 indica che il 2026-08-03 OWASP ha pubblicato l'edizione 2026, con un ordine diverso (es. Excessive Agency passa da LLM06 a LLM03; System Prompt Leakage diventa Hidden Context Exposure, LLM08). L'assistente ha verificato la data sulla pagina della risorsa e l'elenco sul repository canonico.
+
+**Opzioni considerate.** (1) Edizione 2026. (2) Edizione 2025, già citata in D-023.
+
+**Decisione.** Proponiamo l'opzione 1. Il documento 04 riporta anche la corrispondenza con gli ID 2025. Restano invariati: Agentic Top 10 2026 e ISO/IEC 27001:2022 Annex A + clausole 4–10.
+
+**Razionale.** Il pubblico del talk troverà l'edizione 2026 come edizione corrente. Gli ID 2025 vecchi creano confusione.
+
+**Conseguenze.** I rilievi `F-NN` usano `LLMxx` = 2026.
+
+**Fonti.** [S-137](Sources.md#s-137), [S-146](Sources.md#s-146), [S-147](Sources.md#s-147).
+
+---
+
+<a id="d-025"></a>
+## D-025 — Applicazione delle azioni AZ-01…AZ-10
+
+- **Data:** 2026-11-07 — **Stato:** Accepted — **Decisore:** PO
+
+**Contesto.** La security review ([04](04-Security-Review-OWASP-ISO27001.md)) propone 10 azioni che cambiano gli esempi.
+
+**Decisione.** Applichiamo tutte le azioni. Integriamo le correzioni di P-09 e P-10: la sandbox dell'agente è `off` di default e la baseline la attiva; il primo `proxy_admin` si crea con l'API (`/user/new`, `/user/update`) e la master key.
+
+**Razionale.** Gli esempi sono pubblici e saranno copiati: devono essere sicuri di default.
+
+**Conseguenze.** Nuovi file: `scripts/pin-images.sh`, `scripts/bootstrap-admin.sh`, `service/load-env.sh`. Tre punti restano ⚠️ da provare: tag `litellm-non_root:v1.108.2`, campi `provider` di OpenRouter, `turn_off_message_logging`.
+
+**Fonti.** [S-104](Sources.md#s-104), [S-108](Sources.md#s-108), [S-109](Sources.md#s-109), [S-144](Sources.md#s-144), [S-145](Sources.md#s-145), [S-148](Sources.md#s-148), [S-151](Sources.md#s-151).
