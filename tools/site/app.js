@@ -35,7 +35,9 @@
     const p = (navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || '';
     return /win/i.test(p) ? 'windows' : /mac/i.test(p) ? 'macos' : 'debian';
   }
-  const stepState = id => (cur().steps[id] ||= { status: '', checks: [], output: '', note: '', at: '', commands: '' });
+  // checks ha sempre una voce booleana per ogni casella del passo, come in sanitizeSession() (R4-agy-05)
+  const emptyChecks = id => Array.from({ length: (RB.phases.flatMap(p => p.steps).find(s => s.id === id) || {}).checks || 0 }, () => false);
+  const stepState = id => (cur().steps[id] ||= { status: '', checks: emptyChecks(id), output: '', note: '', at: '', commands: '' });
 
   /* ------------------------------------------------------------ parametri */
   function paramValue(p, s = cur()) {
@@ -324,7 +326,9 @@
         });
       });
       el.querySelectorAll('input[data-check]').forEach(cb => cb.addEventListener('change', () => {
-        stepState(id).checks[+cb.dataset.check] = cb.checked; save();
+        const ss = stepState(id), base = emptyChecks(id);
+        ss.checks = base.map((_, i) => ss.checks[i] === true);
+        ss.checks[+cb.dataset.check] = cb.checked; save();
       }));
     });
   }
