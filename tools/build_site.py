@@ -48,6 +48,8 @@ def rewrite_link(href: str, from_dir: str) -> str:
             return "docs/" + path[3:-3] + ".html" + frag
         return path + frag
     # from docs/
+    if path == "runbook/RUNBOOK.md":           # il runbook è la pagina interattiva del sito
+        return "../index.html" + frag
     if path.endswith(".md") and "/" not in path:
         return path[:-3] + ".html" + frag
     if path.startswith("../"):                 # file del repo visti da site/docs/
