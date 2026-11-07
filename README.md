@@ -18,7 +18,11 @@ Il talk confronta due percorsi:
 |---|---|---|
 | Come | VS Code chiama ogni provider con la sua chiave | VS Code chiama un proxy locale; il proxy chiama i provider |
 | Esecuzione | — | Docker oppure servizio locale con `uv` |
-| Punto di forza | Nessun componente in più | Una chiave sul client, alias stabili, budget e chiavi per utente |
+| Punto di forza | Nessun componente in più, nessun punto singolo di guasto | Una chiave sul client, alias stabili, budget e chiavi per utente |
+| Punto debole | Chiavi su ogni client, nessuna governance centrale | Concentrazione delle credenziali, rischio supply chain, traduzione dei formati |
+| Quando | Singolo sviluppatore | Team che richiede governance, con hardening |
+
+Il talk non dichiara un vincitore: presenta i **criteri di scelta** ([docs/Decisions.md#d-017](docs/Decisions.md#d-017)).
 
 ## Organizzazione del repository
 
