@@ -1,0 +1,28 @@
+{
+  "release": "https://github.com/ryanoasis/nerd-fonts/releases/latest/download/",
+  "families": [
+    {"id": "blexmono",      "label": "BlexMono Nerd Font (IBM Plex Mono)", "zip": "IBMPlexMono.zip",
+     "mono": {"400": "BlexMonoNerdFontMono-Regular.*", "700": "BlexMonoNerdFontMono-Bold.*"},
+     "license": ["LICENSE*", "OFL*"]},
+    {"id": "firacode",      "label": "FiraCode Nerd Font", "zip": "FiraCode.zip",
+     "mono": {"400": "FiraCodeNerdFontMono-Regular.*", "700": "FiraCodeNerdFontMono-Bold.*"},
+     "license": ["LICENSE*", "OFL*"]},
+    {"id": "googlesanscode","label": "GoogleSansCode Nerd Font", "zip": "GoogleSansCode.zip",
+     "mono": {"400": "GoogleSansCodeNerdFontMono-Regular.*", "700": "GoogleSansCodeNerdFontMono-Bold.*"},
+     "license": ["LICENSE*", "OFL*"]},
+    {"id": "monoid",        "label": "Monoid Nerd Font", "zip": "Monoid.zip",
+     "mono": {"400": "MonoidNerdFontMono-Regular.*", "700": "MonoidNerdFontMono-Bold.*"},
+     "license": ["LICENSE*", "OFL*"]},
+    {"id": "opendyslexic",  "label": "OpenDyslexic Nerd Font", "zip": "OpenDyslexic.zip",
+     "mono": {"400": "OpenDyslexicMNerdFontMono-Regular.*"},
+     "body": {"400": "OpenDyslexicNerdFont-Regular.*", "700": "OpenDyslexicNerdFont-Bold.*"},
+     "license": ["LICENSE*", "OFL*"]},
+    {"id": "saucecodepro",  "label": "SauceCodePro Nerd Font (Source Code Pro)", "zip": "SourceCodePro.zip",
+     "mono": {"400": "SauceCodeProNerdFontMono-Regular.*", "700": "SauceCodeProNerdFontMono-Bold.*"},
+     "license": ["LICENSE*", "OFL*"]},
+    {"id": "ubuntusans",    "label": "UbuntuSans Nerd Font", "zip": "UbuntuSans.zip",
+     "mono": {"400": "UbuntuSansMonoNerdFontMono-Regular.*", "700": "UbuntuSansMonoNerdFontMono-Bold.*"},
+     "body": {"400": "UbuntuSansNerdFont-Regular.*", "700": "UbuntuSansNerdFont-Bold.*"},
+     "license": ["LICENSE*", "OFL*", "UFL*"]}
+  ]
+}
