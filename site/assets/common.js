@@ -9,11 +9,19 @@
   }
 
   function fonts() {
-    try { return JSON.parse(document.getElementById('fonts-data').textContent || '[]'); } catch (e) { return []; }
+    try {
+      const f = JSON.parse(document.getElementById('fonts-data').textContent || '[]');
+      return Array.isArray(f) ? f.filter(x => x && FONT_ID.test(x.id)) : [];
+    } catch (e) { return []; }
   }
 
+  const THEMES = ['auto', 'light', 'dark'];
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  // Id di famiglia ammesso nei nomi CSS (R2-agy-02): solo lettere minuscole e cifre, come in tools/fonts.json.
+  const FONT_ID = /^[a-z0-9]{1,40}$/;
+
   function applyTheme(theme) {
-    let t = theme || 'auto';
+    let t = THEMES.includes(theme) ? theme : 'auto';
     if (t === 'auto') t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
     document.documentElement.dataset.theme = t;
     const light = document.getElementById('hl-light'), dark = document.getElementById('hl-dark');
@@ -37,9 +45,10 @@
     const theme = document.getElementById('pref-theme');
     const body = document.getElementById('pref-body');
     const code = document.getElementById('pref-code');
-    body.innerHTML = '<option value="">di sistema</option>' + fam.map(f => `<option value="${f.id}">${f.label}${f.body ? '' : ' (mono)'}</option>`).join('');
+    body.innerHTML = '<option value="">di sistema</option>' + fam.map(f => `<option value="${esc(f.id)}">${esc(f.label)}${f.body ? '' : ' (mono)'}</option>`).join('');
     // Il codice usa solo font monospace (classe Mono)
-    code.innerHTML = '<option value="">monospace di sistema</option>' + fam.filter(f => f.mono).map(f => `<option value="${f.id}">${f.label}</option>`).join('');
+    code.innerHTML = '<option value="">monospace di sistema</option>' + fam.filter(f => f.mono).map(f => `<option value="${esc(f.id)}">${esc(f.label)}</option>`).join('');
+    if (!THEMES.includes(prefs.theme)) prefs.theme = 'auto';
     theme.value = prefs.theme; body.value = prefs.body; code.value = prefs.code;
     const save = () => { prefs.theme = theme.value; prefs.body = body.value; prefs.code = code.value; store(PREFS_KEY, prefs); applyTheme(prefs.theme); applyFonts(prefs); };
     [theme, body, code].forEach(el => el.addEventListener('change', save));

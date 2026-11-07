@@ -75,6 +75,14 @@
     if (/["'`\n\r;|&<>]/.test(v) || redact(v) !== v || redact(name + '=' + v) !== name + '=' + v) return null;
     return v;
   }
+  // Comandi importati: restano solo se la redazione non li cambia. Un comando legittimo può contenere
+  // un nome come POSTGRES_PASSWORD (es. in un grep): in quel caso si usano i comandi attuali (S-404, S-501).
+  function importCommands(st, cmds, s) {
+    if (!Array.isArray(cmds)) return '';
+    const list = cmds.slice(0, 20).filter(c => c && typeof c.code === 'string')
+      .map(c => ({ lang: /^[\w-]{1,20}$/.test(c.lang) ? c.lang : 'plaintext', code: c.code.slice(0, 20000) }));
+    return list.every(c => redact(c.code) === c.code) ? list : currentCommands(st, s);
+  }
   function sanitizeSession(raw) {
     if (!raw || typeof raw !== 'object' || !ID_RE.test(raw.id)) throw new Error('id');
     const now = new Date().toISOString();
@@ -106,10 +114,7 @@
         output: noOut ? '' : redact(str(x.output, 100000)),
         note: redact(str(x.note, 10000)),
         at: status ? isoOr(x.at, '') : '',
-        commands: status && Array.isArray(x.commands)
-          ? x.commands.slice(0, 20).filter(c => c && typeof c.code === 'string')
-              .map(c => ({ lang: /^[\w-]{1,20}$/.test(c.lang) ? c.lang : 'plaintext', code: redact(c.code.slice(0, 20000)) }))
-          : ''
+        commands: status ? importCommands(st, x.commands, s) : ''
       };
     }
     return s;
@@ -188,6 +193,7 @@
       <details class="evidence" ${ss.status ? '' : 'open'}><summary>Evidenza${ss.status ? ' — ' + esc(STATUS_LABEL[ss.status]) : ''}</summary>
         <div class="status">${STATUS.map(([v, l]) => `<button type="button" data-v="${esc(v)}" aria-pressed="${ss.status === v}">${esc(l)}</button>`).join('')}
           <span class="when">${ss.at ? new Date(ss.at).toLocaleString('it-IT') : ''}</span></div>
+        <p class="hint stale hidden" data-stale>⚠️ Parametri o sistema operativo cambiati dopo l'esito: l'evidenza contiene i comandi del momento dell'esito. Per registrare i comandi attuali, premi di nuovo il pulsante dell'esito.</p>
         ${noOut ? '<p class="hint">Questo passo produce segreti: il sito non salva l\'output.</p>'
                 : `<label class="field"><span>Output del comando (i segreti riconosciuti sono oscurati)</span><textarea class="mono" data-f="output" spellcheck="false">${esc(ss.output)}</textarea></label>
                    <p class="redacted hidden" data-redacted>Alcuni valori sono stati oscurati come [REDATTO].</p>`}
@@ -210,6 +216,7 @@
     });
     document.querySelectorAll('.step').forEach(el => {
       const ss = stepState(el.dataset.step);
+      const stale = $('[data-stale]', el); if (stale) stale.classList.toggle('hidden', !isStale(findStep(el.dataset.step), ss));
       el.querySelectorAll('input[data-check]').forEach(cb => { cb.checked = !!ss.checks[+cb.dataset.check]; });
     });
   }
@@ -235,13 +242,13 @@
         const ss = stepState(id);
         ss.status = ss.status === b.dataset.v ? '' : b.dataset.v;
         ss.at = ss.status ? new Date().toISOString() : '';
-        ss.commands = ss.status ? st.blocks.filter(x => x.type === 'code' && visibleBlock(x))
-          .map(x => ({ lang: x.lang, code: resolve(x.code) })) : '';
+        ss.commands = ss.status ? currentCommands(st) : '';
         save();
         el.dataset.status = ss.status;
         el.querySelectorAll('.status button').forEach(x => x.setAttribute('aria-pressed', String(x.dataset.v === ss.status)));
         $('.when', el).textContent = ss.at ? new Date(ss.at).toLocaleString('it-IT') : '';
         $('summary', el).textContent = 'Evidenza' + (ss.status ? ' — ' + STATUS_LABEL[ss.status] : '');
+        $('[data-stale]', el).classList.add('hidden');   // l'esito ha appena registrato i comandi attuali
         renderToc();
       }));
       el.querySelectorAll('textarea[data-f]').forEach(ta => {
@@ -259,6 +266,9 @@
     });
   }
   const findStep = id => RB.phases.flatMap(p => p.steps).find(s => s.id === id);
+  // Comandi risolti con i parametri e l'OS attuali; l'esito registra questa lista (R2-agy-04).
+  const currentCommands = (st, s = cur()) => st.blocks.filter(x => x.type === 'code' && visibleBlock(x, s)).map(x => ({ lang: x.lang, code: resolve(x.code, s) }));
+  const isStale = (st, ss, s = cur()) => Array.isArray(ss.commands) && ss.commands.length > 0 && JSON.stringify(ss.commands) !== JSON.stringify(currentCommands(st, s));
 
   function bindGlobal() {
     $('#session-select').addEventListener('change', e => { state.current = e.target.value; save(); renderAll(); });
@@ -326,9 +336,10 @@
       if (ph.id !== lastPh) { md += `\n### ${ph.id} — ${ph.title}\n`; lastPh = ph.id; }
       md += `\n#### ${st.id} — ${st.title}\n\n- Esito: **${ss.status ? STATUS_LABEL[ss.status] : 'da fare'}**\n- Data e ora: ${fmt(ss.at)}\n`;
       if (st.checks) md += `- Checklist: ${ss.checks.filter(Boolean).length} di ${st.checks} punti spuntati\n`;
-      const cmds = Array.isArray(ss.commands) && ss.commands.length ? ss.commands
-        : st.blocks.filter(b => b.type === 'code' && visibleBlock(b, s)).map(b => ({ lang: b.lang, code: resolve(b.code, s) }));
-      if (cmds.length) md += `\n**Comandi (parametri risolti${ss.at ? ' al momento dell\'esito' : ''})**\n\n` + cmds.map(c => fence(c.code, c.lang)).join('\n\n') + '\n';
+      const snap = Array.isArray(ss.commands) && ss.commands.length;
+      const cmds = snap ? ss.commands : currentCommands(st, s);
+      if (cmds.length) md += `\n**Comandi (parametri risolti${snap ? ' al momento dell\'esito' : ''})**\n\n` + cmds.map(c => fence(c.code, c.lang)).join('\n\n') + '\n';
+      if (snap && isStale(st, ss, s)) md += `\n> ⚠️ Parametri o sistema operativo cambiati dopo l'esito: i comandi sopra sono quelli registrati con l'esito.\n`;
       if (st.evidence === 'no-output') md += `\n**Output:** non salvato (il passo produce segreti).\n`;
       else if (ss.output) md += `\n**Output**\n\n${fence(redact(ss.output))}\n`;
       if (ss.note) md += `\n**Note:** ${redact(ss.note)}\n`;

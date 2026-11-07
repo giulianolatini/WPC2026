@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="../assets/vendor/highlight/github-dark.min.css" id="hl-dark" disabled>
 <link rel="stylesheet" href="../assets/styles.css">
 
-<script>try{var p=JSON.parse(localStorage.getItem('wpc2026.prefs')||'{}');var t=p.theme||'auto';if(t==='auto')t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.dataset.theme=t;}catch(e){}</script>
+<script>try{var p=JSON.parse(localStorage.getItem('wpc2026.prefs')||'{}');var t=p.theme;if(t!=='light'&&t!=='dark')t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.dataset.theme=t;}catch(e){}</script>
 </head>
 <body>
 <div class="topbar">
@@ -810,6 +810,42 @@ Gli altri documenti puntano alla fonte con un link del tipo <code>Sources.md#s-0
 <td><a id="s-157"></a>S-157</td>
 <td><a href="https://developer.mozilla.org/docs/Web/API/Window/localStorage">MDN — Window.localStorage</a></td>
 <td>VENDOR-DOC</td>
+<td>2026-11-07</td>
+</tr>
+<tr>
+<td><a id="s-158"></a>S-158</td>
+<td><a href="https://www.postgresql.org/download/windows/">PostgreSQL — Download per Windows (installer EDB)</a></td>
+<td>PRIMARY</td>
+<td>2026-11-07 (ID winget <code>PostgreSQL.PostgreSQL.&lt;NN&gt;</code> ⚠️ da verificare con <code>winget search</code>)</td>
+</tr>
+<tr>
+<td><a id="s-159"></a>S-159</td>
+<td><a href="https://www.postgresql.org/download/macosx/">PostgreSQL — Download per macOS (Homebrew <code>postgresql@NN</code>)</a></td>
+<td>PRIMARY</td>
+<td>2026-11-07</td>
+</tr>
+<tr>
+<td><a id="s-160"></a>S-160</td>
+<td><a href="https://www.postgresql.org/download/linux/ubuntu/">PostgreSQL — Download per Ubuntu e Debian (repository PGDG, script <code>apt.postgresql.org.sh</code>)</a></td>
+<td>PRIMARY</td>
+<td>2026-11-07</td>
+</tr>
+<tr>
+<td><a id="s-161"></a>S-161</td>
+<td><a href="https://www.postgresql.org/download/linux/suse/">PostgreSQL — Download per SUSE / openSUSE</a> e <a href="https://en.opensuse.org/SDB:PostgreSQL">openSUSE — SDB:PostgreSQL</a></td>
+<td>PRIMARY</td>
+<td>2026-11-07 (inizializzazione ⚠️ da provare)</td>
+</tr>
+<tr>
+<td><a id="s-162"></a>S-162</td>
+<td><a href="https://www.postgresql.org/docs/current/runtime-config-connection.html">PostgreSQL — Connections and Authentication (<code>listen_addresses</code>) e ALTER SYSTEM</a></td>
+<td>PRIMARY</td>
+<td>2026-11-07</td>
+</tr>
+<tr>
+<td><a id="s-163"></a>S-163</td>
+<td><a href="https://www.postgresql.org/docs/current/auth-pg-hba-conf.html">PostgreSQL — The pg_hba.conf File (<code>scram-sha-256</code>)</a></td>
+<td>PRIMARY</td>
 <td>2026-11-07</td>
 </tr>
 </tbody>
