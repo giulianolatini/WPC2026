@@ -1,6 +1,6 @@
 [
   {
-    "name": "OpenRouter",
+    "name": "OpenRouter (Custom Endpoint, alternativa al provider built-in)",
     "vendor": "customendpoint",
     "apiKey": "${input:openrouterApiKey}",
     "apiType": "chat-completions",
@@ -12,7 +12,11 @@
         "toolCalling": true,
         "vision": false,
         "maxInputTokens": 112000,
-        "maxOutputTokens": 16000
+        "maxOutputTokens": 16000,
+        "requestHeaders": {
+          "HTTP-Referer": "https://github.com/giulianolatini/WPC2026",
+          "X-OpenRouter-Title": "WPC2026 demo"
+        }
       }
     ]
   },

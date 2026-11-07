@@ -14,13 +14,19 @@ model_list:
       model: anthropic/claude-sonnet-5-5
       api_key: os.environ/ANTHROPIC_API_KEY
 
-  # --- Codex -> OpenAI API (docs/Sources.md#s-042)
+  # --- Codex -> OpenAI API, modello raccomandato per Codex, via Responses API (docs/Decisions.md#d-015)
   - model_name: codex
     litellm_params:
-      model: openai/gpt-6.1-sol
+      model: openai/responses/gpt-6.1-sol
       api_key: os.environ/OPENAI_API_KEY
 
-  # --- Gemini Pro -> Google AI Studio (prefisso gemini/, NON vertex_ai/) (docs/Sources.md#s-025, #s-044)
+  # --- Gemini -> Google AI Studio (prefisso gemini/; senza prefisso = Vertex AI) (docs/Decisions.md#d-016)
+  # Default stabile (solo tier a pagamento)
+  - model_name: gemini
+    litellm_params:
+      model: gemini/gemini-4-argon
+      api_key: os.environ/GEMINI_API_KEY
+  # "Gemini Pro" del titolo del talk: preview
   - model_name: gemini-pro
     litellm_params:
       model: gemini/gemini-3.1-pro-preview
@@ -45,3 +51,5 @@ litellm_settings:
 general_settings:
   # Tutte le chiamate devono presentare questa chiave (o una virtual key nel profilo esteso).
   master_key: os.environ/LITELLM_MASTER_KEY
+  # Hardening (docs/Decisions.md#d-018, docs/Sources.md#s-108)
+  disable_env_credential_login: true
