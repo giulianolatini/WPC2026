@@ -7,6 +7,7 @@
   const STATUS = [['ok', 'OK'], ['ko', 'KO'], ['skip', 'Saltato'], ['na', 'Non applicabile']];
   const STATUS_LABEL = Object.fromEntries(STATUS);
   const $ = (s, el = document) => el.querySelector(s);
+  // Ogni valore dinamico che entra in innerHTML passa da esc(), anche negli attributi (R2-codex-01).
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
   /* ------------------------------------------------------------ stato */
@@ -63,11 +64,11 @@
   function renderSessionBar() {
     const sel = $('#session-select');
     sel.innerHTML = Object.values(state.sessions).sort((a, b) => b.createdAt.localeCompare(a.createdAt))
-      .map(s => `<option value="${s.id}">${esc(s.name)}</option>`).join('');
+      .map(s => `<option value="${esc(s.id)}">${esc(s.name)}</option>`).join('');
     sel.value = state.current;
     const s = cur();
     $('#s-name').value = s.name; $('#s-operator').value = s.operator;
-    $('#s-os').innerHTML = Object.entries(RB.osLabels).map(([k, v]) => `<option value="${k}">${esc(v)}</option>`).join('');
+    $('#s-os').innerHTML = Object.entries(RB.osLabels).map(([k, v]) => `<option value="${esc(k)}">${esc(v)}</option>`).join('');
     $('#s-os').value = s.os; $('#s-path').value = s.path; $('#s-profile').value = s.profile;
     $('#version-warning').classList.toggle('hidden', s.runbookVersion === RB.hash);
   }
@@ -86,7 +87,7 @@
     for (const ph of RB.phases) {
       const steps = ph.steps.filter(st => visibleStep(st, s));
       if (!steps.length) continue;
-      out += `<section class="phase" id="${ph.id}"><h2>${esc(ph.id)} — ${esc(ph.title)}</h2>`;
+      out += `<section class="phase" id="${esc(ph.id)}"><h2>${esc(ph.id)} — ${esc(ph.title)}</h2>`;
       for (const st of steps) out += renderStep(st);
       out += '</section>';
     }
@@ -104,17 +105,17 @@
       if (b.type === 'prose') body += `<div class="prose">${b.html}</div>`;
       else if (visibleBlock(b)) {
         const params = usedParams(b.code);
-        body += `<pre class="code" data-code="${esc(b.code)}" data-os="${b.os.join(',')}"><code class="language-${esc(b.lang)}"></code></pre>`
+        body += `<pre class="code" data-code="${esc(b.code)}" data-os="${esc(b.os.join(','))}"><code class="language-${esc(b.lang)}"></code></pre>`
              + (params.length ? `<p class="hint">Parametri: ${params.map(n => `<code>${esc(n)}</code>`).join(' ')}</p>` : '');
       }
     }
     const noOut = st.evidence === 'no-output';
-    return `<article class="card step" id="${st.id}" data-step="${st.id}" data-status="${ss.status}">
-      <header><h3><span class="sid">${st.id}</span>${esc(st.title)}</h3>
+    return `<article class="card step" id="${esc(st.id)}" data-step="${esc(st.id)}" data-status="${esc(ss.status)}">
+      <header><h3><span class="sid">${esc(st.id)}</span>${esc(st.title)}</h3>
         <div class="badges">${badges.map(b => `<span class="badge">${esc(b)}</span>`).join('')}${noOut ? '<span class="badge secret">segreti: output non salvato</span>' : ''}</div></header>
       ${body}
       <details class="evidence" ${ss.status ? '' : 'open'}><summary>Evidenza${ss.status ? ' — ' + esc(STATUS_LABEL[ss.status]) : ''}</summary>
-        <div class="status">${STATUS.map(([v, l]) => `<button type="button" data-v="${v}" aria-pressed="${ss.status === v}">${l}</button>`).join('')}
+        <div class="status">${STATUS.map(([v, l]) => `<button type="button" data-v="${esc(v)}" aria-pressed="${ss.status === v}">${esc(l)}</button>`).join('')}
           <span class="when">${ss.at ? new Date(ss.at).toLocaleString('it-IT') : ''}</span></div>
         ${noOut ? '<p class="hint">Questo passo produce segreti: il sito non salva l\'output.</p>'
                 : `<label class="field"><span>Output del comando (i segreti riconosciuti sono oscurati)</span><textarea class="mono" data-f="output" spellcheck="false">${esc(ss.output)}</textarea></label>
@@ -149,7 +150,7 @@
       if (!steps.length) return '';
       const d = steps.filter(st => DONE.includes(stepState(st.id).status)).length;
       all += steps.length; done += d;
-      return `<li><a href="#${ph.id}"><span>${esc(ph.id)} — ${esc(ph.title)}</span><span class="count">${d}/${steps.length}</span></a></li>`;
+      return `<li><a href="#${esc(ph.id)}"><span>${esc(ph.id)} — ${esc(ph.title)}</span><span class="count">${d}/${steps.length}</span></a></li>`;
     }).join('');
     $('#progress-bar').style.width = all ? (100 * done / all) + '%' : '0';
     $('#progress-text').textContent = `${done} di ${all} passi completati (OK, saltati o non applicabili).`;
