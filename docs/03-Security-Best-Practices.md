@@ -166,13 +166,17 @@ Fonti: [S-108](Sources.md#s-108) (Security Best Practices), [S-109](Sources.md#s
 ### 5.1 Release e immagini
 
 - [ ] Fissa una versione esatta o un digest. Mai `latest`, `main-latest`, `main-stable` ([S-108](Sources.md#s-108), [D-018](Decisions.md#d-018)).
-- [ ] Verifica la firma dell'immagine con la chiave cosign del commit `e82a3c6`. Impronta SHA-256 di `cosign.pub`: `e3fe3e08c44b16407fe0b37c43b4f8b603b3a0f4ee74c29e647bc022d762c2c0` ([S-104](Sources.md#s-104), [S-109](Sources.md#s-109)). Lo script [`scripts/pin-images.sh`](../examples/litellm/scripts/pin-images.sh) automatizza i passi:
+- [ ] Verifica la firma dell'immagine con la chiave cosign del commit `e82a3c6`. Impronta SHA-256 di `cosign.pub`: `e3fe3e08c44b16407fe0b37c43b4f8b603b3a0f4ee74c29e647bc022d762c2c0` ([S-104](Sources.md#s-104), [S-109](Sources.md#s-109)). L'ordine dei passi è importante:
+
+  1. Scarica `cosign.pub` e controlla la sua impronta SHA-256: una chiave non verificata non prova nulla.
+  2. Esegui `docker pull` del tag e leggi il digest (`docker inspect … RepoDigests`).
+  3. Esegui `cosign verify` sul **digest** (`@sha256:…`), non sul tag: il tag è mobile, il digest no.
+  4. Usa nel deploy il digest verificato.
+
+  Lo script [`scripts/pin-images.sh`](../examples/litellm/scripts/pin-images.sh) esegue i quattro passi:
 
 ```bash
-cosign verify \
-  --key https://raw.githubusercontent.com/BerriAI/litellm/e82a3c646908ba0a6ee0beddc4310d7a6cac4065/cosign.pub \
-  ghcr.io/berriai/litellm-non_root:v1.108.2
-docker inspect --format='{{index .RepoDigests 0}}' ghcr.io/berriai/litellm-non_root:v1.108.2
+./scripts/pin-images.sh        # stampa LITELLM_IMAGE=…@sha256:… e POSTGRES_IMAGE=…@sha256:… da copiare in .env
 ```
 
 - [ ] Preferisci l'immagine `ghcr.io/berriai/litellm-non_root` ([S-109](Sources.md#s-109)).
