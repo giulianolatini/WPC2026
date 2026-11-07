@@ -186,11 +186,10 @@ Fonti: [S-108](Sources.md#s-108) (Security Best Practices), [S-109](Sources.md#s
 
 - [ ] Ruoli RBAC minimi; pochi `proxy_admin` ([S-108](Sources.md#s-108)).
 - [ ] Agli utenti e ai workload solo **virtual keys** con scope; mai la master key ([S-108](Sources.md#s-108)).
-- [ ] `general_settings.disable_env_credential_login: true`. **Prima** crea un utente `proxy_admin` con password o collega l'SSO, altrimenti perdi l'accesso all'Admin UI ([S-108](Sources.md#s-108), [S-148](Sources.md#s-148)):
+- [ ] `general_settings.disable_env_credential_login: true` blocca il login della UI con `UI_USERNAME`/`UI_PASSWORD` e master key. Serve un utente `proxy_admin` con password (o l'SSO), altrimenti nessuno accede all'Admin UI ([S-108](Sources.md#s-108), [S-148](Sources.md#s-148)). La guida LiteLLM crea l'utente prima di attivare l'opzione. Gli esempi la attivano già in `config.yaml`: l'API accetta sempre la master key, quindi crei l'utente anche dopo l'avvio ([01 §5.2](01-Installazione.md#52-profilo-esteso-postgresql--admin-ui--virtual-keys)):
   1. Con la master key: `POST /user/new` con `user_role: proxy_admin` e `auto_create_key: false`.
   2. `POST /user/update` con la password (almeno 12 caratteri, maiuscole, minuscole, cifre, simboli).
   3. Verifica il login con email e password.
-  4. Attiva l'opzione e riavvia.
 
   Lo script [`scripts/bootstrap-admin.sh`](../examples/litellm/scripts/bootstrap-admin.sh) esegue i passi 1–2. Con SSO e `disable_password_login_when_sso_enabled` anche il `proxy_admin` di emergenza (`/fallback/login`) è bloccato ([S-148](Sources.md#s-148)).
 - [ ] SSO per l'Admin UI; JWT per il traffico API; SCIM per il ciclo di vita degli utenti ([S-108](Sources.md#s-108)).
