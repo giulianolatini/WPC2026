@@ -206,7 +206,7 @@ Il formato segue il template ADR di Nygard, con una sezione <strong>Razionale</s
 <td><a href="#d-028">D-028</a></td>
 <td>2026-11-07</td>
 <td>Architettura del sito offline e delle evidenze</td>
-<td>Proposed</td>
+<td>Accepted</td>
 </tr>
 <tr>
 <td><a href="#d-029">D-029</a></td>
@@ -218,7 +218,7 @@ Il formato segue il template ADR di Nygard, con una sezione <strong>Razionale</s
 <td><a href="#d-030">D-030</a></td>
 <td>2026-11-07</td>
 <td>PostgreSQL locale per il percorso uv con profilo esteso</td>
-<td>Proposed</td>
+<td>Accepted</td>
 </tr>
 </tbody>
 </table>
@@ -581,7 +581,7 @@ Il formato segue il template ADR di Nygard, con una sezione <strong>Razionale</s
 <p><a id="d-028"></a></p>
 <h2 id="d-028--architettura-del-sito-offline-e-delle-evidenze">D-028 — Architettura del sito offline e delle evidenze</h2>
 <ul>
-<li><strong>Data:</strong> 2026-11-07 — <strong>Stato:</strong> Proposed — <strong>Decisore:</strong> proposta dell'assistente, da confermare dal PO</li>
+<li><strong>Data:</strong> 2026-11-07 — <strong>Stato:</strong> Accepted (confermata dal PO il 2026-11-07) — <strong>Decisore:</strong> proposta dell'assistente, approvata dal PO</li>
 </ul>
 <p><strong>Contesto.</strong> Il sito si apre da <code>file://</code>, senza server e senza rete.</p>
 <p><strong>Opzioni considerate.</strong> (1) Pagine statiche generate in Python, dati del runbook nel HTML come JSON, sessioni in <code>localStorage</code>, export Markdown e JSON. (2) Static site generator esterno (es. MkDocs) più un'app JavaScript separata. (3) Applicazione con server locale.</p>
@@ -613,7 +613,7 @@ Il formato segue il template ADR di Nygard, con una sezione <strong>Razionale</s
 <p><a id="d-030"></a></p>
 <h2 id="d-030--postgresql-locale-per-il-percorso-uv-con-profilo-esteso">D-030 — PostgreSQL locale per il percorso uv con profilo esteso</h2>
 <ul>
-<li><strong>Data:</strong> 2026-11-07 — <strong>Stato:</strong> Proposed — <strong>Decisore:</strong> richiesta del PO (procedura di installazione per ogni sistema operativo); scelte di dettaglio dell'assistente, da confermare</li>
+<li><strong>Data:</strong> 2026-11-07 — <strong>Stato:</strong> Accepted (confermata dal PO il 2026-11-07) — <strong>Decisore:</strong> richiesta del PO (procedura di installazione per ogni sistema operativo); scelte di dettaglio dell'assistente, approvate dal PO</li>
 </ul>
 <p><strong>Contesto.</strong> Con <code>uv</code> il profilo esteso richiede un PostgreSQL esterno (<a href="01-Installazione.html#6-litellm-come-servizio-locale-con-uv">01 §6</a>). La review della PR #2 (R2-codex-04) ha trovato il percorso incompleto. Il PO chiede una procedura di installazione per ogni sistema operativo.</p>
 <p><strong>Opzioni considerate.</strong> (1) Versione principale fissa, uguale al profilo Docker (<code>postgres:16</code>), con pacchetti ufficiali: installer EDB via <code>winget</code> (Windows), <code>postgresql@16</code> di Homebrew (macOS), repository PGDG (Debian/Ubuntu), <code>postgresql16-server</code> (openSUSE). (2) Versione dei pacchetti della distribuzione, diversa per ogni sistema. (3) Solo un database dell'organizzazione, senza procedura.</p>
