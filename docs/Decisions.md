@@ -37,7 +37,7 @@ Il formato segue il template ADR di Nygard, con una sezione **Razionale** esplic
 | [D-021](#d-021) | 2026-11-07 | `anthropic-version: 2026-10-21` negli esempi | Accepted |
 | [D-022](#d-022) | 2026-11-07 | Documento di best practice di sicurezza | Accepted |
 | [D-023](#d-023) | 2026-11-07 | Security review con OWASP e ISO/IEC 27001 | Superseded by D-024 |
-| [D-024](#d-024) | 2026-11-07 | OWASP LLM Top 10 edizione 2026 | Proposed |
+| [D-024](#d-024) | 2026-11-07 | OWASP LLM Top 10 edizione 2026 | Accepted |
 | [D-025](#d-025) | 2026-11-07 | Applicazione delle azioni AZ-01…AZ-10 | Accepted |
 
 ---
@@ -477,13 +477,13 @@ Il formato segue il template ADR di Nygard, con una sezione **Razionale** esplic
 <a id="d-024"></a>
 ## D-024 — OWASP LLM Top 10 edizione 2026
 
-- **Data:** 2026-11-07 — **Stato:** Proposed — **Decisore:** assistente, conferma PO — **Sostituisce:** [D-023](#d-023) (solo l'edizione OWASP LLM)
+- **Data:** 2026-11-07 — **Stato:** Accepted (confermata dal PO il 2026-11-07) — **Decisore:** proposta dell'assistente, approvata dal PO — **Sostituisce:** [D-023](#d-023) (solo l'edizione OWASP LLM)
 
 **Contesto.** D-023 usa l'OWASP Top 10 for LLM Applications 2025. La review P-10 indica che il 2026-08-03 OWASP ha pubblicato l'edizione 2026, con un ordine diverso (es. Excessive Agency passa da LLM06 a LLM03; System Prompt Leakage diventa Hidden Context Exposure, LLM08). L'assistente ha verificato la data sulla pagina della risorsa e l'elenco sul repository canonico.
 
 **Opzioni considerate.** (1) Edizione 2026. (2) Edizione 2025, già citata in D-023.
 
-**Decisione.** Proponiamo l'opzione 1. Il documento 04 riporta anche la corrispondenza con gli ID 2025. Restano invariati: Agentic Top 10 2026 e ISO/IEC 27001:2022 Annex A + clausole 4–10.
+**Decisione.** Usiamo l'opzione 1. Il documento 04 riporta anche la corrispondenza con gli ID 2025. Restano invariati: Agentic Top 10 2026 e ISO/IEC 27001:2022 Annex A + clausole 4–10.
 
 **Razionale.** Il pubblico del talk troverà l'edizione 2026 come edizione corrente. Gli ID 2025 vecchi creano confusione.
 
