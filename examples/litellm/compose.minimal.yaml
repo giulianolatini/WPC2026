@@ -3,7 +3,11 @@
 # Fonte: docs/Sources.md#s-020
 services:
   litellm:
-    image: ${LITELLM_IMAGE:-ghcr.io/berriai/litellm:v1.108.2}   # LTS fissata, mai tag mobili (docs/Decisions.md#d-018)
+    image: ${LITELLM_IMAGE:-ghcr.io/berriai/litellm-non_root:v1.108.2}   # AZ-02/AZ-03: non-root, LTS; in team usa il digest
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
     command: ["--config", "/app/config.yaml", "--port", "4000"]
     env_file: .env
     volumes:
