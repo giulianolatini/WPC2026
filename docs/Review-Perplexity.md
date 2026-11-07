@@ -145,13 +145,24 @@ A5. Alternative a LiteLLM come gateway per Copilot BYOK (es. Portkey, Azure AI F
 
 ## Registro degli esiti
 
-| Prompt | Data | Esito sintetico | Azioni | Decisioni collegate |
-|--------|------|-----------------|--------|---------------------|
-| P-01 | — | — | — | — |
-| P-02 | — | — | — | — |
-| P-03 | — | — | — | — |
-| P-04 | — | — | — | — |
-| P-05 | — | — | — | — |
-| P-06 | — | — | — | — |
-| P-07 | — | — | — | — |
-| P-08 | — | — | — | — |
+Risposte ricevute il 2026-11-07. L'assistente ha riletto direttamente le fonti primarie dei punti critici (colonna **Verifica diretta**).
+
+| Prompt | Esito sintetico | Verifica diretta | Azioni sui documenti | Decisioni |
+|--------|-----------------|------------------|----------------------|-----------|
+| P-01 | 8 confermate, 2 parziali (A2 provider built-in, A5 percorso file) | Header `x-api-key`/`api-key`/Bearer e `${apiKey}`: confermato ([S-071](Sources.md#s-071)). Percorso file e formato `vendor/id`: non nella doc ufficiale | OpenRouter built-in; percorsi `chatLanguageModels.json` con ⚠️; formato utility model; NES esclusa | [D-019](Decisions.md#d-019) |
+| P-02 | 2 confermate, 3 parziali | Policy "enabled by default": confermato ([S-018](Sources.md#s-018)); FAQ VS Code dice "must enable" ([S-071](Sources.md#s-071)) → incoerenza segnalata | §2.5 riscritta: default, percorsi enterprise/org, AI Credits, piani Max/Student | [D-013](Decisions.md#d-013) |
+| P-03 | 2 confermate, 4 parziali | Harness e Cloud come execution target: confermato ([S-068](Sources.md#s-068)); instructions per harness: confermato ([S-069](Sources.md#s-069)) | Tabella harness in §1; tabella filesystem per harness in §2.3; `.mcp.json`; `errorOccurred` | — |
+| P-04 | 6 confermate, 1 parziale (tag), 1 non verificabile (servizio) | Incidente 1.107.0, tag mobili, nuova chiave cosign: confermato ([S-104](Sources.md#s-104)) | Pin `1.108.2`; §5.0 supply chain; `--host 127.0.0.1`; health senza/con chiave | [D-018](Decisions.md#d-018) |
+| P-05 | 2 confermate, 4 parziali | `anthropic-version: 2026-10-21`: confermato ([S-116](Sources.md#s-116)); `gemini-4-argon` stabile: confermato ([S-103](Sources.md#s-103)) | Codex → `gpt-6.1-sol` via `openai/responses/`; Gemini doppio alias; header OpenRouter | [D-015](Decisions.md#d-015), [D-016](Decisions.md#d-016), [D-021](Decisions.md#d-021) |
+| P-06 | 4 confermate, 2 parziali, 1 confutata (YaST Leap 16) | Non riletta (fonti P-06 in [Sources.md](Sources.md)) | `--scope machine`; Docker Desktop solo machine; Debian; Leap 16 vs Tumbleweed; nota YaST | [D-014](Decisions.md#d-014) |
+| P-07 | 3 confermate, 1 parziale, 1 confutata (`specify check` esiste) | Layout skills di default e `--commands`: confermato ([S-083](Sources.md#s-083)) | Release `v1.3.2`; tabella layout; `--ai` rimossa; `specify check` | — |
+| P-08 | Tesi PARZIALE | Perdita `thinking_blocks` con Chat Completions: confermato ([S-110](Sources.md#s-110)) | §4.1 riscritta (criteri, rischi, hardening); §4.6 alternative | [D-017](Decisions.md#d-017), [D-019](Decisions.md#d-019), [D-020](Decisions.md#d-020) |
+
+**Punti ancora aperti (⚠️), da provare prima del talk**
+
+- [ ] Percorso di `chatLanguageModels.json` su macOS e Linux.
+- [ ] Formato `vendor/id` di `chat.utilitySmallModel` con un modello Custom Endpoint.
+- [ ] `requestHeaders` con `Authorization: Bearer ${apiKey}` verso LiteLLM `/v1/messages`.
+- [ ] Pacchetti Docker su openSUSE Leap 16.
+- [ ] LTS e digest correnti di LiteLLM.
+- [ ] Accesso a `gemini-4-argon` con la chiave Gemini del demo.
