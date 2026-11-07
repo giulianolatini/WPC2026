@@ -10,6 +10,9 @@ services:
       - ALL
     command: ["--config", "/app/config.yaml", "--port", "4000"]
     env_file: .env
+    environment:
+      # Fail-closed: Compose non parte se la chiave è vuota (R-agy-01)
+      LITELLM_MASTER_KEY: ${LITELLM_MASTER_KEY:?set LITELLM_MASTER_KEY in .env}
     volumes:
       - ./config.yaml:/app/config.yaml:ro
     ports:
