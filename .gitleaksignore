@@ -1,0 +1,5 @@
+# Falsi positivi di gitleaks: una riga per impronta (commit:file:regola:riga).
+# mermaid.min.js 12.3.0 è codice di terze parti minimizzato (tools/site/vendor/mermaid/VERSION):
+# alla riga 634 la regola generic-api-key scambia "keyCount" per una chiave. Il file non contiene segreti.
+80f353e0b9f8e605f0d7e6b0b633132f47c6775f:tools/site/vendor/mermaid/mermaid.min.js:generic-api-key:634
+e670a5013d7ddf2b7ff584a96a177c0820f1e812:site/assets/vendor/mermaid/mermaid.min.js:generic-api-key:634
