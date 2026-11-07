@@ -227,9 +227,21 @@ def main():
     stale = [p for p, c in files.items() if not (SITE / p).exists() or (SITE / p).read_text(encoding="utf-8") != c]
     vendor_src, vendor_dst = TPL / "vendor", SITE / "assets" / "vendor"
     if check:
-        missing_vendor = not vendor_dst.exists()
-        if stale or missing_vendor:
-            print("Sito NON aggiornato:", *stale, "(vendor mancante)" if missing_vendor else "", sep="\n  ")
+        # R2-agy-05: confronta anche i file di vendor/ e richiede gli asset dei font.
+        problems = list(stale)
+        for f in sorted(vendor_src.rglob("*")):
+            if f.is_file():
+                d = vendor_dst / f.relative_to(vendor_src)
+                if not d.exists() or d.read_bytes() != f.read_bytes():
+                    problems.append(str(d.relative_to(SITE)))
+        if vendor_dst.exists():
+            extra = [d for d in vendor_dst.rglob("*") if d.is_file() and not (vendor_src / d.relative_to(vendor_dst)).exists()]
+            problems += [str(d.relative_to(SITE)) + " (in più)" for d in extra]
+        for name in ("fonts.css", "fonts-manifest.json"):
+            if not (SITE / "assets" / name).exists():
+                problems.append("assets/" + name + " (manca: esegui tools/fonts.py)")
+        if problems:
+            print("Sito NON aggiornato:", *problems, sep="\n  ")
             sys.exit(1)
         print("Sito aggiornato."); return
     for p, c in files.items():
