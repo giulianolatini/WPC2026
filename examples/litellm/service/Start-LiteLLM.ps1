@@ -26,7 +26,9 @@ if ($unsafe) {
 Set-Location $WpcDir
 Get-Content $envFile | Where-Object { $_ -match '^\s*[A-Za-z_][A-Za-z0-9_]*=' } | ForEach-Object {
     $name, $value = $_ -split '=', 2
-    $value = $value.Trim().Trim('"').Trim("'")
+    $value = $value.Trim()
+    # Rimuove solo una coppia di virgolette esterne uguali, come load-env.sh (R-agy-14)
+    if ($value -match '^"(.*)"$' -or $value -match "^'(.*)'$") { $value = $Matches[1] }
     [Environment]::SetEnvironmentVariable($name.Trim(), $value, 'Process')
 }
 if (-not $env:LITELLM_MASTER_KEY) { Write-Error 'LITELLM_MASTER_KEY vuota in .env'; exit 1 }   # fail-closed (R-agy-01)
