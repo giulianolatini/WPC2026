@@ -41,9 +41,9 @@ Il formato segue il template ADR di Nygard, con una sezione **Razionale** esplic
 | [D-025](#d-025) | 2026-11-07 | Applicazione delle azioni AZ-01…AZ-10 | Accepted |
 | [D-026](#d-026) | 2026-11-07 | Runbook unico con filtri per OS, percorso e profilo | Accepted |
 | [D-027](#d-027) | 2026-11-07 | Nerd Fonts in WOFF2 nel repository | Accepted |
-| [D-028](#d-028) | 2026-11-07 | Architettura del sito offline e delle evidenze | Proposed |
+| [D-028](#d-028) | 2026-11-07 | Architettura del sito offline e delle evidenze | Accepted |
 | [D-029](#d-029) | 2026-11-07 | Deck finale come artefatto Slides | Accepted |
-| [D-030](#d-030) | 2026-11-07 | PostgreSQL locale per il percorso uv con profilo esteso | Proposed |
+| [D-030](#d-030) | 2026-11-07 | PostgreSQL locale per il percorso uv con profilo esteso | Accepted |
 
 ---
 
@@ -556,7 +556,7 @@ Il formato segue il template ADR di Nygard, con una sezione **Razionale** esplic
 <a id="d-028"></a>
 ## D-028 — Architettura del sito offline e delle evidenze
 
-- **Data:** 2026-11-07 — **Stato:** Proposed — **Decisore:** proposta dell'assistente, da confermare dal PO
+- **Data:** 2026-11-07 — **Stato:** Accepted (confermata dal PO il 2026-11-07) — **Decisore:** proposta dell'assistente, approvata dal PO
 
 **Contesto.** Il sito si apre da `file://`, senza server e senza rete.
 
@@ -599,7 +599,7 @@ Il formato segue il template ADR di Nygard, con una sezione **Razionale** esplic
 <a id="d-030"></a>
 ## D-030 — PostgreSQL locale per il percorso uv con profilo esteso
 
-- **Data:** 2026-11-07 — **Stato:** Proposed — **Decisore:** richiesta del PO (procedura di installazione per ogni sistema operativo); scelte di dettaglio dell'assistente, da confermare
+- **Data:** 2026-11-07 — **Stato:** Accepted (confermata dal PO il 2026-11-07) — **Decisore:** richiesta del PO (procedura di installazione per ogni sistema operativo); scelte di dettaglio dell'assistente, approvate dal PO
 
 **Contesto.** Con `uv` il profilo esteso richiede un PostgreSQL esterno ([01 §6](01-Installazione.md#6-litellm-come-servizio-locale-con-uv)). La review della PR #2 (R2-codex-04) ha trovato il percorso incompleto. Il PO chiede una procedura di installazione per ogni sistema operativo.
 
