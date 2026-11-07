@@ -1,0 +1,522 @@
+---
+title: Runbook WPC2026 — GitHub Copilot in VS Code con LLM via API (nativo e LiteLLM)
+version: 1.0.0
+---
+
+# Runbook WPC2026
+
+Questo runbook guida l'installazione e la configurazione descritte in [01-Installazione](../01-Installazione.md) e [02-Configurazione-Copilot](../02-Configurazione-Copilot.md).
+Il sito offline in `site/` si genera da questo file con `tools/update-site.sh` (o `tools/update-site.ps1`).
+
+**Regole di scrittura del file** (il generatore le legge):
+
+- `## F<n> — <titolo>` apre una fase.
+- `### S-<nnn> — <titolo>` apre un passo. La riga successiva `<!-- step: os=… path=… profile=… evidence=… -->` dà i filtri.
+  - `os`: `all`, oppure una lista tra `windows`, `macos`, `debian`, `opensuse`.
+  - `path`: `all`, `docker`, `uv`. `profile`: `all`, `minimal`, `extended`.
+  - `evidence=no-output`: il sito non salva l'output di quel passo (es. generazione di segreti).
+- Un blocco di codice con `os=` nell'intestazione (es. ` ```bash os=macos `) appare solo per quei sistemi.
+- `{{NOME}}` nei comandi è un parametro della tabella **Parametri**. Il sito lo sostituisce con il valore inserito.
+- Nessun segreto nei comandi: le chiavi stanno solo in `.env` e nel secret storage di VS Code.
+
+## Parametri
+
+| Nome | Default | Default Windows | Descrizione |
+|------|---------|-----------------|-------------|
+| WPC_DIR | ~/wpc2026-litellm | $HOME\wpc2026-litellm | Cartella di lavoro di LiteLLM |
+| REPO_DIR | ~/Sviluppo/GITHUB/WPC2026 | $HOME\Sviluppo\GITHUB\WPC2026 | Clone locale del repository WPC2026 |
+| LITELLM_PORT | 4000 | 4000 | Porta del proxy LiteLLM (solo `127.0.0.1`) |
+| LITELLM_VERSION | 1.108.2 | 1.108.2 | Versione LTS di LiteLLM ([D-018](../Decisions.md#d-018)) |
+| ADMIN_ID | wpc-admin | wpc-admin | Utente `proxy_admin` (profilo esteso) |
+| ADMIN_EMAIL | tu@example.com | tu@example.com | Email del `proxy_admin` (profilo esteso) |
+| SPECKIT_VERSION | 1.3.2 | 1.3.2 | Versione di Spec Kit ([S-085](../Sources.md#s-085)) |
+| SPECKIT_PROJECT | wpc-speckit-demo | wpc-speckit-demo | Cartella del progetto di prova Spec Kit |
+
+## F1 — Prerequisiti
+
+### S-101 — Installa Visual Studio Code
+<!-- step: os=all path=all profile=all -->
+
+Installa VS Code con il package manager del sistema ([S-012](../Sources.md#s-012), [S-014](../Sources.md#s-014), [S-009](../Sources.md#s-009)).
+
+```powershell os=windows
+winget install --id Microsoft.VisualStudioCode -e
+```
+
+```bash os=macos
+brew install --cask visual-studio-code
+```
+
+```bash os=debian
+sudo apt install wget gpg &&
+wget -qO- https://packages.microsoft.com/keys/microsoft.asc | sudo gpg --dearmor -o /usr/share/keyrings/microsoft.gpg
+sudo tee /etc/apt/sources.list.d/vscode.sources > /dev/null <<'EOF'
+Types: deb
+URIs: https://packages.microsoft.com/repos/code
+Suites: stable
+Components: main
+Architectures: amd64,arm64,armhf
+Signed-By: /usr/share/keyrings/microsoft.gpg
+EOF
+sudo apt update && sudo apt install code
+```
+
+```bash os=opensuse
+sudo rpm --import https://packages.microsoft.com/keys/microsoft.asc &&
+echo -e "[code]\nname=Visual Studio Code\nbaseurl=https://packages.microsoft.com/yumrepos/vscode\nenabled=1\nautorefresh=1\ntype=rpm-md\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc" | sudo tee /etc/zypp/repos.d/vscode.repo > /dev/null
+sudo zypper refresh && sudo zypper install code
+```
+
+**Esito atteso:** `code --version` mostra la versione di VS Code.
+
+### S-102 — Installa PowerShell 7
+<!-- step: os=windows path=all profile=all -->
+
+Il servizio Windows e gli script `.ps1` usano PowerShell 7 ([01 §3.2](../01-Installazione.md#32-powershell-7-solo-windows)).
+
+```powershell os=windows
+winget install --id Microsoft.PowerShell -e
+pwsh -Version
+```
+
+**Esito atteso:** `pwsh -Version` mostra la versione 7.x.
+
+### S-103 — Installa Docker
+<!-- step: os=all path=docker profile=all -->
+
+Installa Docker Desktop (Windows, macOS) o Docker Engine (Linux) ([S-065](../Sources.md#s-065), [S-061](../Sources.md#s-061), [S-064](../Sources.md#s-064)).
+
+```powershell os=windows
+# PowerShell come amministratore: il pacchetto ha solo l'installer per tutti gli utenti
+winget install --id Docker.DockerDesktop -e
+```
+
+```bash os=macos
+brew install --cask docker-desktop
+```
+
+```bash os=debian
+sudo apt update && sudo apt install ca-certificates curl
+sudo install -m 0755 -d /etc/apt/keyrings
+sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+sudo chmod a+r /etc/apt/keyrings/docker.asc
+sudo tee /etc/apt/sources.list.d/docker.sources > /dev/null <<EOF
+Types: deb
+URIs: https://download.docker.com/linux/ubuntu
+Suites: $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}")
+Components: stable
+Architectures: $(dpkg --print-architecture)
+Signed-By: /etc/apt/keyrings/docker.asc
+EOF
+sudo apt update
+sudo apt install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+sudo usermod -aG docker $USER && newgrp docker
+```
+
+```bash os=opensuse
+# Tumbleweed. Leap 16: sudo zypper install docker docker-compose docker-buildx (⚠️ da provare)
+sudo zypper install docker docker-compose docker-compose-switch
+sudo systemctl enable --now docker
+sudo usermod -G docker -a $USER && newgrp docker
+```
+
+> Su Debian sostituisci `linux/ubuntu` con `linux/debian` e usa solo `$VERSION_CODENAME` ([S-062](../Sources.md#s-062)).
+
+**Esito atteso:** `docker version` e `docker compose version` rispondono senza errori.
+
+### S-104 — Installa uv
+<!-- step: os=all path=all profile=all -->
+
+`uv` serve per LiteLLM come servizio locale e per Spec Kit ([S-060](../Sources.md#s-060), [D-009](../Decisions.md#d-009)).
+
+```powershell os=windows
+winget install --id=astral-sh.uv -e
+```
+
+```bash os=macos
+brew install uv
+```
+
+```bash os=debian,opensuse
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+**Esito atteso:** in un nuovo terminale `uv --version` mostra la versione.
+
+### S-105 — Accedi a GitHub Copilot
+<!-- step: os=all path=all profile=all -->
+
+- [ ] Apri VS Code e la Chat view (`Ctrl+Alt+I`; macOS `Ctrl+Cmd+I`).
+- [ ] Accedi con l'account GitHub del piano Copilot.
+- [ ] Business/Enterprise: se il model picker non mostra **Manage Language Models**, chiedi all'amministratore di controllare la policy *Bring Your Own Language Model Key in VS Code* ([D-013](../Decisions.md#d-013)).
+
+**Esito atteso:** la Chat view risponde e il model picker mostra **Manage Language Models**.
+
+### S-106 — Applica la baseline di sicurezza di VS Code
+<!-- step: os=all path=all profile=all -->
+
+Copia [`settings.secure.jsonc`](../../examples/vscode/settings.secure.jsonc) nelle **impostazioni utente** (*Preferences: Open User Settings (JSON)*), non in `.vscode/settings.json` ([03 §7](../03-Security-Best-Practices.md#7-baseline-di-configurazione)).
+
+- [ ] Workspace Trust con `startupPrompt: once`.
+- [ ] Nessuna auto-approvazione globale.
+- [ ] Sandbox dell'agente: `chat.agent.sandbox.enabled: "on"` (default `off`).
+
+**Esito atteso:** aprendo una cartella nuova, VS Code chiede la fiducia; in chat `/sandbox policy` mostra la sandbox attiva.
+
+## F2 — Cartella di lavoro e segreti di LiteLLM
+
+### S-201 — Copia gli esempi nella cartella di lavoro
+<!-- step: os=all path=all profile=all -->
+
+```bash os=macos,debian,opensuse
+mkdir -p {{WPC_DIR}}
+cp -R {{REPO_DIR}}/examples/litellm/. {{WPC_DIR}}/
+cd {{WPC_DIR}} && cp .env.example .env
+```
+
+```powershell os=windows
+New-Item -ItemType Directory -Force "{{WPC_DIR}}" | Out-Null
+Copy-Item -Recurse -Force "{{REPO_DIR}}\examples\litellm\*" "{{WPC_DIR}}\"
+Set-Location "{{WPC_DIR}}"; Copy-Item .env.example .env
+```
+
+**Esito atteso:** la cartella contiene `.env`, `config.yaml`, `compose.*.yaml`, `scripts/`, `service/`.
+
+### S-202 — Genera master key, salt key e password del database
+<!-- step: os=all path=all profile=all evidence=no-output -->
+
+Il sito **non salva** l'output di questo passo: contiene segreti. Copia i valori direttamente in `.env`.
+
+```bash os=macos,debian,opensuse
+echo "LITELLM_MASTER_KEY=sk-$(openssl rand -hex 32)"
+echo "LITELLM_SALT_KEY=sk-$(openssl rand -hex 32)"
+echo "POSTGRES_PASSWORD=$(openssl rand -hex 24)"
+```
+
+```powershell os=windows
+function New-Hex([int]$n) { -join ([System.Security.Cryptography.RandomNumberGenerator]::GetBytes($n) | ForEach-Object { $_.ToString('x2') }) }
+"LITELLM_MASTER_KEY=sk-$(New-Hex 32)"
+"LITELLM_SALT_KEY=sk-$(New-Hex 32)"
+"POSTGRES_PASSWORD=$(New-Hex 24)"
+```
+
+**Esito atteso:** tre righe `CHIAVE=valore`. `LITELLM_SALT_KEY` non si rigenera più ([S-020](../Sources.md#s-020)).
+
+### S-203 — Compila .env con le chiavi dei provider
+<!-- step: os=all path=all profile=all evidence=no-output -->
+
+- [ ] Scrivi in `.env` i valori di S-202.
+- [ ] Scrivi le chiavi dei provider: `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `GEMINI_API_KEY`, `OPENROUTER_API_KEY`, `HF_TOKEN` (fine-grained, *Make calls to Inference Providers*) ([S-047](../Sources.md#s-047)).
+- [ ] Se usi una porta diversa da 4000: `LITELLM_PORT={{LITELLM_PORT}}`.
+- [ ] Imposta limiti di spesa nelle console dei provider ([03 §6](../03-Security-Best-Practices.md#6-chiavi-api-dei-provider)).
+
+**Esito atteso:** nessuna variabile obbligatoria vuota (`LITELLM_MASTER_KEY`, `LITELLM_SALT_KEY`).
+
+### S-204 — Limita i permessi di .env
+<!-- step: os=all path=all profile=all -->
+
+```bash os=macos,debian,opensuse
+chmod 600 {{WPC_DIR}}/.env && ls -l {{WPC_DIR}}/.env
+```
+
+```powershell os=windows
+& "{{WPC_DIR}}\service\Protect-EnvFile.ps1" -Path "{{WPC_DIR}}\.env"
+(Get-Acl "{{WPC_DIR}}\.env").Access | Format-Table IdentityReference, FileSystemRights
+```
+
+**Esito atteso:** solo l'utente corrente ha accesso (`-rw-------`, oppure un'unica regola ACL).
+
+## F3 — LiteLLM con Docker
+
+### S-301 — Verifica la firma e fissa i digest delle immagini
+<!-- step: os=macos,debian,opensuse path=docker profile=all -->
+
+Richiede `cosign`. Lo script verifica l'impronta della chiave, scarica l'immagine e verifica la firma sul digest ([03 §5.1](../03-Security-Best-Practices.md#51-release-e-immagini)).
+
+```bash os=macos,debian,opensuse
+cd {{WPC_DIR}} && LITELLM_TAG=v{{LITELLM_VERSION}} ./scripts/pin-images.sh
+```
+
+- [ ] Copia in `.env` le righe `LITELLM_IMAGE=…@sha256:…` e `POSTGRES_IMAGE=…@sha256:…`.
+
+**Esito atteso:** lo script stampa `Firma verificata` e i due digest. ⚠️ Se il tag non esiste per `litellm-non_root`, usa il tag LTS delle release note.
+
+### S-302 — Avvia il profilo minimo
+<!-- step: os=all path=docker profile=minimal -->
+
+```bash os=macos,debian,opensuse
+cd {{WPC_DIR}} && docker compose -f compose.minimal.yaml up -d && docker compose -f compose.minimal.yaml ps
+```
+
+```powershell os=windows
+Set-Location "{{WPC_DIR}}"; docker compose -f compose.minimal.yaml up -d; docker compose -f compose.minimal.yaml ps
+```
+
+**Esito atteso:** il servizio `litellm` è `running`. Se Compose segnala `set LITELLM_MASTER_KEY in .env`, completa S-203.
+
+### S-303 — Avvia il profilo esteso
+<!-- step: os=all path=docker profile=extended -->
+
+```bash os=macos,debian,opensuse
+cd {{WPC_DIR}} && docker compose -f compose.extended.yaml up -d && docker compose -f compose.extended.yaml ps
+```
+
+```powershell os=windows
+Set-Location "{{WPC_DIR}}"; docker compose -f compose.extended.yaml up -d; docker compose -f compose.extended.yaml ps
+```
+
+**Esito atteso:** `db` è `healthy` e `litellm` è `running`.
+
+### S-304 — Crea il primo proxy_admin
+<!-- step: os=all path=all profile=extended -->
+
+La password è chiesta in modo interattivo: almeno 12 caratteri con maiuscole, minuscole, cifre e simboli ([S-148](../Sources.md#s-148)).
+
+```bash os=macos,debian,opensuse
+cd {{WPC_DIR}} && WPC_DIR={{WPC_DIR}} ADMIN_ID={{ADMIN_ID}} ADMIN_EMAIL={{ADMIN_EMAIL}} ./scripts/bootstrap-admin.sh
+```
+
+```powershell os=windows
+& "{{WPC_DIR}}\scripts\Bootstrap-Admin.ps1" -WpcDir "{{WPC_DIR}}" -AdminId {{ADMIN_ID}} -AdminEmail {{ADMIN_EMAIL}}
+```
+
+**Esito atteso:** `proxy_admin '{{ADMIN_ID}}' pronto`. Login su `http://localhost:{{LITELLM_PORT}}/ui` con email e password. In caso di errore dopo la creazione: ripeti con `RESUME=1` o `-Resume`.
+
+## F4 — LiteLLM come servizio locale con uv
+
+### S-401 — Installa LiteLLM con uv
+<!-- step: os=all path=uv profile=all -->
+
+```bash os=all
+uv tool install 'litellm[proxy]=={{LITELLM_VERSION}}'
+```
+
+**Esito atteso:** `litellm --version` mostra `{{LITELLM_VERSION}}`. Non usare le versioni `1.82.7`, `1.82.8`, `1.107.0` ([S-104](../Sources.md#s-104)).
+
+### S-402 — Prova l'avvio in primo piano
+<!-- step: os=all path=uv profile=all -->
+
+```bash os=macos,debian,opensuse
+cd {{WPC_DIR}} && WPC_DIR={{WPC_DIR}} ./service/start-litellm.sh
+```
+
+```powershell os=windows
+& "{{WPC_DIR}}\service\Start-LiteLLM.ps1" -WpcDir "{{WPC_DIR}}"
+```
+
+**Esito atteso:** il proxy ascolta su `127.0.0.1:{{LITELLM_PORT}}`. Ferma con `Ctrl+C`.
+
+### S-403 — Registra il servizio
+<!-- step: os=all path=uv profile=all -->
+
+La unit systemd e il LaunchAgent usano il percorso `~/wpc2026-litellm`. Se `WPC_DIR` è diverso, cambia il percorso nei file copiati prima di attivarli.
+
+```bash os=debian,opensuse
+mkdir -p ~/.config/systemd/user
+cp {{WPC_DIR}}/service/litellm.service ~/.config/systemd/user/
+systemctl --user daemon-reload && systemctl --user enable --now litellm.service
+systemctl --user status litellm.service --no-pager
+systemd-analyze --user security litellm.service
+```
+
+```bash os=macos
+sed "s/USERNAME/$(whoami)/g" {{WPC_DIR}}/service/com.wpc2026.litellm.plist > ~/Library/LaunchAgents/com.wpc2026.litellm.plist
+launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.wpc2026.litellm.plist
+launchctl print gui/$(id -u)/com.wpc2026.litellm | head -20
+```
+
+```powershell os=windows
+& "{{WPC_DIR}}\service\Register-LiteLLMTask.ps1" -WpcDir "{{WPC_DIR}}"
+Get-ScheduledTask -TaskName WPC2026-LiteLLM
+```
+
+**Esito atteso:** il servizio è attivo. ⚠️ systemd: verifica l'avvio con `ProtectHome=read-only`.
+
+## F5 — Verifica del gateway
+
+### S-501 — Carica solo la master key nel terminale
+<!-- step: os=all path=all profile=all evidence=no-output -->
+
+```bash os=macos,debian,opensuse
+export LITELLM_MASTER_KEY="$(grep -E '^LITELLM_MASTER_KEY=' {{WPC_DIR}}/.env | cut -d= -f2-)"
+```
+
+```powershell os=windows
+$env:LITELLM_MASTER_KEY = ((Select-String -Path "{{WPC_DIR}}\.env" -Pattern '^LITELLM_MASTER_KEY=').Line -split '=', 2)[1]
+```
+
+**Esito atteso:** nessun output. La variabile vale solo per questo terminale.
+
+### S-502 — Verifica la liveness
+<!-- step: os=all path=all profile=all -->
+
+```bash os=all
+curl -s http://localhost:{{LITELLM_PORT}}/health/liveliness
+```
+
+**Esito atteso:** risposta positiva senza chiave ([S-117](../Sources.md#s-117)).
+
+### S-503 — Elenca i modelli
+<!-- step: os=all path=all profile=all -->
+
+```bash os=macos,debian,opensuse
+printf 'Authorization: Bearer %s\n' "$LITELLM_MASTER_KEY" | curl -s http://localhost:{{LITELLM_PORT}}/v1/models -H @-
+```
+
+```powershell os=windows
+Invoke-RestMethod -Uri http://localhost:{{LITELLM_PORT}}/v1/models -Headers @{ Authorization = "Bearer $env:LITELLM_MASTER_KEY" } | ConvertTo-Json -Depth 5
+```
+
+**Esito atteso:** gli alias `claude-opus`, `claude-sonnet`, `codex`, `gemini`, `gemini-pro`, `openrouter-gpt-oss`, `hf-gpt-oss`.
+
+### S-504 — Invia una richiesta di prova
+<!-- step: os=all path=all profile=all -->
+
+```bash os=macos,debian,opensuse
+printf 'Authorization: Bearer %s\n' "$LITELLM_MASTER_KEY" \
+  | curl -s http://localhost:{{LITELLM_PORT}}/v1/chat/completions -H @- \
+  -H "Content-Type: application/json" \
+  -d '{"model": "claude-sonnet", "messages": [{"role": "user", "content": "Say hello in five words."}]}'
+```
+
+```powershell os=windows
+$body = @{ model = 'claude-sonnet'; messages = @(@{ role = 'user'; content = 'Say hello in five words.' }) } | ConvertTo-Json -Depth 5
+Invoke-RestMethod -Method Post -Uri http://localhost:{{LITELLM_PORT}}/v1/chat/completions -Headers @{ Authorization = "Bearer $env:LITELLM_MASTER_KEY" } -ContentType 'application/json' -Body $body
+```
+
+**Esito atteso:** una risposta del modello. `401`: controlla la master key. Errore del provider: controlla la chiave del provider in `.env`.
+
+## F6 — Copilot con BYOK nativo
+
+### S-601 — Aggiungi Claude (Anthropic)
+<!-- step: os=all path=all profile=all -->
+
+- [ ] **Chat: Manage Language Models** → **Add Models** → **Anthropic** → incolla la chiave.
+- [ ] Seleziona `claude-sonnet-5-5` nel model picker ([02 §3.1](../02-Configurazione-Copilot.md#31-claudeai-anthropic-api)).
+
+**Esito atteso:** il modello risponde in chat e appare tra i modelli per gli agenti.
+
+### S-602 — Aggiungi Codex (OpenAI)
+<!-- step: os=all path=all profile=all -->
+
+- [ ] **Add Models** → **OpenAI** → chiave → modello `gpt-6.1-sol` ([D-015](../Decisions.md#d-015)).
+
+**Esito atteso:** il modello risponde in chat.
+
+### S-603 — Aggiungi Gemini
+<!-- step: os=all path=all profile=all -->
+
+- [ ] **Add Models** → **Gemini** → chiave AI Studio → `gemini-4-argon` e `gemini-3.1-pro-preview` ([D-016](../Decisions.md#d-016)).
+
+**Esito atteso:** entrambi i modelli rispondono. `gemini-4-argon` richiede il tier a pagamento.
+
+### S-604 — Aggiungi OpenRouter
+<!-- step: os=all path=all profile=all -->
+
+- [ ] **Add Models** → **OpenRouter** → chiave → `openai/gpt-oss-120b` ([02 §3.4](../02-Configurazione-Copilot.md#34-openrouter-provider-built-in-o-custom-endpoint)).
+
+**Esito atteso:** il modello risponde in chat.
+
+### S-605 — Aggiungi Hugging Face
+<!-- step: os=all path=all profile=all -->
+
+- [ ] Installa l'estensione *Hugging Face Provider for GitHub Copilot Chat*.
+- [ ] **Manage Models…** → **Hugging Face** → token fine-grained → modelli ([D-008](../Decisions.md#d-008)).
+
+**Esito atteso:** i modelli HF compaiono nel model picker e rispondono.
+
+## F7 — Copilot via LiteLLM
+
+### S-701 — Configura il Custom Endpoint LiteLLM
+<!-- step: os=all path=all profile=all -->
+
+- [ ] **Add Models** → **Custom Endpoint**.
+- [ ] Copia in `chatLanguageModels.json` il contenuto di [`chatLanguageModels.litellm.json`](../../examples/vscode/chatLanguageModels.litellm.json). Se la porta non è 4000, sostituisci `4000` con `{{LITELLM_PORT}}`.
+- [ ] Al prompt `litellmKey` inserisci la master key (profilo minimo) o una virtual key (profilo esteso).
+
+**Esito atteso:** i modelli `LiteLLM · …` compaiono nel model picker.
+
+### S-702 — Prova i modelli via LiteLLM
+<!-- step: os=all path=all profile=all -->
+
+- [ ] Chiedi la stessa cosa a `LiteLLM · Claude Sonnet (messages)`, `LiteLLM · Codex`, `LiteLLM · Gemini 4 Argon`.
+- [ ] Confronta con le risposte dei modelli nativi (F6).
+- [ ] ⚠️ Annota se `Authorization: Bearer ${apiKey}` funziona verso `/v1/messages`.
+
+**Esito atteso:** tutti i modelli rispondono; nessun `401`.
+
+### S-703 — Crea una virtual key per utente
+<!-- step: os=all path=all profile=extended -->
+
+```bash os=macos,debian,opensuse
+printf 'Authorization: Bearer %s\n' "$LITELLM_MASTER_KEY" \
+  | curl -s http://localhost:{{LITELLM_PORT}}/key/generate -H @- \
+  -H "Content-Type: application/json" \
+  -d '{"models": ["claude-sonnet", "gemini-pro"], "max_budget": 5, "metadata": {"user": "demo-wpc"}}'
+```
+
+```powershell os=windows
+$body = @{ models = @('claude-sonnet','gemini-pro'); max_budget = 5; metadata = @{ user = 'demo-wpc' } } | ConvertTo-Json
+Invoke-RestMethod -Method Post -Uri http://localhost:{{LITELLM_PORT}}/key/generate -Headers @{ Authorization = "Bearer $env:LITELLM_MASTER_KEY" } -ContentType 'application/json' -Body $body
+```
+
+**Esito atteso:** la risposta contiene `key`. ⚠️ Non incollare la chiave nelle evidenze: il sito oscura i valori `sk-…`.
+
+## F8 — GitHub Spec Kit
+
+### S-801 — Installa la CLI specify
+<!-- step: os=all path=all profile=all -->
+
+```bash os=all
+uv tool install specify-cli=={{SPECKIT_VERSION}}
+specify version
+specify check
+```
+
+**Esito atteso:** `specify version` mostra `{{SPECKIT_VERSION}}` ([S-085](../Sources.md#s-085)).
+
+### S-802 — Crea il progetto di prova con Copilot
+<!-- step: os=all path=all profile=all -->
+
+```bash os=all
+specify init {{SPECKIT_PROJECT}} --integration copilot
+cd {{SPECKIT_PROJECT}}
+git status --short
+```
+
+**Esito atteso:** cartelle `.specify/` e `.github/skills/speckit-*/` ([S-083](../Sources.md#s-083)).
+
+### S-803 — Controlla i file generati
+<!-- step: os=all path=all profile=all -->
+
+- [ ] Leggi gli script in `.specify/scripts/` e le skill in `.github/skills/` prima del primo commit ([04 AZ-10](../04-Security-Review-OWASP-ISO27001.md#9-azioni)).
+- [ ] Apri la cartella in VS Code e concedi la fiducia solo dopo il controllo.
+
+**Esito atteso:** nessun file inatteso.
+
+### S-804 — Esegui il flusso spec-driven
+<!-- step: os=all path=all profile=all -->
+
+- [ ] Seleziona un modello BYOK con tool calling (nativo o `LiteLLM · …`).
+- [ ] In chat: `/speckit-constitution`, `/speckit-specify`, `/speckit-plan`, `/speckit-tasks`, `/speckit-implement`.
+
+**Esito atteso:** gli artefatti di specifica, piano e task sono creati nel progetto.
+
+## F9 — Chiusura
+
+### S-901 — Revoca le chiavi della demo
+<!-- step: os=all path=all profile=all -->
+
+- [ ] Revoca le chiavi dei provider usate per la demo nelle rispettive console.
+- [ ] Profilo esteso: revoca le virtual keys di prova dall'Admin UI.
+- [ ] Ferma il proxy (`docker compose … down`, `systemctl --user stop litellm`, `launchctl bootout …`, `Stop-ScheduledTask …`).
+
+**Esito atteso:** nessuna chiave della demo resta valida.
+
+### S-902 — Esporta le evidenze
+<!-- step: os=all path=all profile=all -->
+
+- [ ] Nel sito: **Esporta evidenze (Markdown)** e **Esporta sessione (JSON)**.
+- [ ] Controlla che le evidenze non contengano segreti.
+
+**Esito atteso:** due file con data, operatore, parametri ed esito di ogni passo.
