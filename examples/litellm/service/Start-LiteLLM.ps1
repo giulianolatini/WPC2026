@@ -2,7 +2,7 @@
 # Il file .env è letto come coppie CHIAVE=valore, mai eseguito (AZ-08).
 param(
     [string]$WpcDir = "$HOME\wpc2026-litellm",
-    [int]$Port = 4000
+    [int]$Port = 0      # 0 = usa LITELLM_PORT da .env, altrimenti 4000 (R-agy-05)
 )
 $ErrorActionPreference = 'Stop'
 $envFile = Join-Path $WpcDir '.env'
@@ -30,6 +30,7 @@ Get-Content $envFile | Where-Object { $_ -match '^\s*[A-Za-z_][A-Za-z0-9_]*=' } 
     [Environment]::SetEnvironmentVariable($name.Trim(), $value, 'Process')
 }
 if (-not $env:LITELLM_MASTER_KEY) { Write-Error 'LITELLM_MASTER_KEY vuota in .env'; exit 1 }   # fail-closed (R-agy-01)
+if ($Port -eq 0) { $Port = if ($env:LITELLM_PORT) { [int]$env:LITELLM_PORT } else { 4000 } }
 & "$HOME\.local\bin\litellm.exe" --config (Join-Path $WpcDir 'config.yaml') --host 127.0.0.1 --port $Port
 # R-codex-05: propaga il codice di uscita, così Task Scheduler vede il fallimento e applica RestartCount.
 exit $LASTEXITCODE
