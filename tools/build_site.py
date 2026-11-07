@@ -20,6 +20,8 @@ RUNBOOK = DOCS / "runbook" / "RUNBOOK.md"
 TPL = ROOT / "tools" / "site"
 SITE = ROOT / "site"
 OS_ALL = ["windows", "macos", "debian", "opensuse"]
+# Tipi dei parametri del runbook: il sito valida i valori per tipo (tools/site/app.js, PARAM_TYPES).
+PARAM_TYPES = ("path", "port", "major", "version", "name", "email")
 OS_LABEL = {"windows": "Windows", "macos": "macOS", "debian": "Debian/Ubuntu", "opensuse": "openSUSE"}
 DOC_PAGES = ["01-Installazione.md", "02-Configurazione-Copilot.md", "03-Security-Best-Practices.md",
              "04-Security-Review-OWASP-ISO27001.md", "Decisions.md", "Sources.md", "Review-Perplexity.md"]
@@ -137,8 +139,11 @@ def parse_runbook(text: str) -> dict:
             continue
         if in_params:
             cells = [c.strip() for c in line.strip().strip("|").split("|")]
-            if line.startswith("|") and len(cells) == 4 and not set(cells[0]) <= set("-: ") and cells[0] != "Nome":
-                params.append({"name": cells[0], "default": cells[1], "defaultWindows": cells[2], "description": cells[3]})
+            if line.startswith("|") and len(cells) == 5 and not set(cells[0]) <= set("-: ") and cells[0] != "Nome":
+                if cells[1] not in PARAM_TYPES:
+                    raise SystemExit(f"Tipo di parametro non valido per {cells[0]}: {cells[1]!r} (ammessi: {', '.join(PARAM_TYPES)})")
+                params.append({"name": cells[0], "type": cells[1], "default": cells[2], "defaultWindows": cells[3],
+                               "description": cells[4]})
             i += 1
             continue
         if step is None:
