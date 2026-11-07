@@ -87,6 +87,9 @@
       .map(c => ({ lang: /^[\w-]{1,20}$/.test(c.lang) ? c.lang : 'plaintext', code: c.code.slice(0, 20000) }));
     return list.every(c => redact(c.code) === c.code) ? list : currentCommands(st, s);
   }
+  // JSON con chiavi ordinate: confronta due sessioni senza dipendere dall'ordine delle proprietà.
+  const stable = v => JSON.stringify(v, (k, x) => x && typeof x === 'object' && !Array.isArray(x)
+    ? Object.fromEntries(Object.keys(x).sort().map(key => [key, x[key]])) : x);
   function sanitizeSession(raw) {
     if (!raw || typeof raw !== 'object' || !ID_RE.test(raw.id)) throw new Error('id');
     const now = new Date().toISOString();
@@ -306,8 +309,9 @@
         if (!d || d.format !== 'wpc2026-runbook-session') throw new Error('formato');
         const s = sanitizeSession(d.session);   // valida PRIMA di salvare (review codex P2)
         if (state.sessions[s.id] && !confirm('La sessione esiste già in questo browser. Sostituirla?')) return;
+        const unchanged = stable(s) === stable(d.session);   // prima di save(): save() cambia updatedAt (R2-agy-01)
         state.sessions[s.id] = s; state.current = s.id; save(); renderAll();
-        WPC.toast(JSON.stringify(s) === JSON.stringify(d.session) ? 'Sessione importata' : 'Sessione importata: valori non validi o segreti rimossi');
+        WPC.toast(unchanged ? 'Sessione importata' : 'Sessione importata: valori non validi o segreti rimossi');
       } catch (err) { alert('File non valido: serve un export JSON di questo runbook.'); }
     });
   }
