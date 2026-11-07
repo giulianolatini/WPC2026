@@ -15,11 +15,18 @@ CFG = json.loads((ROOT / "tools" / "fonts.json").read_text(encoding="utf-8"))
 OUT = ROOT / "site" / "assets" / "fonts"
 LIC = OUT / "LICENSES"
 
+def safe_file(f: Path, sources) -> bool:
+    """File regolare, non link simbolico, dentro una delle sorgenti (gli zip estratti sono dati non fidati, R2-agy-05)."""
+    if f.is_symlink() or not f.is_file():
+        return False
+    r = f.resolve()
+    return any(r.is_relative_to(s.resolve()) for s in sources)
+
 def find(sources, pattern):
     hits = []
     for src in sources:
-        for dirpath, _, files in os.walk(src):
-            hits += [Path(dirpath) / f for f in files if fnmatch.fnmatch(f, pattern)]
+        for dirpath, _, files in os.walk(src):              # os.walk non segue i link a cartelle
+            hits += [Path(dirpath) / f for f in files if fnmatch.fnmatch(f, pattern) and safe_file(Path(dirpath) / f, sources)]
     return sorted(hits, key=lambda p: len(str(p)))[0] if hits else None
 
 def find_license(font_file: Path, patterns, sources):
@@ -29,7 +36,7 @@ def find_license(font_file: Path, patterns, sources):
     while True:
         for pattern in patterns:
             for f in sorted(d.iterdir()):
-                if f.is_file() and fnmatch.fnmatch(f.name, pattern):
+                if fnmatch.fnmatch(f.name, pattern) and safe_file(f, sources):
                     return f
         if d in roots or d.parent == d:
             return None
