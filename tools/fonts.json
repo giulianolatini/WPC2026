@@ -23,6 +23,6 @@
     {"id": "ubuntusans",    "label": "UbuntuSans Nerd Font", "zip": "UbuntuSans.zip",
      "mono": {"400": "UbuntuSansMonoNerdFontMono-Regular.*", "700": "UbuntuSansMonoNerdFontMono-Bold.*"},
      "body": {"400": "UbuntuSansNerdFont-Regular.*", "700": "UbuntuSansNerdFont-Bold.*"},
-     "license": ["LICENSE*", "OFL*", "UFL*"]}
+     "license": ["LICENSE*", "OFL*", "UFL*", "LICENCE*"]}
   ]
 }
