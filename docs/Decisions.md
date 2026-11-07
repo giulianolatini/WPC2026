@@ -44,7 +44,7 @@ Il formato segue il template ADR di Nygard, con una sezione **Razionale** esplic
 | [D-028](#d-028) | 2026-11-07 | Architettura del sito offline e delle evidenze | Accepted |
 | [D-029](#d-029) | 2026-11-07 | Deck finale come artefatto Slides | Accepted |
 | [D-030](#d-030) | 2026-11-07 | PostgreSQL locale per il percorso uv con profilo esteso | Accepted |
-| [D-031](#d-031) | 2026-11-07 | Diagrammi Mermaid disegnati nel sito offline | Proposed |
+| [D-031](#d-031) | 2026-11-07 | Diagrammi Mermaid disegnati nel sito offline | Accepted |
 
 ---
 
@@ -625,7 +625,7 @@ L'opzione 3 resta possibile: S-402 e S-403 sono «Non applicabile» e S-404 scri
 <a id="d-031"></a>
 ## D-031 — Diagrammi Mermaid disegnati nel sito offline
 
-- **Data:** 2026-11-07 — **Stato:** Proposed — **Decisore:** richiesta del PO (vedere il grafo, oppure un PNG); scelta tra le due opzioni dell'assistente, da confermare
+- **Data:** 2026-11-07 — **Stato:** Accepted (confermata dal PO il 2026-11-07) — **Decisore:** richiesta del PO (vedere il grafo, oppure un PNG); scelta dell'assistente, approvata dal PO
 
 **Contesto.** I documenti 02 e 04 contengono diagrammi Mermaid. GitHub li disegna; il sito offline mostrava solo la sorgente.
 
