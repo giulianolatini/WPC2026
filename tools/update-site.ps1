@@ -12,7 +12,7 @@ $PyFonts = @('--with', 'fonttools==4.67.*', '--with', 'brotli==1.2.*')
 $Cache = Join-Path $Root '.cache\nerd-fonts'      # nel repo, ignorata da git
 
 if ($Check) {
-    uv run --no-project --python 3.12 @PyMd python tools/build_site.py --check
+    uv run --no-project --python 3.12 @PyMd python -I tools/build_site.py --check
     exit $LASTEXITCODE
 }
 
@@ -25,6 +25,9 @@ if ($Fonts) {
         $dest = Join-Path $Cache $name
         Write-Output "Scarico $($f.zip)"
         Invoke-WebRequest -Uri ($cfg.release + $f.zip) -OutFile $zip -MaximumRetryCount 2
+        # Release fissata e sha256 di ogni zip in tools/fonts.json: un file diverso ferma lo script (R4-agy-04)
+        $got = (Get-FileHash -Algorithm SHA256 $zip).Hash.ToLowerInvariant()
+        if ($got -ne $f.sha256) { Remove-Item $zip; throw "sha256 NON valido per $($f.zip): $got (atteso $($f.sha256))" }
         if (Test-Path $dest) { Remove-Item -Recurse -Force $dest }
         # Ogni zip si estrae in una cartella propria: i file scaricati sono dati non fidati.
         Expand-Archive -Path $zip -DestinationPath $dest -Force

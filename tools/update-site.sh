@@ -23,17 +23,23 @@ for a in "$@"; do
 done
 
 if [ "$check" = 1 ]; then
-  exec uv run --no-project --python 3.12 "${PY_MD[@]}" python tools/build_site.py --check
+  exec uv run --no-project --python 3.12 "${PY_MD[@]}" python -I tools/build_site.py --check
 fi
 
 if [ "$fonts" = 1 ]; then
-  release="$(uv run --no-project --python 3.12 python -c 'import json;print(json.load(open("tools/fonts.json"))["release"])')"
+  release="$(uv run --no-project --python 3.12 python -I -c 'import json;print(json.load(open("tools/fonts.json"))["release"])')"
   mkdir -p "$CACHE"
+  # Release fissata e sha256 di ogni zip in tools/fonts.json: un file diverso ferma lo script (R4-agy-04).
   # Ogni zip si estrae in una cartella propria: i file scaricati sono dati non fidati.
-  for zip in $(uv run --no-project --python 3.12 python -c 'import json;print(" ".join(f["zip"] for f in json.load(open("tools/fonts.json"))["families"]))'); do
+  uv run --no-project --python 3.12 python -I -c 'import json;[print(f["zip"], f["sha256"]) for f in json.load(open("tools/fonts.json"))["families"]]' |
+  while read -r zip sha; do
     name="${zip%.zip}"
     echo "Scarico $zip"
     curl -fsSL --retry 2 -o "$CACHE/$zip" "$release$zip"
+    got="$( (sha256sum "$CACHE/$zip" 2>/dev/null || shasum -a 256 "$CACHE/$zip") | awk '{print $1}')"
+    if [ "$got" != "$sha" ]; then
+      echo "sha256 NON valido per $zip: $got (atteso $sha)" >&2; rm -f "$CACHE/$zip"; exit 1
+    fi
     rm -rf "${CACHE:?}/$name" && mkdir -p "$CACHE/$name"
     unzip -q -o "$CACHE/$zip" -d "$CACHE/$name"
   done
