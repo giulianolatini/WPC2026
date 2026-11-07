@@ -12,7 +12,13 @@
 
   /* ------------------------------------------------------------ stato */
   let state = { current: null, sessions: {} };   // caricato e validato all'avvio (loadState)
-  const save = () => { const s = cur(); if (s) s.updatedAt = new Date().toISOString(); WPC.store(KEY, state); };
+  // R4-codex-02: se il browser non salva, un avviso fisso chiede l'export JSON (le evidenze restano solo in memoria).
+  const save = () => {
+    const s = cur(); if (s) s.updatedAt = new Date().toISOString();
+    const ok = WPC.store(KEY, state);
+    const w = document.getElementById('storage-warning'); if (w) w.classList.toggle('hidden', ok);
+    return ok;
+  };
   const cur = () => state.sessions[state.current];
 
   function newSession() {
@@ -132,8 +138,8 @@
     const pick = (v, allowed, d) => allowed.includes(v) ? v : d;
     const s = {
       id: raw.id,
-      name: str(raw.name, 120).trim() || 'Sessione importata',
-      operator: str(raw.operator, 120),
+      name: redact(str(raw.name, 120)).trim() || 'Sessione importata',
+      operator: redact(str(raw.operator, 120)),
       os: pick(raw.os, Object.keys(RB.osLabels), 'debian'),
       path: pick(raw.path, ['docker', 'uv'], 'docker'),
       profile: pick(raw.profile, ['minimal', 'extended'], 'minimal'),
@@ -322,7 +328,15 @@
   const currentCommands = (st, s = cur()) => st.blocks.filter(x => x.type === 'code' && visibleBlock(x, s)).map(x => ({ lang: x.lang, code: resolve(x.code, s) }));
   const isStale = (st, ss, s = cur()) => Array.isArray(ss.commands) && ss.commands.length > 0 && JSON.stringify(ss.commands) !== JSON.stringify(currentCommands(st, s));
 
+  // Un campo modificato si salva all'evento change (perdita del focus). Prima di un export, e quando la pagina
+  // si chiude o va in background, il campo attivo si salva subito (R4-agy-02). Ritorna undefined.
+  function flushActive() {
+    const a = document.activeElement;
+    if (a && a.matches && a.matches('textarea[data-f], #s-name, #s-operator, #params input')) a.dispatchEvent(new Event('change', { bubbles: true }));
+  }
   function bindGlobal() {
+    window.addEventListener('pagehide', flushActive);
+    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') flushActive(); });
     $('#session-select').addEventListener('change', e => { state.current = e.target.value; save(); renderAll(); });
     $('#session-new').addEventListener('click', () => { newSession(); renderAll(); WPC.toast('Nuova sessione creata'); });
     $('#session-delete').addEventListener('click', () => {
@@ -331,8 +345,9 @@
       state.current = Object.keys(state.sessions)[0] || null;
       if (!state.current) newSession(); save(); renderAll();
     });
-    $('#s-name').addEventListener('change', e => { cur().name = e.target.value || cur().name; save(); renderSessionBar(); });
-    $('#s-operator').addEventListener('change', e => { cur().operator = e.target.value; save(); });
+    // nome e operatore passano dalla redazione come output e note (R4-agy-02)
+    $('#s-name').addEventListener('change', e => { cur().name = redact(e.target.value).trim() || cur().name; save(); renderSessionBar(); });
+    $('#s-operator').addEventListener('change', e => { e.target.value = cur().operator = redact(e.target.value); save(); });
     ['os', 'path', 'profile'].forEach(k => $('#s-' + k).addEventListener('change', e => { cur()[k] = e.target.value; save(); renderParams(); renderPhases(); }));
     $('#params').addEventListener('change', e => {
       const name = e.target.dataset.param; if (!name) return;
@@ -344,8 +359,8 @@
       }
       cur().params[name] = v; save(); renderPhases();   // aggiorna comandi e testo dei passi
     });
-    $('#export-md').addEventListener('click', () => download(fileBase() + '.md', exportMarkdown(), 'text/markdown'));
-    $('#export-json').addEventListener('click', () => download(fileBase() + '.json', JSON.stringify({ format: 'wpc2026-runbook-session', version: 1, runbook: RB.version + '·' + RB.hash, session: cur() }, null, 2), 'application/json'));
+    $('#export-md').addEventListener('click', () => flushActive() || download(fileBase() + '.md', exportMarkdown(), 'text/markdown'));
+    $('#export-json').addEventListener('click', () => flushActive() || download(fileBase() + '.json', JSON.stringify({ format: 'wpc2026-runbook-session', version: 1, runbook: RB.version + '·' + RB.hash, session: cur() }, null, 2), 'application/json'));
     $('#import-json').addEventListener('click', () => $('#import-file').click());
     $('#import-file').addEventListener('change', async e => {
       const f = e.target.files[0]; e.target.value = ''; if (!f) return;

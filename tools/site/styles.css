@@ -104,6 +104,7 @@ details.evidence summary { cursor: pointer; font-size: .88rem; color: var(--fg-2
 .when { font-size: .78rem; color: var(--fg-2); font-family: var(--font-code); }
 .redacted { color: var(--warn); font-size: .78rem; }
 .hidden { display: none !important; }
+.alert { color: var(--ko); font-weight: 600; font-size: .85rem; border: 1px solid var(--ko); border-radius: 8px; padding: .4rem .6rem; }
 .toast { position: fixed; bottom: 1rem; right: 1rem; background: var(--fg); color: var(--bg); padding: .5rem .9rem; border-radius: 8px; font-size: .85rem; opacity: 0; transition: opacity .2s; pointer-events: none; z-index: 50; }
 .toast.show { opacity: .95; }
 
