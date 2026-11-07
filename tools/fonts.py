@@ -36,7 +36,7 @@ def find_license(font_file: Path, patterns, sources):
         d = d.parent
 
 def to_woff2(src: Path, dst: Path):
-    font = TTFont(src)
+    font = TTFont(src, recalcTimestamp=False)  # output riproducibile: head.modified non cambia
     font.flavor = "woff2"
     dst.parent.mkdir(parents=True, exist_ok=True)
     font.save(dst)
