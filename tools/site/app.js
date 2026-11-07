@@ -11,7 +11,7 @@
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
   /* ------------------------------------------------------------ stato */
-  let state = WPC.store(KEY) || { current: null, sessions: {} };
+  let state = { current: null, sessions: {} };   // caricato e validato all'avvio (loadState)
   const save = () => { const s = cur(); if (s) s.updatedAt = new Date().toISOString(); WPC.store(KEY, state); };
   const cur = () => state.sessions[state.current];
 
@@ -54,6 +54,71 @@
     [/(postgres(?:ql)?:\/\/[^:\s\/]+:)[^@\s]+@/gi, '$1[REDATTO]@']
   ];
   function redact(text) { let t = text || ''; for (const [re, rep] of REDACT) t = t.replace(re, rep); return t; }
+
+  /* ------------------------------------------------------------ validazione delle sessioni
+     I dati da localStorage e da un JSON importato sono dati non fidati (R2-codex-01, R2-codex-02):
+     la sessione si ricostruisce campo per campo, con valori ammessi, segreti oscurati e nessun
+     output per i passi evidence=no-output. Una sessione non valida non entra nello stato. */
+  const STEPS = Object.fromEntries(RB.phases.flatMap(p => p.steps).map(s => [s.id, s]));
+  const ID_RE = /^s[a-z0-9]{1,20}$/;
+  const isoOr = (v, d) => (typeof v === 'string' && !isNaN(Date.parse(v))) ? new Date(v).toISOString() : d;
+  const str = (v, max) => (typeof v === 'string' ? v : '').slice(0, max);
+  function cleanParam(name, v) {
+    v = str(v, 300).trim();
+    if (!v) return '';
+    if (/["'`\n\r;|&<>]/.test(v) || redact(v) !== v || redact(name + '=' + v) !== name + '=' + v) return null;
+    return v;
+  }
+  function sanitizeSession(raw) {
+    if (!raw || typeof raw !== 'object' || !ID_RE.test(raw.id)) throw new Error('id');
+    const now = new Date().toISOString();
+    const pick = (v, allowed, d) => allowed.includes(v) ? v : d;
+    const s = {
+      id: raw.id,
+      name: str(raw.name, 120).trim() || 'Sessione importata',
+      operator: str(raw.operator, 120),
+      os: pick(raw.os, Object.keys(RB.osLabels), 'debian'),
+      path: pick(raw.path, ['docker', 'uv'], 'docker'),
+      profile: pick(raw.profile, ['minimal', 'extended'], 'minimal'),
+      params: {}, steps: {},
+      createdAt: isoOr(raw.createdAt, now), updatedAt: isoOr(raw.updatedAt, now),
+      runbookVersion: /^[0-9a-f]{12}$/.test(raw.runbookVersion) ? raw.runbookVersion : ''
+    };
+    const params = raw.params && typeof raw.params === 'object' ? raw.params : {};
+    for (const p of RB.params) {
+      const v = cleanParam(p.name, params[p.name]);
+      if (v) s.params[p.name] = v;            // un parametro rifiutato torna al default
+    }
+    const steps = raw.steps && typeof raw.steps === 'object' ? raw.steps : {};
+    for (const [id, st] of Object.entries(STEPS)) {
+      const x = steps[id]; if (!x || typeof x !== 'object') continue;
+      const noOut = st.evidence === 'no-output';
+      const status = pick(x.status, STATUS.map(a => a[0]), '');
+      s.steps[id] = {
+        status,
+        checks: Array.from({ length: st.checks || 0 }, (_, i) => Array.isArray(x.checks) && x.checks[i] === true),
+        output: noOut ? '' : redact(str(x.output, 100000)),
+        note: redact(str(x.note, 10000)),
+        at: status ? isoOr(x.at, '') : '',
+        commands: status && Array.isArray(x.commands)
+          ? x.commands.slice(0, 20).filter(c => c && typeof c.code === 'string')
+              .map(c => ({ lang: /^[\w-]{1,20}$/.test(c.lang) ? c.lang : 'plaintext', code: redact(c.code.slice(0, 20000)) }))
+          : ''
+      };
+    }
+    return s;
+  }
+  function loadState() {
+    const raw = WPC.store(KEY);
+    const st = { current: null, sessions: {} };
+    if (raw && raw.sessions && typeof raw.sessions === 'object') {
+      for (const v of Object.values(raw.sessions)) {
+        try { const s = sanitizeSession(v); st.sessions[s.id] = s; } catch (e) { /* sessione non valida: scartata */ }
+      }
+      if (st.sessions[raw.current]) st.current = raw.current;
+    }
+    return st;
+  }
 
   /* ------------------------------------------------------------ filtri */
   const visibleStep = (st, s = cur()) => st.os.includes(s.os) && (st.path === 'all' || st.path === s.path) && (st.profile === 'all' || st.profile === s.profile);
@@ -203,8 +268,8 @@
     ['os', 'path', 'profile'].forEach(k => $('#s-' + k).addEventListener('change', e => { cur()[k] = e.target.value; save(); renderParams(); renderPhases(); }));
     $('#params').addEventListener('change', e => {
       const name = e.target.dataset.param; if (!name) return;
-      const v = e.target.value.trim();
-      if (redact(name + '=' + v) !== name + '=' + v || redact(v) !== v) { e.target.value = ''; WPC.toast('Non inserire segreti nei parametri'); return; }
+      const v = cleanParam(name, e.target.value);
+      if (v === null) { e.target.value = ''; WPC.toast('Valore rifiutato: niente segreti, virgolette o caratteri ; | & < >'); return; }
       cur().params[name] = v; save(); decorateCode();
     });
     $('#export-md').addEventListener('click', () => download(fileBase() + '.md', exportMarkdown(), 'text/markdown'));
@@ -214,9 +279,11 @@
       const f = e.target.files[0]; e.target.value = ''; if (!f) return;
       try {
         const d = JSON.parse(await f.text());
-        if (d.format !== 'wpc2026-runbook-session' || !d.session || !d.session.id) throw new Error('formato');
-        if (state.sessions[d.session.id] && !confirm('La sessione esiste già in questo browser. Sostituirla?')) return;
-        state.sessions[d.session.id] = d.session; state.current = d.session.id; save(); renderAll(); WPC.toast('Sessione importata');
+        if (!d || d.format !== 'wpc2026-runbook-session') throw new Error('formato');
+        const s = sanitizeSession(d.session);   // valida PRIMA di salvare (review codex P2)
+        if (state.sessions[s.id] && !confirm('La sessione esiste già in questo browser. Sostituirla?')) return;
+        state.sessions[s.id] = s; state.current = s.id; save(); renderAll();
+        WPC.toast(JSON.stringify(s) === JSON.stringify(d.session) ? 'Sessione importata' : 'Sessione importata: valori non validi o segreti rimossi');
       } catch (err) { alert('File non valido: serve un export JSON di questo runbook.'); }
     });
   }
@@ -273,6 +340,7 @@
   /* ------------------------------------------------------------ avvio */
   function renderAll() { renderSessionBar(); renderParams(); renderPhases(); }
   WPC.initPrefs();
+  state = loadState(); WPC.store(KEY, state);   // riscrive lo stato già validato
   if (!cur()) { const ids = Object.keys(state.sessions); if (ids.length) state.current = ids[0]; else newSession(); }
   bindGlobal(); renderAll();
   if (location.hash) { const t = document.getElementById(location.hash.slice(1)); if (t) t.scrollIntoView(); }
