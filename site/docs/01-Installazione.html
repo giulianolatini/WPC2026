@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="it" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="generator" content="tools/build_site.py — non modificare a mano">
+<title>01-Installazione — WPC2026</title>
+<link rel="stylesheet" href="../assets/fonts.css">
+<link rel="stylesheet" href="../assets/vendor/highlight/github.min.css" id="hl-light">
+<link rel="stylesheet" href="../assets/vendor/highlight/github-dark.min.css" id="hl-dark" disabled>
+<link rel="stylesheet" href="../assets/styles.css">
+
+<script>try{var p=JSON.parse(localStorage.getItem('wpc2026.prefs')||'{}');var t=p.theme||'auto';if(t==='auto')t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body>
+<div class="topbar">
+  <h1><a href="../index.html" style="color:inherit;text-decoration:none">WPC2026</a> <span class="ver">01-Installazione</span></h1>
+  <label>Tema <select id="pref-theme"><option value="auto">automatico</option><option value="light">chiaro</option><option value="dark">scuro</option></select></label>
+  <label>Testo <select id="pref-body"></select></label>
+  <label>Codice <select id="pref-code"></select></label>
+</div>
+<nav class="docnav"><a href="../index.html">← Runbook</a><ul><li><a href="01-Installazione.html">01-Installazione</a></li><li><a href="02-Configurazione-Copilot.html">02-Configurazione-Copilot</a></li><li><a href="03-Security-Best-Practices.html">03-Security-Best-Practices</a></li><li><a href="04-Security-Review-OWASP-ISO27001.html">04-Security-Review-OWASP-ISO27001</a></li><li><a href="Decisions.html">Decisions</a></li><li><a href="Sources.html">Sources</a></li><li><a href="Review-Perplexity.html">Review-Perplexity</a></li></ul></nav><article class="doc"><h1 id="01--installazione-di-visual-studio-code-e-litellm">01 — Installazione di Visual Studio Code e LiteLLM</h1>
+<p>Questo documento descrive l'installazione degli strumenti della demo su Windows, macOS e Linux.</p>
+<table>
+<thead>
+<tr>
+<th>Strumento</th>
+<th>Windows</th>
+<th>macOS</th>
+<th>Linux Debian/Ubuntu</th>
+<th>Linux openSUSE</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Visual Studio Code</td>
+<td><code>winget</code></td>
+<td><code>brew</code></td>
+<td><code>apt</code></td>
+<td><code>zypper</code></td>
+</tr>
+<tr>
+<td>Docker</td>
+<td><code>winget</code> (Docker Desktop)</td>
+<td><code>brew</code> (Docker Desktop)</td>
+<td><code>apt</code> (Docker Engine)</td>
+<td><code>zypper</code></td>
+</tr>
+<tr>
+<td>uv</td>
+<td><code>winget</code></td>
+<td><code>brew</code></td>
+<td>installer ufficiale (<a href="Decisions.html#d-009">D-009</a>)</td>
+<td>installer ufficiale (<a href="Decisions.html#d-009">D-009</a>)</td>
+</tr>
+<tr>
+<td>LiteLLM proxy</td>
+<td>Docker o <code>uv tool</code></td>
+<td>Docker o <code>uv tool</code></td>
+<td>Docker o <code>uv tool</code></td>
+<td>Docker o <code>uv tool</code></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Nota su YaST.</strong> Su openSUSE usiamo <code>zypper</code>. Leap 16 non ha più YaST: l'alternativa grafica è Myrlyn. Su Tumbleweed YaST Software è ancora disponibile, ma non riceve più sviluppo (<a href="Decisions.html#d-014">D-014</a>, <a href="Sources.html#s-067">S-067</a>).</p>
+</blockquote>
+<h2 id="indice">Indice</h2>
+<ol>
+<li><a href="#1-parametri">Parametri</a></li>
+<li><a href="#2-visual-studio-code">Visual Studio Code</a></li>
+<li><a href="#3-prerequisiti-per-litellm-docker-e-uv">Prerequisiti per LiteLLM: Docker e uv</a></li>
+<li><a href="#4-chiavi-api-e-file-env">Chiavi API e file <code>.env</code></a></li>
+<li><a href="#5-litellm-con-docker">LiteLLM con Docker</a></li>
+<li><a href="#6-litellm-come-servizio-locale-con-uv">LiteLLM come servizio locale con uv</a></li>
+<li><a href="#7-verifica-finale">Verifica finale</a></li>
+</ol>
+<hr />
+<h2 id="1-parametri">1. Parametri</h2>
+<p>Le procedure usano questi parametri. Registra il valore che usi: il valore serve per le evidenze.</p>
+<table>
+<thead>
+<tr>
+<th>Parametro</th>
+<th>Default</th>
+<th>Descrizione</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>WPC_DIR</code></td>
+<td><code>~/wpc2026-litellm</code> (Windows: <code>$HOME\wpc2026-litellm</code>)</td>
+<td>Cartella di lavoro di LiteLLM</td>
+</tr>
+<tr>
+<td><code>LITELLM_PORT</code></td>
+<td><code>4000</code></td>
+<td>Porta del proxy (<a href="Sources.html#s-020">S-020</a>)</td>
+</tr>
+<tr>
+<td><code>LITELLM_VERSION</code></td>
+<td><code>1.108.2</code></td>
+<td>Versione LTS fissata (<a href="Decisions.html#d-018">D-018</a>, <a href="Sources.html#s-119">S-119</a>). ⚠️ Controlla la LTS corrente prima del talk</td>
+</tr>
+<tr>
+<td><code>LITELLM_IMAGE</code></td>
+<td><code>ghcr.io/berriai/litellm-non_root:v1.108.2</code></td>
+<td>Immagine Docker non-root con tag fisso; in team il digest da <code>scripts/pin-images.sh</code>. Non usare tag mobili (<a href="Sources.html#s-104">S-104</a>, <a href="Sources.html#s-109">S-109</a>)</td>
+</tr>
+<tr>
+<td><code>LITELLM_MASTER_KEY</code></td>
+<td>generata</td>
+<td>Chiave root del proxy, inizia con <code>sk-</code> (<a href="Sources.html#s-020">S-020</a>)</td>
+</tr>
+<tr>
+<td><code>LITELLM_SALT_KEY</code></td>
+<td>generata</td>
+<td>Solo profilo esteso. Non rigenerarla (<a href="Sources.html#s-020">S-020</a>)</td>
+</tr>
+<tr>
+<td><code>POSTGRES_PASSWORD</code></td>
+<td>generata (<code>openssl rand -hex 24</code>)</td>
+<td>Solo profilo esteso. Solo caratteri <code>[0-9a-f]</code>: entra in <code>DATABASE_URL</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="2-visual-studio-code">2. Visual Studio Code</h2>
+<h3 id="21-windows-winget">2.1 Windows (<code>winget</code>)</h3>
+<ul>
+<li class="task"><input type="checkbox" disabled> Apri PowerShell.</li>
+<li class="task"><input type="checkbox" disabled> Installa VS Code (<a href="Sources.html#s-012">S-012</a>, <a href="Sources.html#s-013">S-013</a>):</li>
+</ul>
+<pre class="code"><code class="language-powershell">winget install --id Microsoft.VisualStudioCode -e
+</code></pre>
+<ul>
+<li class="task"><input type="checkbox" disabled> Chiudi e apri di nuovo il terminale.</li>
+<li class="task"><input type="checkbox" disabled> Verifica la versione:</li>
+</ul>
+<pre class="code"><code class="language-powershell">code --version
+</code></pre>
+<blockquote>
+<p>Senza opzioni <code>winget</code> installa la <em>User setup</em>: non richiede privilegi di amministratore (<a href="Sources.html#s-010">S-010</a>, <a href="Sources.html#s-012">S-012</a>).
+Per la <em>System setup</em> (tutti gli utenti, in <code>Program Files</code>) apri PowerShell come amministratore e aggiungi <code>--scope machine</code> (review P-06):</p>
+<p><code>powershell
+winget install --id Microsoft.VisualStudioCode -e --scope machine</code></p>
+</blockquote>
+<h3 id="22-macos-brew">2.2 macOS (<code>brew</code>)</h3>
+<ul>
+<li class="task"><input type="checkbox" disabled> Installa VS Code (<a href="Sources.html#s-014">S-014</a>):</li>
+</ul>
+<pre class="code"><code class="language-bash">brew install --cask visual-studio-code
+</code></pre>
+<ul>
+<li class="task"><input type="checkbox" disabled> Apri VS Code.</li>
+<li class="task"><input type="checkbox" disabled> Apri la Command Palette (<code>Cmd+Shift+P</code>).</li>
+<li class="task"><input type="checkbox" disabled> Esegui <strong>Shell Command: Install 'code' command in PATH</strong> (<a href="Sources.html#s-011">S-011</a>).</li>
+<li class="task"><input type="checkbox" disabled> Apri un nuovo terminale e verifica:</li>
+</ul>
+<pre class="code"><code class="language-bash">code --version
+</code></pre>
+<h3 id="23-linux-debianubuntu-apt">2.3 Linux Debian/Ubuntu (<code>apt</code>)</h3>
+<ul>
+<li class="task"><input type="checkbox" disabled> Installa la chiave di firma Microsoft (<a href="Sources.html#s-009">S-009</a>):</li>
+</ul>
+<pre class="code"><code class="language-bash">sudo apt install wget gpg &amp;&amp;
+wget -qO- https://packages.microsoft.com/keys/microsoft.asc | sudo gpg --dearmor -o /usr/share/keyrings/microsoft.gpg
+</code></pre>
+<ul>
+<li class="task"><input type="checkbox" disabled> Crea il file <code>/etc/apt/sources.list.d/vscode.sources</code>:</li>
+</ul>
+<pre class="code"><code class="language-bash">sudo tee /etc/apt/sources.list.d/vscode.sources &gt; /dev/null &lt;&lt;'EOF'
+Types: deb
+URIs: https://packages.microsoft.com/repos/code
+Suites: stable
+Components: main
+Architectures: amd64,arm64,armhf
+Signed-By: /usr/share/keyrings/microsoft.gpg
+EOF
+</code></pre>
+<ul>
+<li class="task"><input type="checkbox" disabled> Aggiorna la cache e installa:</li>
+</ul>
+<pre class="code"><code class="language-bash">sudo apt update &amp;&amp;
+sudo apt install code
+</code></pre>
+<ul>
+<li class="task"><input type="checkbox" disabled> Verifica: <code>code --version</code>.</li>
+</ul>
+<h3 id="24-linux-opensuse-zypper">2.4 Linux openSUSE (<code>zypper</code>)</h3>
+<ul>
+<li class="task"><input type="checkbox" disabled> Importa la chiave e crea il file di repository (<a href="Sources.html#s-009">S-009</a>):</li>
+</ul>
+<pre class="code"><code class="language-bash">sudo rpm --import https://packages.microsoft.com/keys/microsoft.asc &amp;&amp;
+echo -e &quot;[code]\nname=Visual Studio Code\nbaseurl=https://packages.microsoft.com/yumrepos/vscode\nenabled=1\nautorefresh=1\ntype=rpm-md\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc&quot; | sudo tee /etc/zypp/repos.d/vscode.repo &gt; /dev/null
+</code></pre>
+<ul>
+<li class="task"><input type="checkbox" disabled> Installa:</li>
+</ul>
+<pre class="code"><code class="language-bash">sudo zypper refresh &amp;&amp;
+sudo zypper install code
+</code></pre>
+<ul>
+<li class="task"><input type="checkbox" disabled> Verifica: <code>code --version</code>.</li>
+</ul>
+<blockquote>
+<p>Il contenuto del file <code>vscode.repo</code> corrisponde al testo di <a href="Sources.html#s-009">S-009</a> (review P-06).</p>
+</blockquote>
+<h3 id="25-accesso-a-github-copilot">2.5 Accesso a GitHub Copilot</h3>
+<ul>
+<li class="task"><input type="checkbox" disabled> Apri VS Code.</li>
+<li class="task"><input type="checkbox" disabled> Apri la Chat view (<code>Ctrl+Alt+I</code> su Windows/Linux, <code>Ctrl+Cmd+I</code> su macOS).</li>
+<li class="task"><input type="checkbox" disabled> Esegui l'accesso con l'account GitHub che ha il piano Copilot.</li>
+</ul>
+<blockquote>
+<p>Il BYOK funziona anche <strong>senza</strong> accesso GitHub nelle sessioni <em>Local</em>. In questo caso imposta i modelli di utilità (<code>chat.utilityModel</code>, <code>chat.utilitySmallModel</code>) su un modello BYOK (<a href="Sources.html#s-001">S-001</a>). Il documento <a href="02-Configurazione-Copilot.html">02-Configurazione-Copilot.md</a> descrive questo caso.</p>
+</blockquote>
+<hr />
+<h2 id="3-prerequisiti-per-litellm-docker-e-uv">3. Prerequisiti per LiteLLM: Docker e uv</h2>
+<p>Scegli il percorso:</p>
+<ul>
+<li><strong>Percorso A — Docker:</strong> installa Docker (3.1). <code>uv</code> non è necessario.</li>
+<li><strong>Percorso B — servizio locale:</strong> installa <code>uv</code> (3.3) e, su Windows, PowerShell 7 (3.2). Docker non è necessario.</li>
+</ul>
+<h3 id="31-docker">3.1 Docker</h3>
+<p><strong>Windows</strong></p>
+<ul>
+<li class="task"><input type="checkbox" disabled> Apri PowerShell come amministratore. Il pacchetto <code>winget</code> di Docker Desktop ha solo l'installer per tutti gli utenti (<code>machine</code>) (<a href="Sources.html#s-066">S-066</a>, review P-06).</li>
+<li class="task"><input type="checkbox" disabled> Installa Docker Desktop:</li>
+</ul>
+<pre class="code"><code class="language-powershell">winget install --id Docker.DockerDesktop -e
+</code></pre>
+<ul>
+<li class="task"><input type="checkbox" disabled> Riavvia la sessione Windows, se Docker Desktop lo chiede.</li>
+<li class="task"><input type="checkbox" disabled> Avvia Docker Desktop.</li>
+</ul>
+<p><strong>macOS</strong></p>
+<ul>
+<li class="task"><input type="checkbox" disabled> Installa Docker Desktop (<a href="Sources.html#s-065">S-065</a>):</li>
+</ul>
+<pre class="code"><code class="language-bash">brew install --cask docker-desktop
+</code></pre>
+<ul>
+<li class="task"><input type="checkbox" disabled> Avvia Docker Desktop dalla cartella Applicazioni.</li>
+</ul>
+<p><strong>Linux Ubuntu (<code>apt</code>)</strong> (<a href="Sources.html#s-061">S-061</a>)</p>
+<ul>
+<li class="task"><input type="checkbox" disabled> Aggiungi la chiave del repository Docker:</li>
+</ul>
+<pre class="code"><code class="language-bash">sudo apt update
+sudo apt install ca-certificates curl
+sudo install -m 0755 -d /etc/apt/keyrings
+sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+sudo chmod a+r /etc/apt/keyrings/docker.asc
+</code></pre>
+<ul>
+<li class="task"><input type="checkbox" disabled> Aggiungi il repository:</li>
+</ul>
+<pre class="code"><code class="language-bash">sudo tee /etc/apt/sources.list.d/docker.sources &gt; /dev/null &lt;&lt;EOF
+Types: deb
+URIs: https://download.docker.com/linux/ubuntu
+Suites: $(. /etc/os-release &amp;&amp; echo &quot;${UBUNTU_CODENAME:-$VERSION_CODENAME}&quot;)
+Components: stable
+Architectures: $(dpkg --print-architecture)
+Signed-By: /etc/apt/keyrings/docker.asc
+EOF
+</code></pre>
+<ul>
+<li class="task"><input type="checkbox" disabled> Installa i pacchetti:</li>
+</ul>
+<pre class="code"><code class="language-bash">sudo apt update
+sudo apt install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+</code></pre>
+<blockquote>
+<p><strong>Debian:</strong> usa <code>https://download.docker.com/linux/debian</code> per la chiave e per <code>URIs</code>, e solo <code>$VERSION_CODENAME</code> per <code>Suites</code>. Su Debian testing e sulle derivate scrivi a mano il codename della release Debian (es. <code>trixie</code>) (<a href="Sources.html#s-062">S-062</a>).</p>
+</blockquote>
+<ul>
+<li class="task"><input type="checkbox" disabled> Aggiungi l'utente al gruppo <code>docker</code> ⚠️ (<a href="Sources.html#s-063">S-063</a>):</li>
+</ul>
+<pre class="code"><code class="language-bash">sudo usermod -aG docker $USER
+newgrp docker
+</code></pre>
+<p><strong>Linux openSUSE (<code>zypper</code>)</strong> (<a href="Sources.html#s-064">S-064</a>)</p>
+<ul>
+<li class="task"><input type="checkbox" disabled> Installa Docker e Compose. I pacchetti sono diversi per distribuzione (<a href="Sources.html#s-064">S-064</a>, <a href="Decisions.html#d-014">D-014</a>):</li>
+</ul>
+<pre class="code"><code class="language-bash"># Tumbleweed
+sudo zypper install docker docker-compose docker-compose-switch
+
+# Leap 16  ⚠️ fonti in conflitto: prova il comando su una VM prima del talk
+sudo zypper install docker docker-compose docker-buildx
+</code></pre>
+<ul>
+<li class="task"><input type="checkbox" disabled> Abilita e avvia il servizio:</li>
+</ul>
+<pre class="code"><code class="language-bash">sudo systemctl enable --now docker
+</code></pre>
+<ul>
+<li class="task"><input type="checkbox" disabled> Aggiungi l'utente al gruppo <code>docker</code>:</li>
+</ul>
+<pre class="code"><code class="language-bash">sudo usermod -G docker -a $USER
+newgrp docker
+</code></pre>
+<p><strong>Verifica (tutti i sistemi)</strong></p>
+<pre class="code"><code class="language-bash">docker version
+docker compose version
+</code></pre>
+<h3 id="32-powershell-7-solo-windows">3.2 PowerShell 7 (solo Windows)</h3>
+<p>Il servizio Windows (§6.4) e la generazione delle chiavi (§4) usano PowerShell 7 (<code>pwsh.exe</code>). Windows include solo Windows PowerShell 5.1.</p>
+<ul>
+<li class="task"><input type="checkbox" disabled> Installa PowerShell 7:</li>
+</ul>
+<pre class="code"><code class="language-powershell">winget install --id Microsoft.PowerShell -e
+</code></pre>
+<ul>
+<li class="task"><input type="checkbox" disabled> Verifica: <code>pwsh -Version</code>.</li>
+</ul>
+<h3 id="33-uv">3.3 uv</h3>
+<table>
+<thead>
+<tr>
+<th>Sistema</th>
+<th>Comando</th>
+<th>Fonte</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Windows</td>
+<td><code>winget install --id=astral-sh.uv -e</code></td>
+<td><a href="Sources.html#s-060">S-060</a></td>
+</tr>
+<tr>
+<td>macOS</td>
+<td><code>brew install uv</code></td>
+<td><a href="Sources.html#s-060">S-060</a></td>
+</tr>
+<tr>
+<td>Linux (tutte)</td>
+<td><code>curl -LsSf https://astral.sh/uv/install.sh \| sh</code></td>
+<td><a href="Sources.html#s-060">S-060</a>, <a href="Decisions.html#d-009">D-009</a></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>Ubuntu 26.10 ha un pacchetto <code>uv</code> (0.11.x), più vecchio della release corrente. Non lo usiamo (<a href="Decisions.html#d-009">D-009</a>, review P-06).</p>
+</blockquote>
+<ul>
+<li class="task"><input type="checkbox" disabled> Installa <code>uv</code> con il comando del tuo sistema.</li>
+<li class="task"><input type="checkbox" disabled> Apri un nuovo terminale.</li>
+<li class="task"><input type="checkbox" disabled> Verifica: <code>uv --version</code>.</li>
+</ul>
+<hr />
+<h2 id="4-chiavi-api-e-file-env">4. Chiavi API e file <code>.env</code></h2>
+<ul>
+<li class="task"><input type="checkbox" disabled> Crea la cartella di lavoro e copia gli esempi:</li>
+</ul>
+<pre class="code"><code class="language-bash">mkdir -p ~/wpc2026-litellm
+cp -R examples/litellm/. ~/wpc2026-litellm/     # il &quot;.&quot; copia anche i file nascosti (.env.example)
+cd ~/wpc2026-litellm
+cp .env.example .env
+</code></pre>
+<pre class="code"><code class="language-powershell">New-Item -ItemType Directory -Force &quot;$HOME\wpc2026-litellm&quot; | Out-Null
+Copy-Item -Recurse -Force examples\litellm\* &quot;$HOME\wpc2026-litellm\&quot;
+Set-Location &quot;$HOME\wpc2026-litellm&quot;
+Copy-Item .env.example .env
+</code></pre>
+<ul>
+<li class="task"><input type="checkbox" disabled> Genera la master key e la salt key (<a href="Sources.html#s-020">S-020</a>):</li>
+</ul>
+<pre class="code"><code class="language-bash">echo &quot;LITELLM_MASTER_KEY=sk-$(openssl rand -hex 32)&quot;
+echo &quot;LITELLM_SALT_KEY=sk-$(openssl rand -hex 32)&quot;
+</code></pre>
+<p>Su Windows PowerShell 7 (generatore crittografico .NET):</p>
+<pre class="code"><code class="language-powershell">function New-SkKey { 'sk-' + -join ([System.Security.Cryptography.RandomNumberGenerator]::GetBytes(32) | ForEach-Object { $_.ToString('x2') }) }
+&quot;LITELLM_MASTER_KEY=$(New-SkKey)&quot;
+&quot;LITELLM_SALT_KEY=$(New-SkKey)&quot;
+</code></pre>
+<ul>
+<li class="task"><input type="checkbox" disabled> Scrivi in <code>.env</code> le chiavi generate e le chiavi dei provider:</li>
+</ul>
+<pre class="code"><code class="language-dotenv">LITELLM_MASTER_KEY=sk-...
+LITELLM_SALT_KEY=sk-...
+ANTHROPIC_API_KEY=sk-ant-...
+OPENAI_API_KEY=sk-...
+GEMINI_API_KEY=...
+OPENROUTER_API_KEY=sk-or-...
+HF_TOKEN=hf_...
+</code></pre>
+<ul>
+<li class="task"><input type="checkbox" disabled> Limita i permessi di <code>.env</code> al solo proprietario (<a href="04-Security-Review-OWASP-ISO27001.html#9-azioni">04 AZ-01</a>):</li>
+</ul>
+<pre class="code"><code class="language-bash">chmod 600 .env
+</code></pre>
+<pre class="code"><code class="language-powershell">.\service\Protect-EnvFile.ps1 -Path .env   # rimuove regole ereditate ed esplicite, lascia solo l'utente corrente
+</code></pre>
+<blockquote>
+<p>Gli script di avvio rifiutano un <code>.env</code> leggibile da altri utenti e lo leggono come coppie <code>CHIAVE=valore</code>, senza eseguirlo (<a href="../../examples/litellm/service/load-env.sh"><code>service/load-env.sh</code></a>).</p>
+<p><strong>Sicurezza.</strong> Non fare commit del file <code>.env</code>. Il <code>.gitignore</code> del repo lo esclude.
+Il token Hugging Face deve essere <em>fine-grained</em> con il permesso <em>Make calls to Inference Providers</em> (<a href="Sources.html#s-047">S-047</a>).
+Di default <code>LITELLM_MASTER_KEY</code> è anche la password <code>admin</code> dell'Admin UI (<a href="Sources.html#s-020">S-020</a>). Gli esempi impostano <code>disable_env_credential_login: true</code>: la master key non vale più per il login della UI, ma resta valida per l'API (<a href="Sources.html#s-148">S-148</a>, §5.2).</p>
+</blockquote>
+<p>Il file <a href="../../examples/litellm/config.yaml"><code>examples/litellm/config.yaml</code></a> definisce le route verso i cinque provider. Il documento <a href="02-Configurazione-Copilot.html#4-github-copilot-con-litellm-come-gateway">02-Configurazione-Copilot.md §4</a> lo descrive.</p>
+<hr />
+<h2 id="5-litellm-con-docker">5. LiteLLM con Docker</h2>
+<h3 id="50-sicurezza-della-supply-chain">5.0 Sicurezza della supply chain</h3>
+<p>Nel 2026 LiteLLM ha avuto due compromissioni della release (<a href="Sources.html#s-104">S-104</a>, <a href="Sources.html#s-105">S-105</a>):</p>
+<table>
+<thead>
+<tr>
+<th>Data</th>
+<th>Versioni compromesse</th>
+<th>Canale</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2026-03-24</td>
+<td><code>1.82.7</code>, <code>1.82.8</code></td>
+<td>PyPI</td>
+</tr>
+<tr>
+<td>2026-10-21</td>
+<td><code>1.107.0</code>; tag <code>latest</code>, <code>main-latest</code>, <code>main-stable</code></td>
+<td>PyPI, Docker Hub, GHCR</td>
+</tr>
+</tbody>
+</table>
+<p>Regole del progetto (<a href="Decisions.html#d-018">D-018</a>):</p>
+<ul>
+<li class="task"><input type="checkbox" disabled> Usa sempre una versione fissata (<code>v1.108.2</code>). Non usare <code>latest</code>, <code>main-latest</code>, <code>main-stable</code>.</li>
+<li class="task"><input type="checkbox" disabled> Per l'uso in team fissa anche il digest e verifica la firma cosign con la chiave del 2026-10-23 (<a href="Sources.html#s-104">S-104</a>, <a href="Sources.html#s-109">S-109</a>). Lo script controlla l'impronta della chiave, verifica la firma e stampa i digest da copiare in <code>.env</code>:</li>
+</ul>
+<pre class="code"><code class="language-bash">./scripts/pin-images.sh        # richiede docker e cosign
+</code></pre>
+<ul>
+<li class="task"><input type="checkbox" disabled> Gli esempi usano l'immagine <code>litellm-non_root</code> (<a href="Sources.html#s-109">S-109</a>). ⚠️ Lo script fallisce se il tag <code>v1.108.2</code> non esiste per questa immagine: in quel caso usa il tag LTS indicato dalle release note.</li>
+<li class="task"><input type="checkbox" disabled> Se hai installato <code>1.82.7</code>, <code>1.82.8</code> o <code>1.107.0</code>, considera rubate tutte le credenziali dell'host e ruotale (<a href="Sources.html#s-104">S-104</a>).</li>
+</ul>
+<h3 id="51-profilo-minimo-senza-database">5.1 Profilo minimo (senza database)</h3>
+<p>Il profilo minimo usa solo <code>config.yaml</code> e la master key. Non ha Admin UI per i modelli, virtual keys e budget (<a href="Sources.html#s-020">S-020</a>).</p>
+<p><strong>Con <code>docker run</code></strong> (<a href="Sources.html#s-020">S-020</a>):</p>
+<pre class="code"><code class="language-bash">cd ~/wpc2026-litellm
+docker run -d --name litellm \
+  --env-file .env \
+  --security-opt no-new-privileges:true --cap-drop ALL \
+  -v &quot;$(pwd)/config.yaml:/app/config.yaml:ro&quot; \
+  -p 127.0.0.1:4000:4000 \
+  ghcr.io/berriai/litellm-non_root:v1.108.2 \
+  --config /app/config.yaml
+</code></pre>
+<blockquote>
+<p>La porta è pubblicata solo su <code>127.0.0.1</code>: il proxy non è raggiungibile dalla rete locale.
+In PowerShell sostituisci <code>$(pwd)</code> con <code>${PWD}</code> e <code>\</code> con <code>`</code>.</p>
+</blockquote>
+<p><strong>Con Docker Compose:</strong></p>
+<pre class="code"><code class="language-bash">docker compose -f compose.minimal.yaml up -d
+</code></pre>
+<p>File: <a href="../../examples/litellm/compose.minimal.yaml"><code>examples/litellm/compose.minimal.yaml</code></a>.</p>
+<h3 id="52-profilo-esteso-postgresql--admin-ui--virtual-keys">5.2 Profilo esteso (PostgreSQL + Admin UI + virtual keys)</h3>
+<p>Il profilo esteso aggiunge PostgreSQL. PostgreSQL contiene modelli, chiavi e spend log (<a href="Sources.html#s-020">S-020</a>).</p>
+<ul>
+<li class="task"><input type="checkbox" disabled> Imposta <code>POSTGRES_PASSWORD</code> in <code>.env</code> con soli caratteri esadecimali. La password entra in <code>DATABASE_URL</code> senza codifica URI: caratteri come <code>#</code>, <code>/</code>, <code>%</code>, <code>@</code> impediscono la connessione:</li>
+</ul>
+<pre class="code"><code class="language-bash">echo &quot;POSTGRES_PASSWORD=$(openssl rand -hex 24)&quot;
+</code></pre>
+<ul>
+<li class="task"><input type="checkbox" disabled> Avvia lo stack:</li>
+</ul>
+<pre class="code"><code class="language-bash">docker compose -f compose.extended.yaml up -d
+</code></pre>
+<ul>
+<li class="task"><input type="checkbox" disabled> Crea il primo amministratore. <code>config.yaml</code> blocca il login UI con la master key (<code>disable_env_credential_login: true</code>), ma l'API accetta sempre la master key (<a href="Sources.html#s-148">S-148</a>):</li>
+</ul>
+<pre class="code"><code class="language-bash">ADMIN_EMAIL=tu@example.com ./scripts/bootstrap-admin.sh
+</code></pre>
+<pre class="code"><code class="language-powershell">.\scripts\Bootstrap-Admin.ps1 -AdminEmail tu@example.com      # Windows, PowerShell 7
+</code></pre>
+<blockquote>
+<p>La password deve avere almeno 12 caratteri con maiuscole, minuscole, cifre e simboli: gli script la controllano prima di creare l'utente. Se la creazione riesce ma l'impostazione della password fallisce, ripeti con <code>RESUME=1</code> (bash) o <code>-Resume</code> (PowerShell).</p>
+</blockquote>
+<ul>
+<li class="task"><input type="checkbox" disabled> Apri l'Admin UI: <code>http://localhost:4000/ui</code> e accedi con email e password del <code>proxy_admin</code>.</li>
+</ul>
+<blockquote>
+<p>Se rimani senza accesso: con la master key togli <code>disable_env_credential_login</code> da <code>config.yaml</code>, riavvia, crea l'utente, rimetti l'opzione e riavvia (<a href="Sources.html#s-148">S-148</a>). Un <code>proxy_admin</code> di emergenza può accedere da <code>/fallback/login</code>.</p>
+</blockquote>
+<p>File: <a href="../../examples/litellm/compose.extended.yaml"><code>examples/litellm/compose.extended.yaml</code></a>.</p>
+<blockquote>
+<p><strong>Alternativa ufficiale.</strong> LiteLLM pubblica <code>docker-compose.quickstart.yml</code> con gateway e PostgreSQL (<a href="Sources.html#s-020">S-020</a>):</p>
+<p><code>bash
+curl -sSLO https://github.com/BerriAI/litellm/raw/main/docker/docker-compose.quickstart.yml</code></p>
+</blockquote>
+<h3 id="53-arresto">5.3 Arresto</h3>
+<pre class="code"><code class="language-bash">docker compose -f compose.minimal.yaml down      # oppure compose.extended.yaml
+docker rm -f litellm                             # se hai usato docker run
+</code></pre>
+<hr />
+<h2 id="6-litellm-come-servizio-locale-con-uv">6. LiteLLM come servizio locale con uv</h2>
+<h3 id="61-installazione">6.1 Installazione</h3>
+<ul>
+<li class="task"><input type="checkbox" disabled> Installa LiteLLM proxy come tool isolato (<a href="Sources.html#s-021">S-021</a>):</li>
+</ul>
+<pre class="code"><code class="language-bash">uv tool install 'litellm[proxy]==1.108.2'
+</code></pre>
+<blockquote>
+<p>Non usare <code>pip install</code> su un Python vecchio: <code>pip</code> può installare una release vecchia. LiteLLM ≥ 1.84.0 richiede Python ≥ 3.10; <code>uv</code> installa un Python compatibile (<a href="Sources.html#s-021">S-021</a>).</p>
+</blockquote>
+<ul>
+<li class="task"><input type="checkbox" disabled> Verifica l'avvio in primo piano. Lo script legge <code>.env</code> in modo sicuro e usa <code>--host 127.0.0.1</code>:</li>
+</ul>
+<pre class="code"><code class="language-bash">cd ~/wpc2026-litellm
+./service/start-litellm.sh
+</code></pre>
+<blockquote>
+<p>Il default di <code>--host</code> è <code>0.0.0.0</code>: il proxy è raggiungibile da tutta la rete locale. Usa sempre <code>--host 127.0.0.1</code> (<a href="Sources.html#s-118">S-118</a>).</p>
+</blockquote>
+<ul>
+<li class="task"><input type="checkbox" disabled> Premi <code>Ctrl+C</code> per arrestare.</li>
+</ul>
+<blockquote>
+<p>Il profilo esteso con <code>uv</code> richiede un PostgreSQL esterno e la variabile <code>DATABASE_URL=postgresql://user:password@host:5432/litellm</code> (<a href="Sources.html#s-022">S-022</a>, <a href="Sources.html#s-023">S-023</a>).</p>
+</blockquote>
+<h3 id="62-servizio-su-linux-systemd-utente">6.2 Servizio su Linux (systemd, utente)</h3>
+<p>La documentazione LiteLLM non descrive un servizio systemd (<a href="Sources.html#s-023">S-023</a>). Questa unit è una proposta del progetto.</p>
+<ul>
+<li class="task"><input type="checkbox" disabled> Copia la unit:</li>
+</ul>
+<pre class="code"><code class="language-bash">mkdir -p ~/.config/systemd/user
+cp ~/wpc2026-litellm/service/litellm.service ~/.config/systemd/user/
+</code></pre>
+<ul>
+<li class="task"><input type="checkbox" disabled> Abilita e avvia:</li>
+</ul>
+<pre class="code"><code class="language-bash">systemctl --user daemon-reload
+systemctl --user enable --now litellm.service
+systemctl --user status litellm.service
+systemd-analyze --user security litellm.service   # valuta le direttive di hardening
+</code></pre>
+<ul>
+<li class="task"><input type="checkbox" disabled> (Opzionale) Avvia il servizio anche senza login: <code>sudo loginctl enable-linger $USER</code>.</li>
+</ul>
+<p>File: <a href="../../examples/litellm/service/litellm.service"><code>examples/litellm/service/litellm.service</code></a>. La unit avvia <code>service/start-litellm.sh</code>: così vale anche qui il controllo dei permessi di <code>.env</code>. La cache di LiteLLM va in <code>~/wpc2026-litellm/.cache</code>.</p>
+<h3 id="63-servizio-su-macos-launchd-launchagent">6.3 Servizio su macOS (launchd, LaunchAgent)</h3>
+<ul>
+<li class="task"><input type="checkbox" disabled> Modifica in <a href="../../examples/litellm/service/com.wpc2026.litellm.plist"><code>com.wpc2026.litellm.plist</code></a> il nome utente nei percorsi.</li>
+<li class="task"><input type="checkbox" disabled> Copia e carica l'agente:</li>
+</ul>
+<pre class="code"><code class="language-bash">cp ~/wpc2026-litellm/service/com.wpc2026.litellm.plist ~/Library/LaunchAgents/
+launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.wpc2026.litellm.plist
+launchctl print gui/$(id -u)/com.wpc2026.litellm | head -20
+</code></pre>
+<ul>
+<li class="task"><input type="checkbox" disabled> Per arrestare: <code>launchctl bootout gui/$(id -u)/com.wpc2026.litellm</code>.</li>
+<li class="task"><input type="checkbox" disabled> Log: <code>~/Library/Logs/wpc2026-litellm.log</code> (permessi solo utente).</li>
+</ul>
+<h3 id="64-servizio-su-windows-task-scheduler">6.4 Servizio su Windows (Task Scheduler)</h3>
+<ul>
+<li class="task"><input type="checkbox" disabled> Esegui in PowerShell lo script di registrazione:</li>
+</ul>
+<pre class="code"><code class="language-powershell">cd $HOME\wpc2026-litellm
+.\service\Register-LiteLLMTask.ps1
+</code></pre>
+<ul>
+<li class="task"><input type="checkbox" disabled> Verifica: <code>Get-ScheduledTask -TaskName WPC2026-LiteLLM</code>.</li>
+<li class="task"><input type="checkbox" disabled> Per arrestare: <code>Stop-ScheduledTask -TaskName WPC2026-LiteLLM</code>.</li>
+</ul>
+<p>File: <a href="../../examples/litellm/service/Register-LiteLLMTask.ps1"><code>examples/litellm/service/Register-LiteLLMTask.ps1</code></a>.</p>
+<blockquote>
+<p>Il task si avvia al login dell'utente. Un servizio Windows vero (avvio senza login) richiede un wrapper come NSSM: fuori scopo per la demo.</p>
+</blockquote>
+<hr />
+<h2 id="7-verifica-finale">7. Verifica finale</h2>
+<ul>
+<li class="task"><input type="checkbox" disabled> Carica nel terminale corrente <strong>solo</strong> la master key. Compose e gli script di avvio leggono <code>.env</code> da soli, il terminale no:</li>
+</ul>
+<pre class="code"><code class="language-bash">export LITELLM_MASTER_KEY=&quot;$(grep -E '^LITELLM_MASTER_KEY=' ~/wpc2026-litellm/.env | cut -d= -f2-)&quot;
+</code></pre>
+<pre class="code"><code class="language-powershell">$env:LITELLM_MASTER_KEY = ((Select-String -Path &quot;$HOME\wpc2026-litellm\.env&quot; -Pattern '^LITELLM_MASTER_KEY=').Line -split '=', 2)[1]
+</code></pre>
+<ul>
+<li class="task"><input type="checkbox" disabled> Verifica la liveness. <code>/health/liveliness</code> e <code>/health/readiness</code> non richiedono chiave; <code>/health</code> la richiede (<a href="Sources.html#s-023">S-023</a>, <a href="Sources.html#s-117">S-117</a>):</li>
+</ul>
+<pre class="code"><code class="language-bash">curl -s http://localhost:4000/health/liveliness
+</code></pre>
+<blockquote>
+<p><strong>Chiave fuori dalla riga di comando.</strong> Negli esempi <code>printf</code> (comando interno della shell) passa l'header a <code>curl -H @-</code> attraverso stdin: la chiave non compare negli argomenti del processo, visibili ad altri utenti con <code>ps</code>.</p>
+</blockquote>
+<ul>
+<li class="task"><input type="checkbox" disabled> Verifica l'elenco dei modelli:</li>
+</ul>
+<pre class="code"><code class="language-bash">printf 'Authorization: Bearer %s\n' &quot;$LITELLM_MASTER_KEY&quot; \
+  | curl -s http://localhost:4000/v1/models -H @-
+</code></pre>
+<ul>
+<li class="task"><input type="checkbox" disabled> Invia una richiesta di prova (<a href="Sources.html#s-020">S-020</a>):</li>
+</ul>
+<pre class="code"><code class="language-bash">printf 'Authorization: Bearer %s\n' &quot;$LITELLM_MASTER_KEY&quot; \
+  | curl http://localhost:4000/v1/chat/completions -H @- \
+  -H &quot;Content-Type: application/json&quot; \
+  -d '{&quot;model&quot;: &quot;claude-sonnet&quot;, &quot;messages&quot;: [{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;Say hello in five words.&quot;}]}'
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Risultato</th>
+<th>Azione</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>401</code></td>
+<td>Controlla <code>LITELLM_MASTER_KEY</code> nel terminale e in <code>.env</code>.</td>
+</tr>
+<tr>
+<td>Il modello non è nell'elenco</td>
+<td>Controlla <code>model_name</code> in <code>config.yaml</code> e riavvia il proxy.</td>
+</tr>
+<tr>
+<td>Errore del provider</td>
+<td>Controlla la chiave API del provider in <code>.env</code>. Avvia con <code>--detailed_debug</code> (<a href="Sources.html#s-021">S-021</a>).</td>
+</tr>
+</tbody>
+</table></article>
+<script type="application/json" id="fonts-data">[
+  {
+    "id": "blexmono",
+    "label": "BlexMono Nerd Font (IBM Plex Mono)",
+    "mono": true,
+    "body": false
+  },
+  {
+    "id": "firacode",
+    "label": "FiraCode Nerd Font",
+    "mono": true,
+    "body": false
+  },
+  {
+    "id": "monoid",
+    "label": "Monoid Nerd Font",
+    "mono": true,
+    "body": false
+  },
+  {
+    "id": "opendyslexic",
+    "label": "OpenDyslexic Nerd Font",
+    "mono": true,
+    "body": true
+  },
+  {
+    "id": "saucecodepro",
+    "label": "SauceCodePro Nerd Font (Source Code Pro)",
+    "mono": true,
+    "body": false
+  }
+]</script>
+<script src="../assets/vendor/highlight/highlight.min.js"></script>
+<script src="../assets/vendor/highlight/languages/bash.min.js"></script>
+<script src="../assets/vendor/highlight/languages/powershell.min.js"></script>
+<script src="../assets/vendor/highlight/languages/yaml.min.js"></script>
+<script src="../assets/vendor/highlight/languages/json.min.js"></script>
+<script src="../assets/vendor/highlight/languages/ini.min.js"></script>
+<script src="../assets/vendor/highlight/languages/dockerfile.min.js"></script>
+<script src="../assets/vendor/highlight/languages/plaintext.min.js"></script>
+<script src="../assets/common.js"></script>
+<script src="../assets/doc.js"></script>
+</body>
+</html>

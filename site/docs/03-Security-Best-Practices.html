@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="it" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="generator" content="tools/build_site.py — non modificare a mano">
+<title>03-Security-Best-Practices — WPC2026</title>
+<link rel="stylesheet" href="../assets/fonts.css">
+<link rel="stylesheet" href="../assets/vendor/highlight/github.min.css" id="hl-light">
+<link rel="stylesheet" href="../assets/vendor/highlight/github-dark.min.css" id="hl-dark" disabled>
+<link rel="stylesheet" href="../assets/styles.css">
+
+<script>try{var p=JSON.parse(localStorage.getItem('wpc2026.prefs')||'{}');var t=p.theme||'auto';if(t==='auto')t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body>
+<div class="topbar">
+  <h1><a href="../index.html" style="color:inherit;text-decoration:none">WPC2026</a> <span class="ver">03-Security-Best-Practices</span></h1>
+  <label>Tema <select id="pref-theme"><option value="auto">automatico</option><option value="light">chiaro</option><option value="dark">scuro</option></select></label>
+  <label>Testo <select id="pref-body"></select></label>
+  <label>Codice <select id="pref-code"></select></label>
+</div>
+<nav class="docnav"><a href="../index.html">← Runbook</a><ul><li><a href="01-Installazione.html">01-Installazione</a></li><li><a href="02-Configurazione-Copilot.html">02-Configurazione-Copilot</a></li><li><a href="03-Security-Best-Practices.html">03-Security-Best-Practices</a></li><li><a href="04-Security-Review-OWASP-ISO27001.html">04-Security-Review-OWASP-ISO27001</a></li><li><a href="Decisions.html">Decisions</a></li><li><a href="Sources.html">Sources</a></li><li><a href="Review-Perplexity.html">Review-Perplexity</a></li></ul></nav><article class="doc"><h1 id="03--security-best-practice-per-vs-code-github-copilot-e-litellm">03 — Security: best practice per VS Code, GitHub Copilot e LiteLLM</h1>
+<p>Questo documento raccoglie le best practice di sicurezza della documentazione Microsoft (VS Code, GitHub) e LiteLLM (<a href="Decisions.html#d-022">D-022</a>).
+Ogni regola indica il <strong>comportamento corretto</strong> e, quando esiste, la <strong>configurazione sicura</strong>.</p>
+<p>L'analisi delle configurazioni di esempio rispetto a OWASP e ISO/IEC 27001 è in <a href="04-Security-Review-OWASP-ISO27001.html">04-Security-Review-OWASP-ISO27001.md</a>.</p>
+<h2 id="indice">Indice</h2>
+<ol>
+<li><a href="#1-principi">Principi</a></li>
+<li><a href="#2-visual-studio-code">Visual Studio Code</a></li>
+<li><a href="#3-github-copilot-in-vs-code">GitHub Copilot in VS Code</a></li>
+<li><a href="#4-policy-enterprise">Policy enterprise</a></li>
+<li><a href="#5-litellm-proxy">LiteLLM proxy</a></li>
+<li><a href="#6-chiavi-api-dei-provider">Chiavi API dei provider</a></li>
+<li><a href="#7-baseline-di-configurazione">Baseline di configurazione</a></li>
+<li><a href="#8-checklist-rapida">Checklist rapida</a></li>
+</ol>
+<hr />
+<h2 id="1-principi">1. Principi</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Principio</th>
+<th>Applicazione</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>P1</td>
+<td><strong>Il contenuto è dato, non istruzione.</strong> Output dei tool, pagine web, file del repo e risposte MCP possono contenere istruzioni ostili (<em>prompt injection</em>)</td>
+<td>Workspace Trust, approvazione delle fetch, review delle modifiche (<a href="Sources.html#s-130">S-130</a>)</td>
+</tr>
+<tr>
+<td>P2</td>
+<td><strong>Minimo privilegio per l'agente</strong> (<em>least agency</em>)</td>
+<td>Approvazioni manuali, sandbox, niente auto-approvazione globale (<a href="Sources.html#s-130">S-130</a>, <a href="Sources.html#s-138">S-138</a>)</td>
+</tr>
+<tr>
+<td>P3</td>
+<td><strong>Le istruzioni guidano, non impongono.</strong> <code>copilot-instructions.md</code> e skill non sono controlli di sicurezza</td>
+<td>I controlli sono policy, sandbox, hook, permessi del sistema operativo (<a href="Sources.html#s-130">S-130</a>)</td>
+</tr>
+<tr>
+<td>P4</td>
+<td><strong>Difesa a livelli.</strong> Nessun controllo è sufficiente da solo</td>
+<td>Restricted Mode + approvazioni + sandbox + review (<a href="Sources.html#s-130">S-130</a>)</td>
+</tr>
+<tr>
+<td>P5</td>
+<td><strong>Segreti fuori dal contesto del modello</strong></td>
+<td>Niente chiavi in file del workspace o nell'output del terminale (<a href="Sources.html#s-130">S-130</a>)</td>
+</tr>
+<tr>
+<td>P6</td>
+<td><strong>Versioni fissate e verificate</strong></td>
+<td>Pin di versione e digest, firma cosign (<a href="Sources.html#s-108">S-108</a>, <a href="Sources.html#s-109">S-109</a>)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="2-visual-studio-code">2. Visual Studio Code</h2>
+<h3 id="21-workspace-trust">2.1 Workspace Trust</h3>
+<p><strong>Comportamento corretto</strong></p>
+<ul>
+<li class="task"><input type="checkbox" disabled> Apri ogni cartella sconosciuta in <strong>Restricted Mode</strong>. In Restricted Mode gli agenti, il terminale, i task, il debug e le impostazioni del workspace sono disattivati o limitati (<a href="Sources.html#s-133">S-133</a>).</li>
+<li class="task"><input type="checkbox" disabled> Concedi la fiducia solo a cartelle di autori fidati. Se hai dubbi, resta in Restricted Mode (<a href="Sources.html#s-133">S-133</a>).</li>
+<li class="task"><input type="checkbox" disabled> Tieni i repository sconosciuti in una cartella padre separata e non fidata (<a href="Sources.html#s-133">S-133</a>).</li>
+<li class="task"><input type="checkbox" disabled> Prima di concedere la fiducia, leggi <code>.vscode/mcp.json</code> e <code>.mcp.json</code>: le configurazioni MCP del repo ereditano Workspace Trust (<a href="Sources.html#s-130">S-130</a>).</li>
+</ul>
+<p><strong>Configurazione sicura</strong> (<a href="Sources.html#s-133">S-133</a>) — nelle <strong>impostazioni utente</strong>: a livello di workspace queste impostazioni non hanno effetto.</p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Valore sicuro</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>security.workspace.trust.enabled</code></td>
+<td><code>true</code></td>
+<td><code>true</code></td>
+</tr>
+<tr>
+<td><code>security.workspace.trust.startupPrompt</code></td>
+<td><code>once</code></td>
+<td><code>never</code></td>
+</tr>
+<tr>
+<td><code>security.workspace.trust.emptyWindow</code></td>
+<td><code>false</code></td>
+<td><code>true</code></td>
+</tr>
+<tr>
+<td><code>security.workspace.trust.untrustedFiles</code></td>
+<td><code>prompt</code></td>
+<td><code>prompt</code></td>
+</tr>
+<tr>
+<td><code>terminal.integrated.allowInUntrustedWorkspace</code></td>
+<td><code>false</code></td>
+<td><code>false</code></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>Non usare <code>--disable-workspace-trust</code> e non forzare <code>extensions.supportUntrustedWorkspaces</code> senza un motivo documentato (<a href="Sources.html#s-133">S-133</a>).</p>
+</blockquote>
+<h3 id="22-estensioni">2.2 Estensioni</h3>
+<ul>
+<li class="task"><input type="checkbox" disabled> Installa estensioni solo da publisher fidati. Workspace Trust non impedisce a un'estensione malevola di eseguire codice (<a href="Sources.html#s-133">S-133</a>).</li>
+<li class="task"><input type="checkbox" disabled> Usa estensioni ufficiali per i provider (es. <em>Hugging Face Provider</em>, <em>Ollama</em>) (<a href="Decisions.html#d-008">D-008</a>).</li>
+<li class="task"><input type="checkbox" disabled> In azienda limita i marketplace di plugin con le policy <code>ChatStrictMarketplaces</code> e <code>ChatExtraMarketplaces</code> (<a href="Sources.html#s-131">S-131</a>).</li>
+</ul>
+<h3 id="23-connessioni-remote">2.3 Connessioni remote</h3>
+<ul>
+<li class="task"><input type="checkbox" disabled> Connettiti solo da client fidati. Richiedi autenticazione per i tunnel. Proteggi credenziali SSH e account dei tunnel (<a href="Sources.html#s-130">S-130</a>).</li>
+<li class="task"><input type="checkbox" disabled> Ricorda: la disconnessione non ferma i task in esecuzione (<a href="Sources.html#s-130">S-130</a>).</li>
+</ul>
+<hr />
+<h2 id="3-github-copilot-in-vs-code">3. GitHub Copilot in VS Code</h2>
+<h3 id="31-approvazione-di-tool-e-modifiche">3.1 Approvazione di tool e modifiche</h3>
+<p><strong>Comportamento corretto</strong> (<a href="Sources.html#s-130">S-130</a>)</p>
+<ul>
+<li class="task"><input type="checkbox" disabled> Usa il livello <strong>Manual permissions</strong> per la demo e per repository sensibili. <em>Allow all</em> e <em>Autopilot</em> eliminano le conferme. Nell'harness Copilot <em>Autopilot</em> è una modalità dell'agente; nell'harness Local è un livello di permesso (P-09).</li>
+<li class="task"><input type="checkbox" disabled> Concedi i permessi a livello di <strong>sessione</strong>: scadono con la sessione. I permessi di workspace o utente restano.</li>
+<li class="task"><input type="checkbox" disabled> Controlla ogni modifica nel diff editor prima del commit. Le modifiche fatte con comandi di terminale non sono nel working set dell'editor: controllale a parte.</li>
+<li class="task"><input type="checkbox" disabled> Non usare <code>chat.tools.global.autoApprove</code>: elimina tutte le approvazioni.</li>
+</ul>
+<p><strong>Configurazione sicura</strong> (<a href="Sources.html#s-130">S-130</a>)</p>
+<pre class="code"><code class="language-jsonc">{
+  // Richiedi approvazione per le modifiche ai file sensibili
+  &quot;chat.tools.edits.autoApprove&quot;: {
+    &quot;**/.env&quot;: false,
+    &quot;**/.env.*&quot;: false,
+    &quot;**/*.pem&quot;: false,
+    &quot;**/*.key&quot;: false,
+    &quot;**/.github/workflows/**&quot;: false,
+    &quot;**/.github/hooks/**&quot;: false,
+    &quot;**/.vscode/*.json&quot;: false,
+    &quot;**/.mcp.json&quot;: false
+  },
+  &quot;chat.tools.global.autoApprove&quot;: false
+}
+</code></pre>
+<h3 id="32-terminale">3.2 Terminale</h3>
+<ul>
+<li class="task"><input type="checkbox" disabled> Usa l'auto-approvazione del terminale solo con regole per comandi sicuri e precisi. Ogni sottocomando di un comando composto deve corrispondere a una regola (<a href="Sources.html#s-130">S-130</a>).</li>
+<li class="task"><input type="checkbox" disabled> Non affidarti solo alle regole: alias, concatenazione di stringhe e sintassi complessa possono aggirarle (<a href="Sources.html#s-130">S-130</a>).</li>
+</ul>
+<h3 id="33-sandbox-dellagente">3.3 Sandbox dell'agente</h3>
+<ul>
+<li class="task"><input type="checkbox" disabled> <strong>Attiva la sandbox</strong>: <code>chat.agent.sandbox.enabled</code> vale <code>off</code> di default su tutte le piattaforme. Imposta <code>"on"</code> (<a href="Sources.html#s-145">S-145</a>).</li>
+<li class="task"><input type="checkbox" disabled> Controlla i requisiti: macOS 15+; Linux glibc o WSL2 con bubblewrap ≥ 0.5.0, slirp4netns, util-linux ≥ 2.35; Windows 11 (sperimentale). Non supportati: WSL1, Alpine e altre distribuzioni musl (<a href="Sources.html#s-145">S-145</a>).</li>
+<li class="task"><input type="checkbox" disabled> Limita la rete in uscita: <code>chat.agent.sandbox.network.allowNetwork</code> è <code>true</code> di default. Con <code>false</code> la rete è bloccata, anche per il browser integrato. Con <code>true</code> limita le destinazioni con <code>chat.agent.sandbox.network.allowedDomains</code> e <code>deniedDomains</code> (i negati prevalgono) (<a href="Sources.html#s-145">S-145</a>).</li>
+<li class="task"><input type="checkbox" disabled> Verifica la policy effettiva con <code>/sandbox policy</code> in chat: la documentazione non dice se <code>allowedDomains</code> è una allowlist esclusiva (<a href="Sources.html#s-145">S-145</a>).</li>
+<li class="task"><input type="checkbox" disabled> Su Windows, proxy e restrizioni per hostname richiedono <code>chat.agent.sandbox.network.allowLocalNetwork: true</code> (<a href="Sources.html#s-145">S-145</a>).</li>
+<li class="task"><input type="checkbox" disabled> I server MCP avviati in locale girano nella sandbox (<code>chat.agent.sandbox.mcpServers</code>, default <code>true</code>) (<a href="Sources.html#s-145">S-145</a>).</li>
+<li class="task"><input type="checkbox" disabled> Ricorda i limiti: la sandbox non è una VM né un confine di account. Credenziali iniettate, rete libera e fallback senza sandbox la indeboliscono. Un dev container aggiunge un confine (<a href="Sources.html#s-130">S-130</a>).</li>
+</ul>
+<h3 id="34-mcp-server">3.4 MCP server</h3>
+<ul>
+<li class="task"><input type="checkbox" disabled> Verifica la fonte di ogni MCP server prima di avviarlo (<a href="Sources.html#s-130">S-130</a>).</li>
+<li class="task"><input type="checkbox" disabled> Richiedi l'approvazione per le chiamate ai tool MCP e limita lo scope dell'approvazione (<a href="Sources.html#s-130">S-130</a>).</li>
+<li class="task"><input type="checkbox" disabled> Con server MCP stdio in sandbox (macOS, Linux) le chiamate sono auto-approvate: limita percorsi e domini consentiti (<a href="Sources.html#s-130">S-130</a>).</li>
+<li class="task"><input type="checkbox" disabled> I parametri MCP sensibili vanno nelle variabili di input: VS Code li salva nel secure credentials store (<a href="Sources.html#s-130">S-130</a>).</li>
+</ul>
+<h3 id="35-fetch-e-contenuti-web">3.5 Fetch e contenuti web</h3>
+<ul>
+<li class="task"><input type="checkbox" disabled> Approva prima il <strong>dominio</strong> (Trusted Domains), poi controlla il <strong>contenuto</strong> scaricato prima che il modello lo veda (<a href="Sources.html#s-130">S-130</a>).</li>
+</ul>
+<h3 id="36-prompt-injection">3.6 Prompt injection</h3>
+<ul>
+<li class="task"><input type="checkbox" disabled> Considera non fidati l'output dei tool e le pagine web. Le istruzioni ostili si nascondono in commenti e formattazione (<a href="Sources.html#s-130">S-130</a>).</li>
+<li class="task"><input type="checkbox" disabled> Gli hook (<code>preToolUse</code>) possono negare chiamate, ma non coprono ogni tool e ogni forma di argomento. Prova la copertura e il comportamento in caso di errore (<a href="Sources.html#s-130">S-130</a>, <a href="Sources.html#s-006">S-006</a>).</li>
+<li class="task"><input type="checkbox" disabled> Non usare impostazioni di bypass come <code>allowDangerouslySkipPermissions</code> (harness Claude), salvo in ambienti isolati (<a href="Sources.html#s-130">S-130</a>).</li>
+</ul>
+<h3 id="37-segreti-e-dati">3.7 Segreti e dati</h3>
+<ul>
+<li class="task"><input type="checkbox" disabled> Tieni chiavi e credenziali fuori dai file del workspace e dall'output del terminale: il contesto inviato al modello può includerli (<a href="Sources.html#s-130">S-130</a>).</li>
+<li class="task"><input type="checkbox" disabled> Nei modelli BYOK usa <code>"${input:...}"</code> per <code>apiKey</code>: la chiave resta nel secret storage di VS Code (<a href="Sources.html#s-001">S-001</a>).</li>
+<li class="task"><input type="checkbox" disabled> (Business/Enterprise) Configura la <strong>content exclusion</strong> per file sensibili, ad esempio <code>"*": ["**/.env"]</code>. Vale anche per gli agenti in VS Code. Limiti: accessi indiretti, symlink, filesystem remoti e server MCP di terzi non sono garantiti; non sostituisce i permessi del sistema operativo; le modifiche richiedono fino a 30 minuti o un reload della finestra (<a href="Sources.html#s-134">S-134</a>, P-09).</li>
+<li class="task"><input type="checkbox" disabled> ⚠️ <strong>Content exclusion e BYOK:</strong> nessuna fonte dice che l'esclusione vale per i modelli BYOK. La policy arriva da GitHub con l'account: senza login, nell'harness Local, è probabile che non sia applicata (P-09). Per i file sensibili usa anche <code>chat.tools.edits.autoApprove</code> e i permessi del sistema operativo.</li>
+<li class="task"><input type="checkbox" disabled> Con BYOK i dati vanno al provider scelto. Verifica le condizioni del provider (conservazione, zero data retention) prima di inviare codice riservato (<a href="Sources.html#s-015">S-015</a>).</li>
+</ul>
+<hr />
+<h2 id="4-policy-enterprise">4. Policy enterprise</h2>
+<p>Le policy si distribuiscono con Group Policy, Microsoft Intune o profili di configurazione macOS (<a href="Sources.html#s-131">S-131</a>, <a href="Sources.html#s-132">S-132</a>).</p>
+<table>
+<thead>
+<tr>
+<th>Rischio</th>
+<th>Policy</th>
+<th>Effetto</th>
+<th>Fonte</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Account non aziendali</td>
+<td><code>ChatApprovedAccountOrganizations</code></td>
+<td>Limita le funzioni AI alle organizzazioni GitHub approvate</td>
+<td><a href="Sources.html#s-131">S-131</a></td>
+</tr>
+<tr>
+<td>Auto-approvazione globale</td>
+<td><code>ChatToolsAutoApprove</code></td>
+<td>Blocca l'auto-approvazione globale</td>
+<td><a href="Sources.html#s-130">S-130</a></td>
+</tr>
+<tr>
+<td>Tool critici</td>
+<td><code>ChatToolsEligibleForAutoApproval</code></td>
+<td>Approvazione manuale obbligatoria per tool specifici</td>
+<td><a href="Sources.html#s-130">S-130</a></td>
+</tr>
+<tr>
+<td>Terminale</td>
+<td><code>ChatToolsTerminalEnableAutoApprove</code></td>
+<td>Disattiva l'auto-approvazione a regole</td>
+<td><a href="Sources.html#s-130">S-130</a></td>
+</tr>
+<tr>
+<td>MCP non controllati</td>
+<td><code>ChatMCP</code> (<code>registryOnly</code> o <code>off</code>), <code>McpGalleryServiceUrl</code></td>
+<td>Solo registry privato o nessun MCP</td>
+<td><a href="Sources.html#s-130">S-130</a></td>
+</tr>
+<tr>
+<td>Tool di estensioni</td>
+<td><code>ChatAgentExtensionTools</code></td>
+<td>Blocca i tool forniti da estensioni</td>
+<td><a href="Sources.html#s-130">S-130</a></td>
+</tr>
+<tr>
+<td>Rete dell'agente</td>
+<td><code>ChatAgentNetworkFilter</code>, <code>ChatAgentAllowedNetworkDomains</code>, <code>ChatAgentDeniedNetworkDomains</code></td>
+<td>Filtro per dominio; i domini negati hanno precedenza</td>
+<td><a href="Sources.html#s-131">S-131</a></td>
+</tr>
+<tr>
+<td>Hook non gestiti</td>
+<td><code>ChatAllowManagedHooksOnly</code></td>
+<td>Solo hook da fonti gestite</td>
+<td><a href="Sources.html#s-131">S-131</a></td>
+</tr>
+<tr>
+<td>Customization non gestite</td>
+<td><code>ChatStrictPluginOnlyCustomization</code></td>
+<td>Blocca customization utente e workspace fuori dai plugin</td>
+<td><a href="Sources.html#s-131">S-131</a></td>
+</tr>
+<tr>
+<td>Harness di terze parti</td>
+<td><code>Claude3PIntegration</code>, <code>Codex3PIntegration</code></td>
+<td>Controlla gli harness Claude e Codex</td>
+<td><a href="Sources.html#s-131">S-131</a></td>
+</tr>
+<tr>
+<td>BYOK</td>
+<td><em>Bring Your Own Language Model Key in VS Code</em> (GitHub.com)</td>
+<td>Disattiva il BYOK locale</td>
+<td><a href="Sources.html#s-018">S-018</a></td>
+</tr>
+<tr>
+<td>Osservabilità</td>
+<td><code>CopilotOtel*</code></td>
+<td>Export OpenTelemetry</td>
+<td><a href="Sources.html#s-131">S-131</a></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>⚠️ Le sessioni dell'harness Copilot non applicano completamente tre policy (<a href="Sources.html#s-130">S-130</a>, <a href="Sources.html#s-131">S-131</a>): <code>ChatAgentMode</code> non toglie le opzioni dell'Agent Host dal selettore <em>Session Target</em>; <code>ChatMCP</code> non vale per i server MCP che il runtime Copilot scopre da solo; <code>ChatToolsEligibleForAutoApproval</code> toglie <em>Allow all</em>, ma <em>Assisted permissions</em> e le approvazioni salvate nella sessione possono ancora approvare il tool. I setting gestiti dall'enterprise in Copilot (<code>permissions.*</code>, <code>sandbox</code>, <code>allowedMcpServers</code>) hanno precedenza sulle policy del dispositivo (P-09). Le policy <code>ChatAgentSandbox*</code> sono deprecate e valgono solo per l'harness Local (<a href="Sources.html#s-131">S-131</a>). Verifica le note dell'harness prima di affidarti a queste policy.</p>
+</blockquote>
+<hr />
+<h2 id="5-litellm-proxy">5. LiteLLM proxy</h2>
+<p>Fonti: <a href="Sources.html#s-108">S-108</a> (Security Best Practices), <a href="Sources.html#s-109">S-109</a> (Docker Image Security), <a href="Sources.html#s-104">S-104</a> (incidente 2026-10-21).</p>
+<h3 id="51-release-e-immagini">5.1 Release e immagini</h3>
+<ul>
+<li class="task"><input type="checkbox" disabled> Fissa una versione esatta o un digest. Mai <code>latest</code>, <code>main-latest</code>, <code>main-stable</code> (<a href="Sources.html#s-108">S-108</a>, <a href="Decisions.html#d-018">D-018</a>).</li>
+<li class="task"><input type="checkbox" disabled> Verifica la firma dell'immagine con la chiave cosign del commit <code>e82a3c6</code>. Impronta SHA-256 di <code>cosign.pub</code>: <code>e3fe3e08c44b16407fe0b37c43b4f8b603b3a0f4ee74c29e647bc022d762c2c0</code> (<a href="Sources.html#s-104">S-104</a>, <a href="Sources.html#s-109">S-109</a>). L'ordine dei passi è importante:</li>
+</ul>
+<ol>
+<li>Scarica <code>cosign.pub</code> e controlla la sua impronta SHA-256: una chiave non verificata non prova nulla.</li>
+<li>Esegui <code>docker pull</code> del tag e leggi il digest (<code>docker inspect … RepoDigests</code>).</li>
+<li>Esegui <code>cosign verify</code> sul <strong>digest</strong> (<code>@sha256:…</code>), non sul tag: il tag è mobile, il digest no.</li>
+<li>Usa nel deploy il digest verificato.</li>
+</ol>
+<p>Lo script <a href="../../examples/litellm/scripts/pin-images.sh"><code>scripts/pin-images.sh</code></a> esegue i quattro passi:</p>
+<pre class="code"><code class="language-bash">./scripts/pin-images.sh        # stampa LITELLM_IMAGE=…@sha256:… e POSTGRES_IMAGE=…@sha256:… da copiare in .env
+</code></pre>
+<ul>
+<li class="task"><input type="checkbox" disabled> Preferisci l'immagine <code>ghcr.io/berriai/litellm-non_root</code> (<a href="Sources.html#s-109">S-109</a>).</li>
+<li class="task"><input type="checkbox" disabled> Segui gli avvisi di sicurezza del progetto e aggiorna alla release stabile (<a href="Sources.html#s-108">S-108</a>).</li>
+</ul>
+<h3 id="52-identità-e-privilegi">5.2 Identità e privilegi</h3>
+<ul>
+<li class="task"><input type="checkbox" disabled> Ruoli RBAC minimi; pochi <code>proxy_admin</code> (<a href="Sources.html#s-108">S-108</a>).</li>
+<li class="task"><input type="checkbox" disabled> Agli utenti e ai workload solo <strong>virtual keys</strong> con scope; mai la master key (<a href="Sources.html#s-108">S-108</a>).</li>
+<li class="task"><input type="checkbox" disabled> <code>general_settings.disable_env_credential_login: true</code> blocca il login della UI con <code>UI_USERNAME</code>/<code>UI_PASSWORD</code> e master key. Serve un utente <code>proxy_admin</code> con password (o l'SSO), altrimenti nessuno accede all'Admin UI (<a href="Sources.html#s-108">S-108</a>, <a href="Sources.html#s-148">S-148</a>). La guida LiteLLM crea l'utente prima di attivare l'opzione. Gli esempi la attivano già in <code>config.yaml</code>: l'API accetta sempre la master key, quindi crei l'utente anche dopo l'avvio (<a href="01-Installazione.html#52-profilo-esteso-postgresql--admin-ui--virtual-keys">01 §5.2</a>):
+  1. Con la master key: <code>POST /user/new</code> con <code>user_role: proxy_admin</code> e <code>auto_create_key: false</code>.
+  2. <code>POST /user/update</code> con la password (almeno 12 caratteri, maiuscole, minuscole, cifre, simboli).
+  3. Verifica il login con email e password.</li>
+</ul>
+<p>Lo script <a href="../../examples/litellm/scripts/bootstrap-admin.sh"><code>scripts/bootstrap-admin.sh</code></a> esegue i passi 1–2. Con SSO e <code>disable_password_login_when_sso_enabled</code> anche il <code>proxy_admin</code> di emergenza (<code>/fallback/login</code>) è bloccato (<a href="Sources.html#s-148">S-148</a>).
+- [ ] SSO per l'Admin UI; JWT per il traffico API; SCIM per il ciclo di vita degli utenti (<a href="Sources.html#s-108">S-108</a>).
+- [ ] Limiti di login falliti: imposta <code>general_settings.trusted_proxy_ranges</code> (CIDR dell'ingress, o <code>[]</code> con client diretti) (<a href="Sources.html#s-108">S-108</a>).</p>
+<h3 id="53-rete-e-tls">5.3 Rete e TLS</h3>
+<ul>
+<li class="task"><input type="checkbox" disabled> Bind su <code>127.0.0.1</code> per l'uso locale (il default è <code>0.0.0.0</code>) (<a href="Sources.html#s-118">S-118</a>).</li>
+<li class="task"><input type="checkbox" disabled> In rete: rete privata, solo le route necessarie, TLS client→gateway e gateway→provider, verifica dei certificati attiva (<a href="Sources.html#s-108">S-108</a>).</li>
+<li class="task"><input type="checkbox" disabled> Dietro un reverse proxy TLS: imposta <code>PROXY_BASE_URL</code> all'origine <code>https://</code> esatta (<a href="Sources.html#s-108">S-108</a>).</li>
+</ul>
+<h3 id="54-segreti-rotazione-audit">5.4 Segreti, rotazione, audit</h3>
+<ul>
+<li class="task"><input type="checkbox" disabled> Chiavi dei provider, <code>LITELLM_MASTER_KEY</code> e <code>LITELLM_SALT_KEY</code> in un secret store, mai in <code>config.yaml</code> (usa <code>os.environ/...</code>) (<a href="Sources.html#s-108">S-108</a>).</li>
+<li class="task"><input type="checkbox" disabled> Ruota la master key con la procedura ufficiale. Non ruotare <code>LITELLM_SALT_KEY</code> dopo il salvataggio di credenziali (<a href="Sources.html#s-108">S-108</a>).</li>
+<li class="task"><input type="checkbox" disabled> Attiva gli audit log e controlla le modifiche a chiavi, ruoli e team (<a href="Sources.html#s-108">S-108</a>).</li>
+<li class="task"><input type="checkbox" disabled> Se hai eseguito <code>1.82.7</code>, <code>1.82.8</code> o <code>1.107.0</code>: considera rubate le credenziali e ruotale tutte (<a href="Sources.html#s-104">S-104</a>).</li>
+</ul>
+<h3 id="55-superficie-esposta">5.5 Superficie esposta</h3>
+<ul>
+<li class="task"><input type="checkbox" disabled> Disattiva la documentazione API in produzione: <code>NO_DOCS="True"</code>, <code>NO_REDOC="True"</code>, <code>NO_OPENAPI="True"</code> (<a href="Sources.html#s-108">S-108</a>).</li>
+<li class="task"><input type="checkbox" disabled> Limita gli upload: <code>general_settings.allowed_file_extensions</code> (allowlist), <code>max_file_size_mb</code>, <code>max_request_size_mb</code> (<a href="Sources.html#s-108">S-108</a>).</li>
+<li class="task"><input type="checkbox" disabled> Non mostrare l'header <code>Server</code> se un reverse proxy lo aggiunge (<a href="Sources.html#s-108">S-108</a>).</li>
+<li class="task"><input type="checkbox" disabled> (Opzionale) Guardrail per contenuti e PII per chiave, team o modello (<a href="Sources.html#s-108">S-108</a>).</li>
+</ul>
+<h3 id="56-inoltro-di-header">5.6 Inoltro di header</h3>
+<ul>
+<li class="task"><input type="checkbox" disabled> Non attivare <code>forward_llm_provider_auth_headers</code> senza motivo: LiteLLM inoltra <code>x-api-key</code> del client al provider (P-04).</li>
+</ul>
+<hr />
+<h2 id="6-chiavi-api-dei-provider">6. Chiavi API dei provider</h2>
+<ul>
+<li class="task"><input type="checkbox" disabled> Una chiave per scopo (demo, sviluppo, produzione); revocala dopo il talk.</li>
+<li class="task"><input type="checkbox" disabled> Imposta limiti di spesa nella console del provider, indipendenti dal gateway.</li>
+<li class="task"><input type="checkbox" disabled> Hugging Face: token <em>fine-grained</em> con il solo permesso <em>Make calls to Inference Providers</em> (<a href="Sources.html#s-047">S-047</a>).</li>
+<li class="task"><input type="checkbox" disabled> OpenRouter: chiavi con limite di credito e guardrail di organizzazione (budget, allowlist di modelli, ZDR) (<a href="Sources.html#s-115">S-115</a>).</li>
+<li class="task"><input type="checkbox" disabled> Hugging Face Router: fissa il provider di inferenza con il suffisso <code>:&lt;provider&gt;</code> per sapere chi tratta i dati; <code>:fastest</code> e <code>:cheapest</code> scelgono il provider in automatico (<a href="Sources.html#s-047">S-047</a>).</li>
+</ul>
+<hr />
+<h2 id="7-baseline-di-configurazione">7. Baseline di configurazione</h2>
+<p>File: <a href="../../examples/vscode/settings.secure.jsonc"><code>examples/vscode/settings.secure.jsonc</code></a>. Copialo nelle <strong>impostazioni utente</strong> (<em>Preferences: Open User Settings (JSON)</em>). Non usare <code>.vscode/settings.json</code>: le impostazioni <code>security.workspace.trust.*</code> hanno scope applicazione e VS Code le ignora a livello di workspace ⚠️ (scope dichiarato nel codice sorgente di VS Code, non nella documentazione).</p>
+<blockquote>
+<p>La baseline <strong>attiva</strong> la sandbox (default <code>off</code>) e blocca la rete dell'agente. Se un agente deve scaricare pacchetti, imposta <code>allowNetwork: true</code> con <code>allowedDomains</code> espliciti invece della rete completa (<a href="Sources.html#s-145">S-145</a>).</p>
+</blockquote>
+<hr />
+<h2 id="8-checklist-rapida">8. Checklist rapida</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Controllo</th>
+<th>Dove</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Restricted Mode per repo sconosciuti</td>
+<td>VS Code</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Manual permissions, nessuna auto-approvazione globale</td>
+<td>Copilot</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Sandbox attivata (<code>chat.agent.sandbox.enabled: "on"</code>), rete limitata</td>
+<td>Copilot</td>
+</tr>
+<tr>
+<td>4</td>
+<td>MCP solo da fonti verificate, con approvazione</td>
+<td>Copilot</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Chiavi solo in <code>${input:...}</code> o secret store</td>
+<td>VS Code, LiteLLM</td>
+</tr>
+<tr>
+<td>6</td>
+<td>LiteLLM con versione e digest fissati, firma verificata</td>
+<td>LiteLLM</td>
+</tr>
+<tr>
+<td>7</td>
+<td>LiteLLM su <code>127.0.0.1</code>, virtual keys, niente master key agli utenti</td>
+<td>LiteLLM</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Documentazione API disattivata, limiti di upload</td>
+<td>LiteLLM</td>
+</tr>
+<tr>
+<td>9</td>
+<td>Limiti di spesa nelle console dei provider</td>
+<td>Provider</td>
+</tr>
+<tr>
+<td>10</td>
+<td>Policy enterprise distribuite e verificate per l'harness in uso</td>
+<td>Organizzazione</td>
+</tr>
+</tbody>
+</table></article>
+<script type="application/json" id="fonts-data">[
+  {
+    "id": "blexmono",
+    "label": "BlexMono Nerd Font (IBM Plex Mono)",
+    "mono": true,
+    "body": false
+  },
+  {
+    "id": "firacode",
+    "label": "FiraCode Nerd Font",
+    "mono": true,
+    "body": false
+  },
+  {
+    "id": "monoid",
+    "label": "Monoid Nerd Font",
+    "mono": true,
+    "body": false
+  },
+  {
+    "id": "opendyslexic",
+    "label": "OpenDyslexic Nerd Font",
+    "mono": true,
+    "body": true
+  },
+  {
+    "id": "saucecodepro",
+    "label": "SauceCodePro Nerd Font (Source Code Pro)",
+    "mono": true,
+    "body": false
+  }
+]</script>
+<script src="../assets/vendor/highlight/highlight.min.js"></script>
+<script src="../assets/vendor/highlight/languages/bash.min.js"></script>
+<script src="../assets/vendor/highlight/languages/powershell.min.js"></script>
+<script src="../assets/vendor/highlight/languages/yaml.min.js"></script>
+<script src="../assets/vendor/highlight/languages/json.min.js"></script>
+<script src="../assets/vendor/highlight/languages/ini.min.js"></script>
+<script src="../assets/vendor/highlight/languages/dockerfile.min.js"></script>
+<script src="../assets/vendor/highlight/languages/plaintext.min.js"></script>
+<script src="../assets/common.js"></script>
+<script src="../assets/doc.js"></script>
+</body>
+</html>

@@ -1,0 +1,1370 @@
+<!DOCTYPE html>
+<html lang="it" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="generator" content="tools/build_site.py — non modificare a mano">
+<title>04-Security-Review-OWASP-ISO27001 — WPC2026</title>
+<link rel="stylesheet" href="../assets/fonts.css">
+<link rel="stylesheet" href="../assets/vendor/highlight/github.min.css" id="hl-light">
+<link rel="stylesheet" href="../assets/vendor/highlight/github-dark.min.css" id="hl-dark" disabled>
+<link rel="stylesheet" href="../assets/styles.css">
+
+<script>try{var p=JSON.parse(localStorage.getItem('wpc2026.prefs')||'{}');var t=p.theme||'auto';if(t==='auto')t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body>
+<div class="topbar">
+  <h1><a href="../index.html" style="color:inherit;text-decoration:none">WPC2026</a> <span class="ver">04-Security-Review-OWASP-ISO27001</span></h1>
+  <label>Tema <select id="pref-theme"><option value="auto">automatico</option><option value="light">chiaro</option><option value="dark">scuro</option></select></label>
+  <label>Testo <select id="pref-body"></select></label>
+  <label>Codice <select id="pref-code"></select></label>
+</div>
+<nav class="docnav"><a href="../index.html">← Runbook</a><ul><li><a href="01-Installazione.html">01-Installazione</a></li><li><a href="02-Configurazione-Copilot.html">02-Configurazione-Copilot</a></li><li><a href="03-Security-Best-Practices.html">03-Security-Best-Practices</a></li><li><a href="04-Security-Review-OWASP-ISO27001.html">04-Security-Review-OWASP-ISO27001</a></li><li><a href="Decisions.html">Decisions</a></li><li><a href="Sources.html">Sources</a></li><li><a href="Review-Perplexity.html">Review-Perplexity</a></li></ul></nav><article class="doc"><h1 id="04--security-review-delle-configurazioni-di-esempio-owasp-isoiec-27001">04 — Security review delle configurazioni di esempio (OWASP, ISO/IEC 27001)</h1>
+<p>Questo documento analizza le configurazioni di esempio del repository dal punto di vista della sicurezza (<a href="Decisions.html#d-023">D-023</a>).</p>
+<p><strong>Riferimenti</strong></p>
+<ul>
+<li>OWASP Top 10 for LLM Applications <strong>2026</strong> (<code>LLM01:2026</code>…<code>LLM10:2026</code>, pubblicata il 2026-08-03) (<a href="Sources.html#s-146">S-146</a>, <a href="Sources.html#s-147">S-147</a>, <a href="Decisions.html#d-024">D-024</a>). L'edizione 2025 (<a href="Sources.html#s-137">S-137</a>) ha un ordine diverso: vedi la corrispondenza in §4.</li>
+<li>OWASP Top 10 for Agentic Applications 2026 (<code>ASI01</code>…<code>ASI10</code>) (<a href="Sources.html#s-138">S-138</a>).</li>
+<li>ISO/IEC 27001:2022 con Amd 1:2024, Annex A e clausole 4–10 (<a href="Sources.html#s-140">S-140</a>, <a href="Sources.html#s-141">S-141</a>). Il documento cita solo numero e titolo dei controlli. Il testo della norma non è riprodotto. Riferimento opzionale: ISO/IEC 42001:2023 (<a href="Sources.html#s-149">S-149</a>).</li>
+</ul>
+<p><strong>Revisione.</strong> v2 del 2026-11-07: integra la review P-09/P-10 e applica le azioni AZ-01…AZ-10 approvate dal PO (<a href="Decisions.html#d-025">D-025</a>).</p>
+<p>Le best practice di riferimento sono in <a href="03-Security-Best-Practices.html">03-Security-Best-Practices.md</a>.</p>
+<h2 id="indice">Indice</h2>
+<ol>
+<li><a href="#1-ambito-e-metodo">Ambito e metodo</a></li>
+<li><a href="#2-contesto-asset-confini-di-fiducia-flussi">Contesto: asset, confini di fiducia, flussi</a></li>
+<li><a href="#3-rilievi-sulle-configurazioni">Rilievi sulle configurazioni</a></li>
+<li><a href="#4-matrice-owasp-llm-top-10-2026">Matrice OWASP LLM Top 10 2026</a></li>
+<li><a href="#5-matrice-owasp-agentic-top-10-2026">Matrice OWASP Agentic Top 10 2026</a></li>
+<li><a href="#6-mappatura-isoiec-270012022-annex-a">Mappatura ISO/IEC 27001:2022 Annex A</a></li>
+<li><a href="#7-isoiec-270012022-clausole-410">ISO/IEC 27001:2022 clausole 4–10</a></li>
+<li><a href="#8-registro-dei-rischi">Registro dei rischi</a></li>
+<li><a href="#9-azioni">Azioni</a></li>
+<li><a href="#10-rischi-residui">Rischi residui</a></li>
+</ol>
+<hr />
+<h2 id="1-ambito-e-metodo">1. Ambito e metodo</h2>
+<p><strong>File analizzati</strong></p>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Componente</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="../../examples/litellm/config.yaml"><code>examples/litellm/config.yaml</code></a></td>
+<td>Route LiteLLM, master key</td>
+</tr>
+<tr>
+<td><a href="../../examples/litellm/.env.example"><code>examples/litellm/.env.example</code></a></td>
+<td>Segreti</td>
+</tr>
+<tr>
+<td><a href="../../examples/litellm/compose.minimal.yaml"><code>examples/litellm/compose.minimal.yaml</code></a></td>
+<td>Container senza DB</td>
+</tr>
+<tr>
+<td><a href="../../examples/litellm/compose.extended.yaml"><code>examples/litellm/compose.extended.yaml</code></a></td>
+<td>Container + PostgreSQL</td>
+</tr>
+<tr>
+<td><a href="../../examples/litellm/service/"><code>examples/litellm/service/*</code></a></td>
+<td>systemd, launchd, Task Scheduler</td>
+</tr>
+<tr>
+<td><a href="../../examples/vscode/"><code>examples/vscode/chatLanguageModels.*.json</code></a></td>
+<td>Modelli BYOK</td>
+</tr>
+<tr>
+<td><a href="../../examples/vscode/settings.secure.jsonc"><code>examples/vscode/settings.secure.jsonc</code></a></td>
+<td>Baseline VS Code</td>
+</tr>
+<tr>
+<td>Procedure di <a href="01-Installazione.html">01-Installazione.md</a> e <a href="02-Configurazione-Copilot.html">02-Configurazione-Copilot.md</a></td>
+<td>Installazione, Spec Kit</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Metodo</strong></p>
+<ol>
+<li>Identifica asset, confini di fiducia e flussi (§2).</li>
+<li>Per ogni file, registra i rilievi (§3) con categoria OWASP e controllo ISO.</li>
+<li>Valuta la gravità: <strong>Alta</strong> (compromissione di credenziali o esecuzione di codice), <strong>Media</strong> (esposizione di dati o costi senza limite), <strong>Bassa</strong> (miglioramento di robustezza).</li>
+<li>Indica lo stato: <strong>Mitigato</strong> (l'esempio applica il controllo; <code>AZ-NN</code> indica l'azione che lo ha introdotto), <strong>Residuo</strong> (accettato e documentato in §10).</li>
+</ol>
+<blockquote>
+<p>Questa review analizza documentazione ed esempi. Non è un penetration test. Non sostituisce il risk assessment dell'organizzazione che adotta gli esempi (§7, clausola 6.1.2).</p>
+</blockquote>
+<hr />
+<h2 id="2-contesto-asset-confini-di-fiducia-flussi">2. Contesto: asset, confini di fiducia, flussi</h2>
+<p><strong>Asset</strong></p>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Asset</th>
+<th>Classificazione proposta</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A1</td>
+<td>Chiavi API dei provider (Anthropic, OpenAI, Gemini, OpenRouter, HF)</td>
+<td>Riservato — impatto economico diretto</td>
+</tr>
+<tr>
+<td>A2</td>
+<td><code>LITELLM_MASTER_KEY</code>, <code>LITELLM_SALT_KEY</code>, virtual keys</td>
+<td>Riservato</td>
+</tr>
+<tr>
+<td>A3</td>
+<td>Codice sorgente e contesto inviato ai modelli</td>
+<td>Secondo la classificazione del progetto</td>
+</tr>
+<tr>
+<td>A4</td>
+<td>Postazione dello sviluppatore (VS Code, terminale, file)</td>
+<td>Interno</td>
+</tr>
+<tr>
+<td>A5</td>
+<td>Database PostgreSQL di LiteLLM (chiavi cifrate, spend log)</td>
+<td>Riservato</td>
+</tr>
+<tr>
+<td>A6</td>
+<td>Configurazione dell'agente (permessi, istruzioni, skill, hook, MCP)</td>
+<td>Interno — integrità critica</td>
+</tr>
+<tr>
+<td>A7</td>
+<td>Fornitori: provider LLM, vendor degli strumenti (GitHub, LiteLLM, Spec Kit)</td>
+<td>Fornitori distinti (A.5.19)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Confini di fiducia e flussi</strong></p>
+<pre class="code"><code class="language-mermaid">flowchart LR
+  subgraph TB1[&quot;Postazione sviluppatore&quot;]
+    VS[&quot;VS Code + Copilot&lt;br/&gt;(agente, tool, MCP)&quot;]
+    SS[(&quot;Secret storage&lt;br/&gt;VS Code&quot;)]
+    subgraph TB2[&quot;Processo / container LiteLLM :4000 (loopback)&quot;]
+      LL[&quot;LiteLLM proxy&quot;]
+      ENV[(&quot;.env&quot;)]
+    end
+    DB[(&quot;PostgreSQL&lt;br/&gt;profilo esteso&quot;)]
+  end
+  REPO[&quot;Repository / web / MCP&lt;br/&gt;(contenuto non fidato)&quot;]
+  subgraph TB3[&quot;Provider esterni&quot;]
+    AN[Anthropic]
+    OA[OpenAI]
+    GE[Google Gemini]
+    OR[OpenRouter → provider terzi]
+    HF[HF Router → provider terzi]
+  end
+  REPO -- &quot;prompt injection (LLM01, ASI01)&quot; --&gt; VS
+  SS -. apiKey .-&gt; VS
+  VS -- &quot;virtual/master key&quot; --&gt; LL
+  ENV -. chiavi provider .-&gt; LL
+  LL --&gt; DB
+  LL -- &quot;chiavi provider + contesto (LLM02)&quot; --&gt; AN &amp; OA &amp; GE &amp; OR &amp; HF
+  VS -- &quot;BYOK nativo&quot; --&gt; AN &amp; OA &amp; GE &amp; OR &amp; HF
+</code></pre>
+<ul>
+<li><strong>TB1:</strong> la postazione. L'agente esegue tool e comandi con i privilegi dell'utente.</li>
+<li><strong>TB2:</strong> il gateway. Contiene tutte le chiavi dei provider: un solo punto di compromissione (<a href="Sources.html#s-104">S-104</a>).</li>
+<li><strong>TB3:</strong> i provider. OpenRouter e il router HF possono instradare il contesto verso altri provider (subprocessor).</li>
+</ul>
+<hr />
+<h2 id="3-rilievi-sulle-configurazioni">3. Rilievi sulle configurazioni</h2>
+<p>Codici OWASP: <code>LLMxx</code> = LLM Top 10 2026; <code>ASIxx</code> = Agentic Top 10 2026.</p>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>File</th>
+<th>Rilievo</th>
+<th>OWASP</th>
+<th>ISO 27001 Annex A</th>
+<th>Gravità</th>
+<th>Stato</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>F-01</td>
+<td><code>config.yaml</code></td>
+<td>Le chiavi sono lette da variabili d'ambiente (<code>os.environ/...</code>), non scritte nel file</td>
+<td>LLM02, LLM04</td>
+<td>A.5.17, A.8.24</td>
+<td>—</td>
+<td><strong>Mitigato</strong></td>
+</tr>
+<tr>
+<td>F-02</td>
+<td><code>.env</code></td>
+<td>Chiavi in chiaro su disco</td>
+<td>LLM02</td>
+<td>A.5.17, A.8.3, A.8.12, A.8.24</td>
+<td>Alta</td>
+<td><strong>Mitigato</strong> (AZ-01: <code>chmod 600</code>/<code>Protect-EnvFile.ps1</code>, verifica dei permessi negli script). Residuo in team: secret store (R-07)</td>
+</tr>
+<tr>
+<td>F-03</td>
+<td><code>.gitignore</code></td>
+<td><code>.env</code> e <code>*.env</code> esclusi dal commit</td>
+<td>LLM02</td>
+<td>A.5.17, A.8.4, A.8.12</td>
+<td>—</td>
+<td><strong>Mitigato</strong></td>
+</tr>
+<tr>
+<td>F-04</td>
+<td><code>compose.*.yaml</code></td>
+<td>Immagine LiteLLM fissata per tag, non per digest; firma non verificata</td>
+<td>LLM04, ASI04</td>
+<td>A.5.21, A.8.9, A.8.19, A.8.32</td>
+<td>Alta</td>
+<td><strong>Mitigato</strong> (AZ-02: <code>scripts/pin-images.sh</code>, digest in <code>.env</code>)</td>
+</tr>
+<tr>
+<td>F-05</td>
+<td><code>compose.*.yaml</code></td>
+<td>Immagine con utente root</td>
+<td>ASI05</td>
+<td>A.8.2, A.8.9</td>
+<td>Media</td>
+<td><strong>Mitigato</strong> (AZ-03: <code>litellm-non_root</code>, <code>no-new-privileges</code>, <code>cap_drop: ALL</code>) ⚠️ tag da verificare</td>
+</tr>
+<tr>
+<td>F-06</td>
+<td><code>compose.extended.yaml</code></td>
+<td><code>postgres:16</code> con tag mobile</td>
+<td>LLM04</td>
+<td>A.5.21, A.8.19</td>
+<td>Media</td>
+<td><strong>Mitigato</strong> (AZ-02: <code>POSTGRES_IMAGE</code> per digest)</td>
+</tr>
+<tr>
+<td>F-07</td>
+<td><code>compose.*.yaml</code></td>
+<td>Porta solo su <code>127.0.0.1</code>; PostgreSQL non pubblicato</td>
+<td>ASI02</td>
+<td>A.8.20, A.8.22</td>
+<td>—</td>
+<td><strong>Mitigato</strong></td>
+</tr>
+<tr>
+<td>F-08</td>
+<td><code>config.yaml</code></td>
+<td><code>disable_env_credential_login: true</code> senza <code>proxy_admin</code> blocca l'Admin UI</td>
+<td>—</td>
+<td>A.5.16, A.5.18</td>
+<td>Media</td>
+<td><strong>Mitigato</strong> (AZ-04: <code>scripts/bootstrap-admin.sh</code>, procedura in <a href="01-Installazione.html#52-profilo-esteso-postgresql--admin-ui--virtual-keys">01 §5.2</a>)</td>
+</tr>
+<tr>
+<td>F-09</td>
+<td><code>.env.example</code></td>
+<td>Documentazione API attiva</td>
+<td>LLM06</td>
+<td>A.8.9</td>
+<td>Bassa</td>
+<td><strong>Mitigato</strong> (AZ-05: <code>NO_DOCS</code>, <code>NO_REDOC</code>, <code>NO_OPENAPI</code>)</td>
+</tr>
+<tr>
+<td>F-10</td>
+<td><code>config.yaml</code></td>
+<td>Nessun limite di richiesta e upload</td>
+<td>LLM06</td>
+<td>A.8.6, A.8.9</td>
+<td>Media</td>
+<td><strong>Mitigato</strong> (AZ-05: <code>max_request_size_mb: 20</code>, <code>allowed_file_extensions: []</code>)</td>
+</tr>
+<tr>
+<td>F-11</td>
+<td>Profilo minimo</td>
+<td>Nessun budget né rate limit senza DB</td>
+<td>LLM06, ASI08</td>
+<td>A.8.6, A.8.16, A.5.22</td>
+<td>Media</td>
+<td><strong>Residuo</strong> (R-03)</td>
+</tr>
+<tr>
+<td>F-12</td>
+<td>Profilo minimo</td>
+<td>La master key va al client: nessuna attribuzione per utente</td>
+<td>ASI03</td>
+<td>A.5.15, A.5.16, A.8.2</td>
+<td>Alta in team</td>
+<td><strong>Residuo</strong> per uso personale; in team profilo esteso con virtual keys</td>
+</tr>
+<tr>
+<td>F-13</td>
+<td><code>config.yaml</code></td>
+<td><code>drop_params: true</code> scarta parametri in silenzio</td>
+<td>LLM07</td>
+<td>A.8.9</td>
+<td>Bassa</td>
+<td><strong>Residuo</strong> (R-05)</td>
+</tr>
+<tr>
+<td>F-14</td>
+<td><code>config.yaml</code>, <code>chatLanguageModels.native.json</code></td>
+<td>OpenRouter e router HF instradano il contesto verso provider terzi</td>
+<td>LLM02</td>
+<td>A.5.12, A.5.14, A.5.19, A.5.20, A.5.21, A.5.23, A.5.34</td>
+<td>Media</td>
+<td><strong>Mitigato</strong> (AZ-06: HF fissato su <code>groq</code>; OpenRouter <code>data_collection: deny</code>, <code>allow_fallbacks: false</code> ⚠️)</td>
+</tr>
+<tr>
+<td>F-15</td>
+<td><code>chatLanguageModels.*.json</code></td>
+<td><code>apiKey</code> con <code>${input:...}</code>: chiave nel secret storage</td>
+<td>LLM02</td>
+<td>A.5.17</td>
+<td>—</td>
+<td><strong>Mitigato</strong></td>
+</tr>
+<tr>
+<td>F-16</td>
+<td><code>chatLanguageModels.litellm.json</code></td>
+<td>HTTP in chiaro verso <code>localhost:4000</code></td>
+<td>LLM02</td>
+<td>A.8.20, A.8.24</td>
+<td>Bassa</td>
+<td><strong>Residuo</strong> (R-04)</td>
+</tr>
+<tr>
+<td>F-17</td>
+<td><code>chatLanguageModels.native.json</code></td>
+<td><code>HTTP-Referer</code> rivela l'URL del repo a OpenRouter</td>
+<td>LLM02</td>
+<td>A.5.14</td>
+<td>Bassa</td>
+<td><strong>Residuo</strong> (header opzionale)</td>
+</tr>
+<tr>
+<td>F-18</td>
+<td><code>service/litellm.service</code></td>
+<td>Unit systemd senza hardening</td>
+<td>ASI05</td>
+<td>A.8.2, A.8.9</td>
+<td>Media</td>
+<td><strong>Mitigato</strong> (AZ-07: <code>NoNewPrivileges</code>, <code>ProtectSystem=strict</code>, <code>UMask=0077</code>, …)</td>
+</tr>
+<tr>
+<td>F-19</td>
+<td>Script di avvio</td>
+<td><code>.env</code> eseguito come script shell</td>
+<td>ASI05</td>
+<td>A.8.3, A.8.9</td>
+<td>Media</td>
+<td><strong>Mitigato</strong> (AZ-08: <code>service/load-env.sh</code> legge solo <code>CHIAVE=valore</code>; testato con una riga <code>$(…)</code>)</td>
+</tr>
+<tr>
+<td>F-20</td>
+<td><code>com.wpc2026.litellm.plist</code>, <code>config.yaml</code></td>
+<td>Log con possibili dati delle richieste</td>
+<td>LLM02, LLM08</td>
+<td>A.8.10, A.8.11, A.8.15, A.5.33</td>
+<td>Bassa</td>
+<td><strong>Mitigato</strong> (AZ-09: log in <code>~/Library/Logs</code>, <code>Umask</code>, <code>turn_off_message_logging</code> ⚠️)</td>
+</tr>
+<tr>
+<td>F-21</td>
+<td><code>uv tool install</code></td>
+<td>Versione fissata, nessuna verifica di hash</td>
+<td>LLM04, ASI04</td>
+<td>A.5.21, A.8.19</td>
+<td>Media</td>
+<td><strong>Residuo</strong> (R-01)</td>
+</tr>
+<tr>
+<td>F-22</td>
+<td>Spec Kit</td>
+<td>Script e skill eseguiti dall'agente</td>
+<td>ASI04, ASI05, LLM04</td>
+<td>A.8.19, A.8.25, A.8.28, A.8.32</td>
+<td>Media</td>
+<td><strong>Mitigato</strong> (AZ-10: versione <code>v1.3.2</code>, <code>git diff</code> prima del commit)</td>
+</tr>
+<tr>
+<td>F-23</td>
+<td>Demo Copilot</td>
+<td><em>Allow all</em> o <em>Autopilot</em> eliminano le conferme</td>
+<td>LLM03, ASI02, ASI09</td>
+<td>A.5.3, A.5.15, A.8.2, A.8.18</td>
+<td>Alta</td>
+<td><strong>Mitigato</strong> (<a href="03-Security-Best-Practices.html#31-approvazione-di-tool-e-modifiche">03 §3.1</a>)</td>
+</tr>
+<tr>
+<td>F-24</td>
+<td>Workspace del pubblico</td>
+<td><code>.mcp.json</code>, hook o istruzioni ostili in un repo clonato</td>
+<td>LLM01, ASI01, ASI04, ASI06</td>
+<td>A.8.7, A.8.19, A.8.26</td>
+<td>Alta</td>
+<td><strong>Mitigato</strong> (Workspace Trust, <a href="03-Security-Best-Practices.html#21-workspace-trust">03 §2.1</a>)</td>
+</tr>
+<tr>
+<td>F-25</td>
+<td>Gateway LiteLLM</td>
+<td>Concentrazione delle credenziali; compromissioni 2026</td>
+<td>LLM04, ASI03, ASI04</td>
+<td>A.5.21, A.5.24, A.8.8</td>
+<td>Alta</td>
+<td><strong>Residuo</strong> (R-02) con D-018</td>
+</tr>
+<tr>
+<td>F-26</td>
+<td><code>settings.secure.jsonc</code></td>
+<td>Sandbox dell'agente <code>off</code> di default</td>
+<td>ASI05, LLM03</td>
+<td>A.8.9, A.8.18</td>
+<td>Alta</td>
+<td><strong>Mitigato</strong> (baseline: <code>chat.agent.sandbox.enabled: "on"</code>, rete bloccata) (<a href="Sources.html#s-145">S-145</a>)</td>
+</tr>
+<tr>
+<td>F-27</td>
+<td>BYOK in harness Local</td>
+<td>Content exclusion non garantita senza login GitHub</td>
+<td>LLM02</td>
+<td>A.8.12, A.5.12</td>
+<td>Media</td>
+<td><strong>Residuo</strong> (R-06)</td>
+</tr>
+<tr>
+<td>F-28</td>
+<td><code>scripts/bootstrap-admin.sh</code></td>
+<td>Uso della master key da riga di comando</td>
+<td>ASI03</td>
+<td>A.5.17</td>
+<td>Bassa</td>
+<td><strong>Mitigato</strong> (header in file temporaneo <code>0600</code>, password da stdin)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="4-matrice-owasp-llm-top-10-2026">4. Matrice OWASP LLM Top 10 2026</h2>
+<table>
+<thead>
+<tr>
+<th>ID 2026</th>
+<th>Rischio</th>
+<th>ID 2025</th>
+<th>Applicabile</th>
+<th>Rilievi</th>
+<th>Controlli nel progetto</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>LLM01</td>
+<td>Prompt Injection</td>
+<td>LLM01</td>
+<td>Sì</td>
+<td>F-24</td>
+<td>Workspace Trust, approvazione fetch, review</td>
+</tr>
+<tr>
+<td>LLM02</td>
+<td>Sensitive Information Disclosure</td>
+<td>LLM02</td>
+<td>Sì</td>
+<td>F-02, F-14, F-16, F-17, F-20, F-27</td>
+<td>Segreti fuori dal workspace, provider fissati</td>
+</tr>
+<tr>
+<td>LLM03</td>
+<td>Excessive Agency</td>
+<td>LLM06</td>
+<td>Sì</td>
+<td>F-23, F-26</td>
+<td>Manual permissions, sandbox attivata, policy</td>
+</tr>
+<tr>
+<td>LLM04</td>
+<td>Supply Chain</td>
+<td>LLM03</td>
+<td>Sì</td>
+<td>F-04, F-06, F-21, F-22, F-25</td>
+<td>Digest, cosign, D-018</td>
+</tr>
+<tr>
+<td>LLM05</td>
+<td>Data and Model Poisoning</td>
+<td>LLM04</td>
+<td>Limitata</td>
+<td>—</td>
+<td>Modelli dei provider: fuori controllo</td>
+</tr>
+<tr>
+<td>LLM06</td>
+<td>Unbounded Consumption</td>
+<td>LLM10</td>
+<td>Sì</td>
+<td>F-09, F-10, F-11</td>
+<td>Limiti di richiesta, budget, console dei provider</td>
+</tr>
+<tr>
+<td>LLM07</td>
+<td>Misinformation</td>
+<td>LLM09</td>
+<td>Sì</td>
+<td>F-13</td>
+<td>Review umana; ID modello e pacchetti verificati</td>
+</tr>
+<tr>
+<td>LLM08</td>
+<td>Hidden Context Exposure</td>
+<td>LLM07</td>
+<td>Sì</td>
+<td>F-20</td>
+<td>Nessun segreto in istruzioni e skill; log senza contenuto</td>
+</tr>
+<tr>
+<td>LLM09</td>
+<td>Vector and Embedding Weaknesses</td>
+<td>LLM08</td>
+<td>No</td>
+<td>—</td>
+<td>Il BYOK non usa embeddings (<a href="Sources.html#s-001">S-001</a>)</td>
+</tr>
+<tr>
+<td>LLM10</td>
+<td>Improper Output Handling</td>
+<td>LLM05</td>
+<td>Sì</td>
+<td>F-23</td>
+<td>Diff editor, approvazione dei comandi</td>
+</tr>
+</tbody>
+</table>
+<p>Fonti: <a href="Sources.html#s-146">S-146</a>, <a href="Sources.html#s-147">S-147</a>.</p>
+<hr />
+<h2 id="5-matrice-owasp-agentic-top-10-2026">5. Matrice OWASP Agentic Top 10 2026</h2>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Rischio</th>
+<th>Applicabile</th>
+<th>Rilievi</th>
+<th>Controlli nel progetto</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ASI01</td>
+<td>Agent Goal Hijack</td>
+<td>Sì</td>
+<td>F-24</td>
+<td>Restricted Mode, contenuto trattato come dato</td>
+</tr>
+<tr>
+<td>ASI02</td>
+<td>Tool Misuse and Exploitation</td>
+<td>Sì</td>
+<td>F-07, F-23</td>
+<td>Approvazioni per sessione, regole terminale precise</td>
+</tr>
+<tr>
+<td>ASI03</td>
+<td>Identity and Privilege Abuse</td>
+<td>Sì</td>
+<td>F-12, F-25, F-28</td>
+<td>Virtual keys con scope, RBAC minimo</td>
+</tr>
+<tr>
+<td>ASI04</td>
+<td>Agentic Supply Chain Vulnerabilities</td>
+<td>Sì</td>
+<td>F-04, F-21, F-22, F-24</td>
+<td>MCP da fonti verificate, pin di Spec Kit e LiteLLM</td>
+</tr>
+<tr>
+<td>ASI05</td>
+<td>Unexpected Code Execution (RCE)</td>
+<td>Sì</td>
+<td>F-05, F-18, F-19, F-22, F-26</td>
+<td>Sandbox, non-root, hardening dei servizi, <code>.env</code> non eseguito</td>
+</tr>
+<tr>
+<td>ASI06</td>
+<td>Memory &amp; Context Poisoning</td>
+<td>Sì</td>
+<td>F-24</td>
+<td>File di regole e skill del repo sotto review in PR</td>
+</tr>
+<tr>
+<td>ASI07</td>
+<td>Insecure Inter-Agent Communication</td>
+<td>Limitata</td>
+<td>—</td>
+<td>Subagent dello stesso harness</td>
+</tr>
+<tr>
+<td>ASI08</td>
+<td>Cascading Failures</td>
+<td>Sì</td>
+<td>F-11, F-25</td>
+<td>Fallback al BYOK nativo; budget</td>
+</tr>
+<tr>
+<td>ASI09</td>
+<td>Human-Agent Trust Exploitation</td>
+<td>Sì</td>
+<td>F-23</td>
+<td>Review umana prima di commit e merge; attenzione alla <em>approval fatigue</em></td>
+</tr>
+<tr>
+<td>ASI10</td>
+<td>Rogue Agents</td>
+<td>Limitata</td>
+<td>—</td>
+<td>Sessioni brevi, nessun Autopilot nella demo</td>
+</tr>
+</tbody>
+</table>
+<p>Fonte: <a href="Sources.html#s-138">S-138</a> (titoli confermati sul PDF ufficiale, P-10). Principio guida dell'OWASP: <em>least agency</em>.</p>
+<hr />
+<h2 id="6-mappatura-isoiec-270012022-annex-a">6. Mappatura ISO/IEC 27001:2022 Annex A</h2>
+<table>
+<thead>
+<tr>
+<th>Controllo</th>
+<th>Titolo</th>
+<th>Evidenza nel repository</th>
+<th>Rilievi</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A.5.1</td>
+<td>Policies for information security</td>
+<td><a href="03-Security-Best-Practices.html">03</a> come base di una policy d'uso degli assistenti AI</td>
+<td>—</td>
+</tr>
+<tr>
+<td>A.5.3</td>
+<td>Segregation of duties</td>
+<td>L'agente non approva le proprie PR: review di PO e reviewer</td>
+<td>F-23</td>
+</tr>
+<tr>
+<td>A.5.9</td>
+<td>Inventory of information and other associated assets</td>
+<td>§2 (asset A1…A7)</td>
+<td>—</td>
+</tr>
+<tr>
+<td>A.5.12</td>
+<td>Classification of information</td>
+<td>§2; repository ammessi verso provider esterni</td>
+<td>F-14, F-27</td>
+</tr>
+<tr>
+<td>A.5.14</td>
+<td>Information transfer</td>
+<td>Flussi in §2</td>
+<td>F-14, F-17</td>
+</tr>
+<tr>
+<td>A.5.15</td>
+<td>Access control</td>
+<td>Approvazioni dell'agente, virtual keys</td>
+<td>F-12, F-23</td>
+</tr>
+<tr>
+<td>A.5.16</td>
+<td>Identity management</td>
+<td>Utenti LiteLLM, agente come identità non umana</td>
+<td>F-08, F-12</td>
+</tr>
+<tr>
+<td>A.5.17</td>
+<td>Authentication information</td>
+<td><code>${input:...}</code>, <code>.env</code> <code>0600</code>, secret store</td>
+<td>F-01, F-02, F-03, F-15, F-28</td>
+</tr>
+<tr>
+<td>A.5.18</td>
+<td>Access rights</td>
+<td>RBAC, <code>proxy_admin</code> minimi, rotazione e revoca delle chiavi</td>
+<td>F-08</td>
+</tr>
+<tr>
+<td>A.5.19</td>
+<td>Information security in supplier relationships</td>
+<td>Provider LLM e vendor degli strumenti</td>
+<td>F-14</td>
+</tr>
+<tr>
+<td>A.5.20</td>
+<td>Addressing information security within supplier agreements</td>
+<td>DPA, zero data retention, nessun training sui dati</td>
+<td>F-14</td>
+</tr>
+<tr>
+<td>A.5.21</td>
+<td>Managing information security in the ICT supply chain</td>
+<td>Digest, cosign, D-018</td>
+<td>F-04, F-06, F-21, F-25</td>
+</tr>
+<tr>
+<td>A.5.22</td>
+<td>Monitoring, review and change management of supplier services</td>
+<td>Deprecazioni dei modelli (es. Codex, <code>gemini-2.5-pro</code>), cambi di termini</td>
+<td>F-11</td>
+</tr>
+<tr>
+<td>A.5.23</td>
+<td>Information security for use of cloud services</td>
+<td>Provider SaaS, OpenRouter, HF Router</td>
+<td>F-14</td>
+</tr>
+<tr>
+<td>A.5.24</td>
+<td>Information security incident management planning and preparation</td>
+<td>Rotazione dopo versioni compromesse (<a href="01-Installazione.html#50-sicurezza-della-supply-chain">01 §5.0</a>)</td>
+<td>F-25</td>
+</tr>
+<tr>
+<td>A.5.28</td>
+<td>Collection of evidence</td>
+<td>Output di <code>pin-images.sh</code> (data, digest), storia Git</td>
+<td>F-04</td>
+</tr>
+<tr>
+<td>A.5.30</td>
+<td>ICT readiness for business continuity</td>
+<td>Fallback al BYOK nativo</td>
+<td>F-25</td>
+</tr>
+<tr>
+<td>A.5.31</td>
+<td>Legal, statutory, regulatory and contractual requirements</td>
+<td>GDPR (art. 28), trasferimenti extra-UE, EU AI Act ⚠️</td>
+<td>F-14</td>
+</tr>
+<tr>
+<td>A.5.32</td>
+<td>Intellectual property rights</td>
+<td>Codice inviato ai provider</td>
+<td>F-14</td>
+</tr>
+<tr>
+<td>A.5.33</td>
+<td>Protection of records</td>
+<td>Log e spend log</td>
+<td>F-20</td>
+</tr>
+<tr>
+<td>A.5.34</td>
+<td>Privacy and protection of PII</td>
+<td>Scelta del provider, ZDR</td>
+<td>F-14</td>
+</tr>
+<tr>
+<td>A.5.37</td>
+<td>Documented operating procedures</td>
+<td><a href="01-Installazione.html">01</a>, <a href="02-Configurazione-Copilot.html">02</a></td>
+<td>—</td>
+</tr>
+<tr>
+<td>A.6.3</td>
+<td>Information security awareness, education and training</td>
+<td>Il talk, <a href="03-Security-Best-Practices.html">03</a></td>
+<td>—</td>
+</tr>
+<tr>
+<td>A.8.1</td>
+<td>User end point devices</td>
+<td>Workspace Trust, sandbox</td>
+<td>F-24, F-26</td>
+</tr>
+<tr>
+<td>A.8.2</td>
+<td>Privileged access rights</td>
+<td>Non-root, permessi dell'agente</td>
+<td>F-05, F-12, F-18, F-23</td>
+</tr>
+<tr>
+<td>A.8.3</td>
+<td>Information access restriction</td>
+<td>Permessi di <code>.env</code></td>
+<td>F-02, F-19</td>
+</tr>
+<tr>
+<td>A.8.4</td>
+<td>Access to source code</td>
+<td><code>.gitignore</code>, content exclusion</td>
+<td>F-03</td>
+</tr>
+<tr>
+<td>A.8.6</td>
+<td>Capacity management</td>
+<td>Limiti di richiesta, budget</td>
+<td>F-10, F-11</td>
+</tr>
+<tr>
+<td>A.8.7</td>
+<td>Protection against malware</td>
+<td>Restricted Mode, estensioni fidate, firma immagini</td>
+<td>F-24</td>
+</tr>
+<tr>
+<td>A.8.8</td>
+<td>Management of technical vulnerabilities</td>
+<td>Advisory LiteLLM, aggiornamento LTS</td>
+<td>F-25</td>
+</tr>
+<tr>
+<td>A.8.9</td>
+<td>Configuration management</td>
+<td>Baseline, <code>config.yaml</code>, Compose versionati</td>
+<td>F-04, F-05, F-09, F-10, F-13, F-18, F-19, F-26</td>
+</tr>
+<tr>
+<td>A.8.10</td>
+<td>Information deletion</td>
+<td>Conservazione dei log con codice</td>
+<td>F-20</td>
+</tr>
+<tr>
+<td>A.8.11</td>
+<td>Data masking</td>
+<td>Guardrail PII opzionali</td>
+<td>F-20</td>
+</tr>
+<tr>
+<td>A.8.12</td>
+<td>Data leakage prevention</td>
+<td><code>.gitignore</code>, content exclusion, <code>edits.autoApprove</code></td>
+<td>F-02, F-03, F-27</td>
+</tr>
+<tr>
+<td>A.8.14</td>
+<td>Redundancy of information processing facilities</td>
+<td>Fallback, più provider</td>
+<td>F-25</td>
+</tr>
+<tr>
+<td>A.8.15</td>
+<td>Logging</td>
+<td>Audit log LiteLLM, log del servizio</td>
+<td>F-20</td>
+</tr>
+<tr>
+<td>A.8.16</td>
+<td>Monitoring activities</td>
+<td>Health check, spend log, anomalie di costo</td>
+<td>F-11</td>
+</tr>
+<tr>
+<td>A.8.17</td>
+<td>Clock synchronization</td>
+<td>Timestamp coerenti nei log ⚠️ (non configurato negli esempi)</td>
+<td>—</td>
+</tr>
+<tr>
+<td>A.8.18</td>
+<td>Use of privileged utility programs</td>
+<td>Shell e terminale dell'agente</td>
+<td>F-23, F-26</td>
+</tr>
+<tr>
+<td>A.8.19</td>
+<td>Installation of software on operational systems</td>
+<td>Package manager, versioni fissate</td>
+<td>F-04, F-06, F-21, F-22, F-24</td>
+</tr>
+<tr>
+<td>A.8.20</td>
+<td>Networks security</td>
+<td>Bind loopback</td>
+<td>F-07, F-16</td>
+</tr>
+<tr>
+<td>A.8.22</td>
+<td>Segregation of networks</td>
+<td>Rete Compose interna</td>
+<td>F-07</td>
+</tr>
+<tr>
+<td>A.8.24</td>
+<td>Use of cryptography</td>
+<td>TLS in rete, <code>LITELLM_SALT_KEY</code>, secret store</td>
+<td>F-01, F-02, F-16</td>
+</tr>
+<tr>
+<td>A.8.25</td>
+<td>Secure development life cycle</td>
+<td>GitHub Flow, PR, review codex/agy</td>
+<td>F-22</td>
+</tr>
+<tr>
+<td>A.8.26</td>
+<td>Application security requirements</td>
+<td>Contenuto non fidato, approvazione umana</td>
+<td>F-24</td>
+</tr>
+<tr>
+<td>A.8.28</td>
+<td>Secure coding</td>
+<td>Review del codice generato</td>
+<td>F-22</td>
+</tr>
+<tr>
+<td>A.8.31</td>
+<td>Separation of development, test and production environments</td>
+<td>Chiavi distinte per demo, sviluppo, produzione</td>
+<td>—</td>
+</tr>
+<tr>
+<td>A.8.32</td>
+<td>Change management</td>
+<td><code>Decisions.md</code>, PR con rebase merge</td>
+<td>F-04, F-22</td>
+</tr>
+</tbody>
+</table>
+<p>Fonti: <a href="Sources.html#s-140">S-140</a>, <a href="Sources.html#s-141">S-141</a>. I titoli dei controlli sono verificati su fonti secondarie (P-10); il testo della norma non è libero.</p>
+<hr />
+<h2 id="7-isoiec-270012022-clausole-410">7. ISO/IEC 27001:2022 clausole 4–10</h2>
+<p>Il repository non è un SGSI: fornisce input ed evidenze per l'organizzazione che adotta gli esempi.</p>
+<table>
+<thead>
+<tr>
+<th>Clausola</th>
+<th>Tema</th>
+<th>Contributo del repository</th>
+<th>Azione dell'organizzazione</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>4.1, 4.2</td>
+<td>Contesto e parti interessate; Amd 1:2024 aggiunge la valutazione della rilevanza del cambiamento climatico</td>
+<td>§2: asset e fornitori</td>
+<td>Documenta la valutazione, anche "non rilevante" con motivazione; spunti: disponibilità delle region del provider (A.5.30), requisiti ESG dei clienti (<a href="Sources.html#s-141">S-141</a>, P-10)</td>
+</tr>
+<tr>
+<td>4.3</td>
+<td>Campo di applicazione</td>
+<td>§1</td>
+<td>Decidi se assistenti AI e gateway sono nel perimetro</td>
+</tr>
+<tr>
+<td>5.1, 5.2</td>
+<td>Leadership, politica</td>
+<td><a href="03-Security-Best-Practices.html">03</a></td>
+<td>Approva una politica d'uso degli assistenti AI</td>
+</tr>
+<tr>
+<td>5.3</td>
+<td>Ruoli e responsabilità</td>
+<td><code>proxy_admin</code>, PO, reviewer</td>
+<td>Assegna un owner a gateway, chiavi e configurazione dell'agente</td>
+</tr>
+<tr>
+<td>6.1.2</td>
+<td>Valutazione del rischio</td>
+<td>§8</td>
+<td>Applica la tua metodologia; un owner per rischio</td>
+</tr>
+<tr>
+<td>6.1.3</td>
+<td>Trattamento, Statement of Applicability</td>
+<td>§6, §9</td>
+<td>Nel SoA: controlli necessari, giustificazione, stato di attuazione, giustificazione delle esclusioni. Le mitigazioni OWASP (sandbox, approvazione umana, least agency) entrano come controlli aggiuntivi collegati all'Annex A (P-10)</td>
+</tr>
+<tr>
+<td>6.2</td>
+<td>Obiettivi</td>
+<td>—</td>
+<td>Obiettivi misurabili (es. 100% delle chiavi in secret store)</td>
+</tr>
+<tr>
+<td>6.3</td>
+<td>Pianificazione delle modifiche</td>
+<td><code>Decisions.md</code></td>
+<td>Collega gli ADR al processo di change</td>
+</tr>
+<tr>
+<td>7.2, 7.3</td>
+<td>Competenza, consapevolezza</td>
+<td>Il talk, i documenti</td>
+<td>Formazione per gli sviluppatori</td>
+</tr>
+<tr>
+<td>7.5</td>
+<td>Informazioni documentate</td>
+<td><code>docs/</code>, Git, PR</td>
+<td>Conservazione e controllo delle versioni</td>
+</tr>
+<tr>
+<td>8.1</td>
+<td>Controllo operativo</td>
+<td>Procedure con checklist, baseline</td>
+<td>Rendi obbligatoria la baseline</td>
+</tr>
+<tr>
+<td>8.2, 8.3</td>
+<td>Valutazione e trattamento eseguiti</td>
+<td>§8, §9</td>
+<td>Ripeti a ogni nuova release del gateway</td>
+</tr>
+<tr>
+<td>9.1</td>
+<td>Monitoraggio</td>
+<td>Health check, audit log, spend log</td>
+<td>Metriche e revisioni periodiche</td>
+</tr>
+<tr>
+<td>9.2</td>
+<td>Audit interno</td>
+<td>Review PR (codex, agy, PO)</td>
+<td>Includi gateway e BYOK nel programma di audit</td>
+</tr>
+<tr>
+<td>9.3</td>
+<td>Riesame della direzione</td>
+<td><a href="Review-Perplexity.html">Review-Perplexity.md</a></td>
+<td>Porta i rischi residui (§10) al riesame</td>
+</tr>
+<tr>
+<td>10.1</td>
+<td>Miglioramento continuo</td>
+<td>ADR sostituiti: D-004 → D-013, D-006 → D-014, D-023 → D-024</td>
+<td>—</td>
+</tr>
+<tr>
+<td>10.2</td>
+<td>Non conformità e azioni correttive</td>
+<td>§9 (AZ-01…AZ-10 chiuse)</td>
+<td>Registra e chiudi le azioni con evidenza</td>
+</tr>
+</tbody>
+</table>
+<p><strong>ISO/IEC 42001:2023.</strong> Vale anche per chi <em>usa</em> sistemi AI. Non è richiesta dalla 27001; si integra con la stessa struttura e aggiunge l'AI system impact assessment. Citala come riferimento se l'AI non è il core business (<a href="Sources.html#s-149">S-149</a>, P-10).</p>
+<hr />
+<h2 id="8-registro-dei-rischi">8. Registro dei rischi</h2>
+<p>Scala: Probabilità (P) e Impatto (I) da 1 a 3; Rischio = P × I. I valori sono dopo le azioni AZ-01…AZ-10.</p>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Rischio</th>
+<th>Asset</th>
+<th>OWASP</th>
+<th>Annex A</th>
+<th>P</th>
+<th>I</th>
+<th>Rischio</th>
+<th>Trattamento</th>
+<th>Rilievi</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>RK-01</td>
+<td>Furto delle chiavi dal gateway</td>
+<td>A1, A2</td>
+<td>ASI03, LLM02</td>
+<td>A.5.17, A.8.24, A.8.2, A.8.16</td>
+<td>1</td>
+<td>3</td>
+<td>3</td>
+<td>Ridurre: digest, cosign, non-root, virtual keys, rotazione</td>
+<td>F-04, F-25</td>
+</tr>
+<tr>
+<td>RK-02</td>
+<td>Prompt injection che fa eseguire comandi o esfiltrare dati</td>
+<td>A3, A4, A6</td>
+<td>ASI01, LLM01</td>
+<td>A.8.26, A.8.28, A.8.7</td>
+<td>2</td>
+<td>3</td>
+<td>6</td>
+<td>Ridurre: Workspace Trust, approvazioni, sandbox</td>
+<td>F-23, F-24, F-26</td>
+</tr>
+<tr>
+<td>RK-03</td>
+<td>Lettura di <code>.env</code> da parte dell'agente o di altri utenti</td>
+<td>A1, A2</td>
+<td>ASI02, ASI03, LLM02</td>
+<td>A.8.3, A.8.12, A.5.17</td>
+<td>1</td>
+<td>3</td>
+<td>3</td>
+<td>Ridurre: <code>0600</code>, <code>edits.autoApprove</code>, segreti fuori dal workspace</td>
+<td>F-02, F-19</td>
+</tr>
+<tr>
+<td>RK-04</td>
+<td>Costi non controllati</td>
+<td>A1</td>
+<td>LLM06, ASI08</td>
+<td>A.8.6, A.8.16, A.5.22</td>
+<td>2</td>
+<td>2</td>
+<td>4</td>
+<td>Ridurre: budget, rate limit, limiti nelle console</td>
+<td>F-10, F-11</td>
+</tr>
+<tr>
+<td>RK-05</td>
+<td>Codice trattato da provider terzi non scelti</td>
+<td>A3, A7</td>
+<td>LLM02, ASI04</td>
+<td>A.5.19–A.5.23, A.5.32, A.5.34, A.5.12</td>
+<td>1</td>
+<td>2</td>
+<td>2</td>
+<td>Ridurre: provider fissati, DPA, ZDR, classificazione dei repo</td>
+<td>F-14</td>
+</tr>
+<tr>
+<td>RK-06</td>
+<td>Script non verificati (installer, MCP, Spec Kit)</td>
+<td>A4, A6</td>
+<td>ASI04, ASI05</td>
+<td>A.5.21, A.8.19, A.8.7, A.8.32</td>
+<td>1</td>
+<td>3</td>
+<td>3</td>
+<td>Ridurre: pin, review dei file generati, sandbox</td>
+<td>F-22</td>
+</tr>
+<tr>
+<td>RK-07</td>
+<td>Indisponibilità del gateway</td>
+<td>A3</td>
+<td>ASI08</td>
+<td>A.8.14, A.5.30, A.8.6</td>
+<td>2</td>
+<td>1</td>
+<td>2</td>
+<td>Accettare: fallback al BYOK nativo</td>
+<td>F-25</td>
+</tr>
+<tr>
+<td>RK-08</td>
+<td>Avvelenamento di istruzioni, skill e regole del repo</td>
+<td>A6</td>
+<td>ASI06</td>
+<td>A.8.32, A.8.25</td>
+<td>1</td>
+<td>2</td>
+<td>2</td>
+<td>Ridurre: review in PR dei file <code>.github/</code></td>
+<td>F-24</td>
+</tr>
+<tr>
+<td>RK-09</td>
+<td><em>Approval fatigue</em>: l'utente approva senza leggere</td>
+<td>A4</td>
+<td>ASI09</td>
+<td>A.6.3, A.8.18</td>
+<td>2</td>
+<td>2</td>
+<td>4</td>
+<td>Ridurre: regole precise, sessioni brevi, formazione</td>
+<td>F-23</td>
+</tr>
+<tr>
+<td>RK-10</td>
+<td>Pacchetti o API inventati dal modello</td>
+<td>A3</td>
+<td>LLM07</td>
+<td>A.8.28, A.8.19</td>
+<td>2</td>
+<td>2</td>
+<td>4</td>
+<td>Ridurre: review, lockfile, verifica delle dipendenze</td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="9-azioni">9. Azioni</h2>
+<p>Approvate dal PO e applicate il 2026-11-07 (<a href="Decisions.html#d-025">D-025</a>).</p>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Azione</th>
+<th>File modificati</th>
+<th>Stato</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AZ-01</td>
+<td>Permessi di <code>.env</code> (<code>chmod 600</code>, <code>Protect-EnvFile.ps1</code>); verifica negli script (Windows: confronto per SID, uscita con errore)</td>
+<td><code>.env.example</code>, <code>service/load-env.sh</code>, <code>Start-LiteLLM.ps1</code>, <code>Protect-EnvFile.ps1</code>, <a href="01-Installazione.html#4-chiavi-api-e-file-env">01 §4</a></td>
+<td>✅ Applicata</td>
+</tr>
+<tr>
+<td>AZ-02</td>
+<td>Digest e firma cosign per LiteLLM e PostgreSQL</td>
+<td><code>scripts/pin-images.sh</code>, <code>compose.*.yaml</code>, <code>.env.example</code></td>
+<td>✅ Applicata</td>
+</tr>
+<tr>
+<td>AZ-03</td>
+<td>Immagine <code>litellm-non_root</code>, <code>no-new-privileges</code>, <code>cap_drop: ALL</code></td>
+<td><code>compose.*.yaml</code>, <a href="01-Installazione.html#51-profilo-minimo-senza-database">01 §5.1</a></td>
+<td>✅ Applicata ⚠️ tag da verificare</td>
+</tr>
+<tr>
+<td>AZ-04</td>
+<td>Primo <code>proxy_admin</code> prima del blocco del login da ambiente</td>
+<td><code>scripts/bootstrap-admin.sh</code>, <code>config.yaml</code>, <a href="01-Installazione.html#52-profilo-esteso-postgresql--admin-ui--virtual-keys">01 §5.2</a></td>
+<td>✅ Applicata</td>
+</tr>
+<tr>
+<td>AZ-05</td>
+<td><code>NO_DOCS</code>/<code>NO_REDOC</code>/<code>NO_OPENAPI</code>, <code>max_request_size_mb</code>, <code>allowed_file_extensions</code></td>
+<td><code>.env.example</code>, <code>config.yaml</code></td>
+<td>✅ Applicata</td>
+</tr>
+<tr>
+<td>AZ-06</td>
+<td>Provider fissati: HF <code>groq</code>; OpenRouter <code>data_collection: deny</code>, <code>allow_fallbacks: false</code></td>
+<td><code>config.yaml</code>, <code>chatLanguageModels.native.json</code></td>
+<td>✅ Applicata ⚠️ campi OpenRouter da verificare</td>
+</tr>
+<tr>
+<td>AZ-07</td>
+<td>Hardening della unit systemd</td>
+<td><code>service/litellm.service</code></td>
+<td>✅ Applicata</td>
+</tr>
+<tr>
+<td>AZ-08</td>
+<td><code>.env</code> letto come dati, mai eseguito</td>
+<td><code>service/load-env.sh</code>, <code>start-litellm.sh</code></td>
+<td>✅ Applicata, testata</td>
+</tr>
+<tr>
+<td>AZ-09</td>
+<td>Log in <code>~/Library/Logs</code>, <code>Umask</code>, <code>turn_off_message_logging</code></td>
+<td><code>com.wpc2026.litellm.plist</code>, <code>start-litellm.sh</code>, <code>config.yaml</code></td>
+<td>✅ Applicata ⚠️ opzione LiteLLM da verificare</td>
+</tr>
+<tr>
+<td>AZ-10</td>
+<td>Spec Kit fissato e controllo dei file generati</td>
+<td><a href="02-Configurazione-Copilot.html#a3-integrazione-con-github-copilot">02 §A.3</a></td>
+<td>✅ Applicata</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="10-rischi-residui">10. Rischi residui</h2>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Rischio residuo</th>
+<th>Motivo dell'accettazione</th>
+<th>Rilievi</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>R-01</td>
+<td><code>uv tool install</code> senza verifica di hash</td>
+<td>Versione fissata; nessuna procedura ufficiale di hash per <code>uv tool</code> ⚠️</td>
+<td>F-21</td>
+</tr>
+<tr>
+<td>R-02</td>
+<td>Concentrazione delle credenziali nel gateway</td>
+<td>Intrinseco al modello gateway; mitigato da D-018</td>
+<td>F-25</td>
+</tr>
+<tr>
+<td>R-03</td>
+<td>Nessun budget nel profilo minimo</td>
+<td>Uso personale e demo; limiti nelle console dei provider</td>
+<td>F-11</td>
+</tr>
+<tr>
+<td>R-04</td>
+<td>HTTP in chiaro su loopback</td>
+<td>Il traffico non lascia la postazione</td>
+<td>F-16</td>
+</tr>
+<tr>
+<td>R-05</td>
+<td><code>drop_params</code> modifica le richieste in silenzio</td>
+<td>Necessario per la compatibilità multi-provider</td>
+<td>F-13</td>
+</tr>
+<tr>
+<td>R-06</td>
+<td>Content exclusion non garantita con BYOK senza login</td>
+<td>Comportamento non documentato; compensato da <code>edits.autoApprove</code> e permessi del sistema operativo</td>
+<td>F-27</td>
+</tr>
+<tr>
+<td>R-07</td>
+<td>Chiavi in un file su disco (anche con <code>0600</code>)</td>
+<td>Accettabile per la demo; in team usa un secret store (A.8.24)</td>
+<td>F-02</td>
+</tr>
+</tbody>
+</table></article>
+<script type="application/json" id="fonts-data">[
+  {
+    "id": "blexmono",
+    "label": "BlexMono Nerd Font (IBM Plex Mono)",
+    "mono": true,
+    "body": false
+  },
+  {
+    "id": "firacode",
+    "label": "FiraCode Nerd Font",
+    "mono": true,
+    "body": false
+  },
+  {
+    "id": "monoid",
+    "label": "Monoid Nerd Font",
+    "mono": true,
+    "body": false
+  },
+  {
+    "id": "opendyslexic",
+    "label": "OpenDyslexic Nerd Font",
+    "mono": true,
+    "body": true
+  },
+  {
+    "id": "saucecodepro",
+    "label": "SauceCodePro Nerd Font (Source Code Pro)",
+    "mono": true,
+    "body": false
+  }
+]</script>
+<script src="../assets/vendor/highlight/highlight.min.js"></script>
+<script src="../assets/vendor/highlight/languages/bash.min.js"></script>
+<script src="../assets/vendor/highlight/languages/powershell.min.js"></script>
+<script src="../assets/vendor/highlight/languages/yaml.min.js"></script>
+<script src="../assets/vendor/highlight/languages/json.min.js"></script>
+<script src="../assets/vendor/highlight/languages/ini.min.js"></script>
+<script src="../assets/vendor/highlight/languages/dockerfile.min.js"></script>
+<script src="../assets/vendor/highlight/languages/plaintext.min.js"></script>
+<script src="../assets/common.js"></script>
+<script src="../assets/doc.js"></script>
+</body>
+</html>

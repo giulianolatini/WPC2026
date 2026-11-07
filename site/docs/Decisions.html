@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="it" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="generator" content="tools/build_site.py — non modificare a mano">
+<title>Decisions — WPC2026</title>
+<link rel="stylesheet" href="../assets/fonts.css">
+<link rel="stylesheet" href="../assets/vendor/highlight/github.min.css" id="hl-light">
+<link rel="stylesheet" href="../assets/vendor/highlight/github-dark.min.css" id="hl-dark" disabled>
+<link rel="stylesheet" href="../assets/styles.css">
+
+<script>try{var p=JSON.parse(localStorage.getItem('wpc2026.prefs')||'{}');var t=p.theme||'auto';if(t==='auto')t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body>
+<div class="topbar">
+  <h1><a href="../index.html" style="color:inherit;text-decoration:none">WPC2026</a> <span class="ver">Decisions</span></h1>
+  <label>Tema <select id="pref-theme"><option value="auto">automatico</option><option value="light">chiaro</option><option value="dark">scuro</option></select></label>
+  <label>Testo <select id="pref-body"></select></label>
+  <label>Codice <select id="pref-code"></select></label>
+</div>
+<nav class="docnav"><a href="../index.html">← Runbook</a><ul><li><a href="01-Installazione.html">01-Installazione</a></li><li><a href="02-Configurazione-Copilot.html">02-Configurazione-Copilot</a></li><li><a href="03-Security-Best-Practices.html">03-Security-Best-Practices</a></li><li><a href="04-Security-Review-OWASP-ISO27001.html">04-Security-Review-OWASP-ISO27001</a></li><li><a href="Decisions.html">Decisions</a></li><li><a href="Sources.html">Sources</a></li><li><a href="Review-Perplexity.html">Review-Perplexity</a></li></ul></nav><article class="doc"><h1 id="decisions--registro-delle-decisioni">Decisions — Registro delle decisioni</h1>
+<p>Questo file è il registro cronologico delle decisioni del progetto WPC2026.
+Il formato segue il template ADR di Nygard, con una sezione <strong>Razionale</strong> esplicita (<a href="Sources.html#s-090">S-090</a>, <a href="Sources.html#s-091">S-091</a>).</p>
+<p><strong>Regole del registro</strong></p>
+<ul>
+<li>Il registro è <em>append-only</em>. Non modifica una decisione <code>Accepted</code>: scrivi una nuova decisione che la sostituisce (<code>Superseded by D-NNN</code>).</li>
+<li>Ogni decisione ha uno stato: <code>Proposed</code> → <code>Accepted</code> | <code>Rejected</code> → <code>Superseded</code>.</li>
+<li><code>Proposed</code> indica una scelta dell'assistente che il PO deve confermare.</li>
+<li>Ogni decisione punta alle fonti in <a href="Sources.html">Sources.md</a>.</li>
+</ul>
+<h2 id="indice">Indice</h2>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Data</th>
+<th>Titolo</th>
+<th>Stato</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="#d-001">D-001</a></td>
+<td>2026-11-07</td>
+<td>Struttura del repository e cartella <code>docs/</code></td>
+<td>Accepted</td>
+</tr>
+<tr>
+<td><a href="#d-002">D-002</a></td>
+<td>2026-11-07</td>
+<td>Registro decisioni e fonti in due file con ancore</td>
+<td>Accepted</td>
+</tr>
+<tr>
+<td><a href="#d-003">D-003</a></td>
+<td>2026-11-07</td>
+<td>Provider: solo API dirette dei vendor</td>
+<td>Accepted</td>
+</tr>
+<tr>
+<td><a href="#d-004">D-004</a></td>
+<td>2026-11-07</td>
+<td>Piani Copilot: individuali e di organizzazione</td>
+<td>Superseded by D-013</td>
+</tr>
+<tr>
+<td><a href="#d-005">D-005</a></td>
+<td>2026-11-07</td>
+<td>LiteLLM: profilo minimo e profilo esteso</td>
+<td>Accepted</td>
+</tr>
+<tr>
+<td><a href="#d-006">D-006</a></td>
+<td>2026-11-07</td>
+<td>openSUSE: <code>zypper</code> al posto di YaST</td>
+<td>Superseded by D-014</td>
+</tr>
+<tr>
+<td><a href="#d-007">D-007</a></td>
+<td>2026-11-07</td>
+<td>Provider <em>Custom Endpoint</em> al posto di <code>customOAIModels</code></td>
+<td>Accepted</td>
+</tr>
+<tr>
+<td><a href="#d-008">D-008</a></td>
+<td>2026-11-07</td>
+<td>Hugging Face nativo: estensione ufficiale HF</td>
+<td>Accepted</td>
+</tr>
+<tr>
+<td><a href="#d-009">D-009</a></td>
+<td>2026-11-07</td>
+<td>Installazione di <code>uv</code> su Linux con installer ufficiale</td>
+<td>Accepted</td>
+</tr>
+<tr>
+<td><a href="#d-010">D-010</a></td>
+<td>2026-11-07</td>
+<td>File di esempio in <code>examples/</code></td>
+<td>Accepted</td>
+</tr>
+<tr>
+<td><a href="#d-011">D-011</a></td>
+<td>2026-11-07</td>
+<td>GitHub Flow con rebase merge su <code>main</code> protetto</td>
+<td>Accepted</td>
+</tr>
+<tr>
+<td><a href="#d-012">D-012</a></td>
+<td>2026-11-07</td>
+<td>Lingua italiana con regole ASD-STE100 adattate</td>
+<td>Accepted</td>
+</tr>
+<tr>
+<td><a href="#d-013">D-013</a></td>
+<td>2026-11-07</td>
+<td>Policy BYOK: attiva di default, fatturazione in AI Credits</td>
+<td>Accepted</td>
+</tr>
+<tr>
+<td><a href="#d-014">D-014</a></td>
+<td>2026-11-07</td>
+<td>openSUSE: <code>zypper</code>; YaST rimosso da Leap 16</td>
+<td>Accepted</td>
+</tr>
+<tr>
+<td><a href="#d-015">D-015</a></td>
+<td>2026-11-07</td>
+<td>"Codex" = <code>gpt-6.1-sol</code> via Responses API</td>
+<td>Accepted</td>
+</tr>
+<tr>
+<td><a href="#d-016">D-016</a></td>
+<td>2026-11-07</td>
+<td>Gemini: <code>gemini-4-argon</code> stabile + <code>gemini-3.1-pro-preview</code></td>
+<td>Accepted</td>
+</tr>
+<tr>
+<td><a href="#d-017">D-017</a></td>
+<td>2026-11-07</td>
+<td>Tesi del talk: confronto con criteri</td>
+<td>Accepted</td>
+</tr>
+<tr>
+<td><a href="#d-018">D-018</a></td>
+<td>2026-11-07</td>
+<td>LiteLLM: versione fissata <code>v1.108.2</code> e hardening</td>
+<td>Accepted</td>
+</tr>
+<tr>
+<td><a href="#d-019">D-019</a></td>
+<td>2026-11-07</td>
+<td>Claude via LiteLLM con <code>apiType: messages</code>, senza discovery</td>
+<td>Accepted</td>
+</tr>
+<tr>
+<td><a href="#d-020">D-020</a></td>
+<td>2026-11-07</td>
+<td>Tabella breve delle alternative a LiteLLM</td>
+<td>Accepted</td>
+</tr>
+<tr>
+<td><a href="#d-021">D-021</a></td>
+<td>2026-11-07</td>
+<td><code>anthropic-version: 2026-10-21</code> negli esempi</td>
+<td>Accepted</td>
+</tr>
+<tr>
+<td><a href="#d-022">D-022</a></td>
+<td>2026-11-07</td>
+<td>Documento di best practice di sicurezza</td>
+<td>Accepted</td>
+</tr>
+<tr>
+<td><a href="#d-023">D-023</a></td>
+<td>2026-11-07</td>
+<td>Security review con OWASP e ISO/IEC 27001</td>
+<td>Superseded by D-024</td>
+</tr>
+<tr>
+<td><a href="#d-024">D-024</a></td>
+<td>2026-11-07</td>
+<td>OWASP LLM Top 10 edizione 2026</td>
+<td>Accepted</td>
+</tr>
+<tr>
+<td><a href="#d-025">D-025</a></td>
+<td>2026-11-07</td>
+<td>Applicazione delle azioni AZ-01…AZ-10</td>
+<td>Accepted</td>
+</tr>
+<tr>
+<td><a href="#d-026">D-026</a></td>
+<td>2026-11-07</td>
+<td>Runbook unico con filtri per OS, percorso e profilo</td>
+<td>Accepted</td>
+</tr>
+<tr>
+<td><a href="#d-027">D-027</a></td>
+<td>2026-11-07</td>
+<td>Nerd Fonts in WOFF2 nel repository</td>
+<td>Accepted</td>
+</tr>
+<tr>
+<td><a href="#d-028">D-028</a></td>
+<td>2026-11-07</td>
+<td>Architettura del sito offline e delle evidenze</td>
+<td>Proposed</td>
+</tr>
+<tr>
+<td><a href="#d-029">D-029</a></td>
+<td>2026-11-07</td>
+<td>Deck finale come artefatto Slides</td>
+<td>Accepted</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p><a id="d-001"></a></p>
+<h2 id="d-001--struttura-del-repository-e-cartella-docs">D-001 — Struttura del repository e cartella <code>docs/</code></h2>
+<ul>
+<li><strong>Data:</strong> 2026-11-07 — <strong>Stato:</strong> Accepted — <strong>Decisore:</strong> PO</li>
+</ul>
+<p><strong>Contesto.</strong> Il repository diventa pubblico all'evento WPC2026. Il pubblico deve trovare subito lo scopo e i materiali.</p>
+<p><strong>Opzioni considerate.</strong> (1) Tutti i file nella radice. (2) <code>README.md</code> nella radice e documentazione Markdown in <code>docs/</code>.</p>
+<p><strong>Decisione.</strong> Usiamo l'opzione 2. <code>README.md</code> riassume scopo, argomento e organizzazione. <code>docs/</code> contiene tutta la documentazione Markdown.</p>
+<p><strong>Razionale.</strong> GitHub mostra <code>README.md</code> come pagina d'ingresso. Una cartella dedicata separa documentazione, esempi e strumenti del sito offline.</p>
+<p><strong>Conseguenze.</strong> Ogni nuovo documento Markdown va in <code>docs/</code> e va elencato nel <code>README.md</code>.</p>
+<p><strong>Fonti.</strong> Richiesta del PO in chat (2026-11-07).</p>
+<hr />
+<p><a id="d-002"></a></p>
+<h2 id="d-002--registro-decisioni-e-fonti-in-due-file-con-ancore">D-002 — Registro decisioni e fonti in due file con ancore</h2>
+<ul>
+<li><strong>Data:</strong> 2026-11-07 — <strong>Stato:</strong> Accepted — <strong>Decisore:</strong> PO</li>
+</ul>
+<p><strong>Contesto.</strong> Le decisioni devono essere collegate alle fonti. Le stesse fonti servono per citazioni e rimandi in tutta la documentazione.</p>
+<p><strong>Opzioni considerate.</strong> (1) <code>Decisions.md</code> + <code>Sources.md</code> con ancore <code>S-NNN</code>. (2) Un file per ADR in <code>docs/adr/</code> più un indice. (3) Fonti come sezione di <code>Decisions.md</code>.</p>
+<p><strong>Decisione.</strong> Usiamo l'opzione 1. <code>Decisions.md</code> è la lista cronologica. <code>Sources.md</code> contiene titolo e URL di ogni fonte, con un'ancora stabile.</p>
+<p><strong>Razionale.</strong> Un solo file di decisioni è sufficiente per la dimensione del progetto. Un solo file di fonti dà un link unico per la stessa fonte in tutti i documenti: così un URL cambia in un solo punto.</p>
+<p><strong>Conseguenze.</strong> I documenti puntano a <code>Sources.md#s-NNN</code>, non all'URL diretto. Se il numero di decisioni cresce molto, una nuova decisione può introdurre <code>docs/adr/</code>.</p>
+<p><strong>Fonti.</strong> <a href="Sources.html#s-090">S-090</a>, <a href="Sources.html#s-091">S-091</a>.</p>
+<hr />
+<p><a id="d-003"></a></p>
+<h2 id="d-003--provider-solo-api-dirette-dei-vendor">D-003 — Provider: solo API dirette dei vendor</h2>
+<ul>
+<li><strong>Data:</strong> 2026-11-07 — <strong>Stato:</strong> Accepted — <strong>Decisore:</strong> PO</li>
+</ul>
+<p><strong>Contesto.</strong> "Claude.AI", "Codex" e "Gemini Pro" hanno più canali di accesso: API del vendor, cloud enterprise (Azure, Vertex AI, Bedrock), abbonamenti consumer.</p>
+<p><strong>Opzioni considerate.</strong> (1) API dirette dei vendor. (2) API dirette più cloud enterprise. (3) Abbonamenti consumer.</p>
+<p><strong>Decisione.</strong> Usiamo l'opzione 1:</p>
+<table>
+<thead>
+<tr>
+<th>Nome nel talk</th>
+<th>Endpoint usato</th>
+<th>Chiave</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Claude.AI</td>
+<td>Anthropic API (<code>api.anthropic.com</code>)</td>
+<td><code>ANTHROPIC_API_KEY</code></td>
+</tr>
+<tr>
+<td>Codex</td>
+<td>OpenAI API, modelli della famiglia Codex/GPT</td>
+<td><code>OPENAI_API_KEY</code></td>
+</tr>
+<tr>
+<td>Gemini Pro</td>
+<td>Gemini API di Google AI Studio</td>
+<td><code>GEMINI_API_KEY</code></td>
+</tr>
+<tr>
+<td>OpenRouter</td>
+<td><code>openrouter.ai/api/v1</code></td>
+<td><code>OPENROUTER_API_KEY</code></td>
+</tr>
+<tr>
+<td>Hugging Face</td>
+<td>Inference Providers (<code>router.huggingface.co/v1</code>)</td>
+<td><code>HF_TOKEN</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Razionale.</strong> Le API dirette hanno autenticazione semplice (una chiave) e sono supportate sia da VS Code BYOK sia da LiteLLM. In 30 minuti i canali enterprise aggiungono complessità senza valore per la tesi del talk. Gli abbonamenti consumer non sono un canale BYOK documentato.</p>
+<p><strong>Conseguenze.</strong> Il prefisso LiteLLM per Gemini è <code>gemini/</code> (AI Studio), non <code>vertex_ai/</code> (<a href="Sources.html#s-025">S-025</a>). Gli harness Claude e Codex di VS Code hanno credenziali proprie e restano fuori dallo scopo (<a href="Sources.html#s-001">S-001</a>).</p>
+<p><strong>Fonti.</strong> <a href="Sources.html#s-001">S-001</a>, <a href="Sources.html#s-024">S-024</a>, <a href="Sources.html#s-025">S-025</a>, <a href="Sources.html#s-040">S-040</a>, <a href="Sources.html#s-042">S-042</a>, <a href="Sources.html#s-044">S-044</a>, <a href="Sources.html#s-047">S-047</a>.</p>
+<hr />
+<p><a id="d-004"></a></p>
+<h2 id="d-004--piani-copilot-individuali-e-di-organizzazione">D-004 — Piani Copilot: individuali e di organizzazione</h2>
+<ul>
+<li><strong>Data:</strong> 2026-11-07 — <strong>Stato:</strong> Superseded by <a href="#d-013">D-013</a> — <strong>Decisore:</strong> PO</li>
+</ul>
+<p><strong>Contesto.</strong> Il BYOK ha regole diverse per i piani individuali (Free, Pro, Pro+) e per i piani Business/Enterprise.</p>
+<p><strong>Opzioni considerate.</strong> (1) Entrambi. (2) Solo individuali. (3) Solo Business/Enterprise.</p>
+<p><strong>Decisione.</strong> Usiamo l'opzione 1. La documentazione descrive il flusso individuale e aggiunge le policy di organizzazione.</p>
+<p><strong>Razionale.</strong> La platea WPC include sviluppatori e amministratori di tenant. Per Business/Enterprise un amministratore deve abilitare la policy <em>Bring Your Own Language Model Key in VS Code</em>; senza questa informazione la demo non è riproducibile in azienda.</p>
+<p><strong>Conseguenze.</strong> Il documento di configurazione contiene una sezione sulle policy: BYOK locale e <em>Enterprise BYOK</em> (public preview, policy <em>Enable custom models</em>).</p>
+<p><strong>Fonti.</strong> <a href="Sources.html#s-001">S-001</a>, <a href="Sources.html#s-015">S-015</a>, <a href="Sources.html#s-016">S-016</a>.</p>
+<hr />
+<p><a id="d-005"></a></p>
+<h2 id="d-005--litellm-profilo-minimo-e-profilo-esteso">D-005 — LiteLLM: profilo minimo e profilo esteso</h2>
+<ul>
+<li><strong>Data:</strong> 2026-11-07 — <strong>Stato:</strong> Accepted — <strong>Decisore:</strong> PO</li>
+</ul>
+<p><strong>Contesto.</strong> LiteLLM proxy funziona senza database (solo <code>config.yaml</code> e master key) oppure con PostgreSQL (Admin UI, virtual keys, budget, spend log).</p>
+<p><strong>Opzioni considerate.</strong> (1) Minimo per la demo + esteso come approfondimento. (2) Solo minimo. (3) Solo completo.</p>
+<p><strong>Decisione.</strong> Usiamo l'opzione 1, per Docker e per il servizio locale con <code>uv</code>.</p>
+<p><strong>Razionale.</strong> Il profilo minimo parte in pochi secondi e riduce il rischio in demo. Il profilo esteso mostra il valore aziendale del gateway: chiavi virtuali per utente e controllo dei costi. Senza database i budget non sono applicati (<a href="Sources.html#s-020">S-020</a>).</p>
+<p><strong>Conseguenze.</strong> Gli esempi in <code>examples/litellm/</code> contengono due file Compose. <code>LITELLM_SALT_KEY</code> va generata una sola volta e non va rigenerata (<a href="Sources.html#s-020">S-020</a>, <a href="Sources.html#s-023">S-023</a>).</p>
+<p><strong>Fonti.</strong> <a href="Sources.html#s-020">S-020</a>, <a href="Sources.html#s-021">S-021</a>, <a href="Sources.html#s-022">S-022</a>, <a href="Sources.html#s-023">S-023</a>.</p>
+<hr />
+<p><a id="d-006"></a></p>
+<h2 id="d-006--opensuse-zypper-al-posto-di-yast">D-006 — openSUSE: <code>zypper</code> al posto di YaST</h2>
+<ul>
+<li><strong>Data:</strong> 2026-11-07 — <strong>Stato:</strong> Superseded by <a href="#d-014">D-014</a> (confermata dal PO il 2026-11-07) — <strong>Decisore:</strong> proposta dell'assistente, approvata dal PO</li>
+</ul>
+<p><strong>Contesto.</strong> La richiesta cita <code>yast</code>. YaST è lo strumento di amministrazione (GUI/TUI) di openSUSE. Il package manager a riga di comando è <code>zypper</code>; YaST usa la stessa libreria.</p>
+<p><strong>Opzioni considerate.</strong> (1) Comandi <code>zypper</code>, con nota su YaST Software Management. (2) Procedura grafica YaST.</p>
+<p><strong>Decisione.</strong> Usiamo l'opzione 1.</p>
+<p><strong>Razionale.</strong> Un comando è copiabile, ripetibile e registrabile nelle evidenze. La documentazione VS Code e la wiki openSUSE usano <code>zypper</code> (<a href="Sources.html#s-009">S-009</a>, <a href="Sources.html#s-064">S-064</a>).</p>
+<p><strong>Conseguenze.</strong> Il documento d'installazione mostra <code>zypper</code> e cita YaST come alternativa grafica.</p>
+<p><strong>Fonti.</strong> <a href="Sources.html#s-009">S-009</a>, <a href="Sources.html#s-064">S-064</a>.</p>
+<hr />
+<p><a id="d-007"></a></p>
+<h2 id="d-007--provider-custom-endpoint-al-posto-di-customoaimodels">D-007 — Provider <em>Custom Endpoint</em> al posto di <code>customOAIModels</code></h2>
+<ul>
+<li><strong>Data:</strong> 2026-11-07 — <strong>Stato:</strong> Accepted (confermata dal PO il 2026-11-07) — <strong>Decisore:</strong> proposta dell'assistente, approvata dal PO</li>
+</ul>
+<p><strong>Contesto.</strong> Molte guide in rete usano l'impostazione <code>github.copilot.chat.customOAIModels</code> o il provider <em>OpenAI Compatible</em>. La documentazione VS Code attuale li dichiara deprecati e li sostituisce con il provider <em>Custom Endpoint</em> (<code>vendor: customendpoint</code>), che supporta le API <code>chat-completions</code>, <code>responses</code> e <code>messages</code>.</p>
+<p><strong>Opzioni considerate.</strong> (1) Custom Endpoint. (2) <code>customOAIModels</code> deprecato.</p>
+<p><strong>Decisione.</strong> Usiamo l'opzione 1 per OpenRouter, Hugging Face (alternativa all'estensione) e LiteLLM.</p>
+<p><strong>Razionale.</strong> Una configurazione deprecata può smettere di funzionare dopo il talk. Custom Endpoint permette di scegliere il formato API: con LiteLLM possiamo mostrare la stessa route in formato OpenAI e in formato Anthropic.</p>
+<p><strong>Conseguenze.</strong> Gli esempi usano <code>chatLanguageModels.json</code>. Le guide di terze parti con <code>customOAIModels</code> sono citate solo come contesto storico.</p>
+<p><strong>Fonti.</strong> <a href="Sources.html#s-001">S-001</a>.</p>
+<hr />
+<p><a id="d-008"></a></p>
+<h2 id="d-008--hugging-face-nativo-estensione-ufficiale-hf">D-008 — Hugging Face nativo: estensione ufficiale HF</h2>
+<ul>
+<li><strong>Data:</strong> 2026-11-07 — <strong>Stato:</strong> Accepted (confermata dal PO il 2026-11-07) — <strong>Decisore:</strong> proposta dell'assistente, approvata dal PO</li>
+</ul>
+<p><strong>Contesto.</strong> VS Code non ha un provider built-in Hugging Face. Hugging Face pubblica l'estensione <em>Hugging Face Provider for GitHub Copilot Chat</em>, che aggiunge un provider al Language Models editor. Il router HF è anche OpenAI-compatible.</p>
+<p><strong>Opzioni considerate.</strong> (1) Estensione ufficiale HF come configurazione "nativa". (2) Solo Custom Endpoint verso <code>router.huggingface.co/v1</code>. (3) Entrambe.</p>
+<p><strong>Decisione.</strong> Usiamo l'opzione 3: l'estensione come percorso principale, il Custom Endpoint come alternativa senza estensione.</p>
+<p><strong>Razionale.</strong> L'estensione usa l'API ufficiale <em>Language Model Chat Provider</em> di VS Code ed è il percorso documentato da HF. Il Custom Endpoint mostra che lo stesso risultato non dipende da un'estensione.</p>
+<p><strong>Conseguenze.</strong> Il token HF deve essere <em>fine-grained</em> con il permesso <em>Make calls to Inference Providers</em> (<a href="Sources.html#s-047">S-047</a>).</p>
+<p><strong>Fonti.</strong> <a href="Sources.html#s-001">S-001</a>, <a href="Sources.html#s-047">S-047</a>, <a href="Sources.html#s-048">S-048</a>, <a href="Sources.html#s-049">S-049</a>.</p>
+<hr />
+<p><a id="d-009"></a></p>
+<h2 id="d-009--installazione-di-uv-su-linux-con-installer-ufficiale">D-009 — Installazione di <code>uv</code> su Linux con installer ufficiale</h2>
+<ul>
+<li><strong>Data:</strong> 2026-11-07 — <strong>Stato:</strong> Accepted (confermata dal PO il 2026-11-07) — <strong>Decisore:</strong> proposta dell'assistente, approvata dal PO</li>
+</ul>
+<p><strong>Contesto.</strong> La richiesta chiede i package manager <code>apt</code> e <code>zypper</code>. La documentazione di <code>uv</code> non cita pacchetti di distribuzione Linux; cita <code>winget</code> e <code>brew</code>.</p>
+<p><strong>Opzioni considerate.</strong> (1) Installer ufficiale <code>astral.sh</code> su Linux. (2) Pacchetti di distribuzione, se presenti. (3) <code>pipx install uv</code>.</p>
+<p><strong>Decisione.</strong> Usiamo l'opzione 1 su Linux; <code>winget</code> su Windows; <code>brew</code> su macOS.</p>
+<p><strong>Razionale.</strong> LiteLLM ≥ 1.84.0 richiede Python ≥ 3.10; <code>uv tool install</code> installa un Python compatibile (<a href="Sources.html#s-021">S-021</a>). Un pacchetto di distribuzione può essere vecchio o assente.</p>
+<p><strong>Conseguenze.</strong> Su Linux il documento indica un'eccezione esplicita alla regola "solo package manager".</p>
+<p><strong>Fonti.</strong> <a href="Sources.html#s-021">S-021</a>, <a href="Sources.html#s-060">S-060</a>.</p>
+<hr />
+<p><a id="d-010"></a></p>
+<h2 id="d-010--file-di-esempio-in-examples">D-010 — File di esempio in <code>examples/</code></h2>
+<ul>
+<li><strong>Data:</strong> 2026-11-07 — <strong>Stato:</strong> Accepted (confermata dal PO il 2026-11-07) — <strong>Decisore:</strong> proposta dell'assistente, approvata dal PO</li>
+</ul>
+<p><strong>Contesto.</strong> I documenti contengono configurazioni lunghe (<code>config.yaml</code>, Compose, <code>chatLanguageModels.json</code>, unit di servizio). Il pubblico deve poterle scaricare e usare.</p>
+<p><strong>Opzioni considerate.</strong> (1) Solo blocchi di codice nei documenti. (2) File pronti in <code>examples/</code> e blocchi di codice brevi nei documenti.</p>
+<p><strong>Decisione.</strong> Usiamo l'opzione 2.</p>
+<p><strong>Razionale.</strong> Un file versionato è testabile e non contiene errori di copia. <code>docs/</code> resta riservata al Markdown (D-001).</p>
+<p><strong>Conseguenze.</strong> Le chiavi API non entrano mai nel repo: gli esempi usano <code>.env</code> (escluso da <code>.gitignore</code>) e <code>.env.example</code>.</p>
+<p><strong>Fonti.</strong> —</p>
+<hr />
+<p><a id="d-011"></a></p>
+<h2 id="d-011--github-flow-con-rebase-merge-su-main-protetto">D-011 — GitHub Flow con rebase merge su <code>main</code> protetto</h2>
+<ul>
+<li><strong>Data:</strong> 2026-11-07 — <strong>Stato:</strong> Accepted — <strong>Decisore:</strong> PO (istruzioni di progetto)</li>
+</ul>
+<p><strong>Contesto.</strong> Il PO chiede GitHub Flow, <code>main</code> protetto, ingresso dei commit solo con rebase merge di una PR, review con codex cli e agy cli prima della review del PO.</p>
+<p><strong>Decisione.</strong> Ogni attività apre un ramo da <code>main</code>. Il ramo rientra con una PR e <em>rebase merge</em>. Il PO esegue la review finale e il merge.</p>
+<p><strong>Razionale.</strong> Il rebase merge conserva i singoli commit su una storia lineare. Questa scelta richiede commit atomici e messaggi curati.</p>
+<p><strong>Conseguenze.</strong> Il primo ramo è <code>docs/initial-documentation</code>. La protezione di <code>main</code> va configurata su GitHub (vedi PR).</p>
+<p><strong>Fonti.</strong> <a href="Sources.html#s-017">S-017</a>.</p>
+<hr />
+<p><a id="d-012"></a></p>
+<h2 id="d-012--lingua-italiana-con-regole-asd-ste100-adattate">D-012 — Lingua italiana con regole ASD-STE100 adattate</h2>
+<ul>
+<li><strong>Data:</strong> 2026-11-07 — <strong>Stato:</strong> Accepted — <strong>Decisore:</strong> PO (istruzioni di progetto)</li>
+</ul>
+<p><strong>Contesto.</strong> La documentazione deve essere sintetica e senza ambiguità.</p>
+<p><strong>Decisione.</strong> I documenti sono in italiano. Le regole di scrittura ASD-STE100 sono adattate all'italiano: frasi brevi, una istruzione per frase, forma attiva, imperativo nelle procedure, un termine per un concetto. I nomi tecnici restano in inglese.</p>
+<p><strong>Razionale.</strong> La platea usa i comandi in inglese. Frasi brevi riducono gli errori nell'esecuzione delle procedure.</p>
+<p><strong>Conseguenze.</strong> I riferimenti allo standard citano solo l'indice delle regole, non il testo (<a href="Sources.html#s-092">S-092</a>).</p>
+<p><strong>Fonti.</strong> <a href="Sources.html#s-092">S-092</a>.</p>
+<hr />
+<p><a id="d-013"></a></p>
+<h2 id="d-013--policy-byok-attiva-di-default-fatturazione-in-ai-credits">D-013 — Policy BYOK: attiva di default, fatturazione in AI Credits</h2>
+<ul>
+<li><strong>Data:</strong> 2026-11-07 — <strong>Stato:</strong> Accepted — <strong>Decisore:</strong> PO (review P-02) — <strong>Sostituisce:</strong> <a href="#d-004">D-004</a></li>
+</ul>
+<p><strong>Contesto.</strong> D-004 afferma che un amministratore Business/Enterprise <em>deve abilitare</em> la policy BYOK. La review P-02 e il changelog GitHub dicono che la policy è <em>attiva di default</em>. La FAQ di VS Code dice ancora "must enable": le fonti ufficiali non sono coerenti. Dal 2026-06-01 Copilot usa i GitHub AI Credits al posto delle premium requests.</p>
+<p><strong>Decisione.</strong> Manteniamo lo scopo di D-004 (piani individuali e di organizzazione). Correggiamo i fatti:
+- La policy <em>Bring Your Own Language Model Key in VS Code</em> è attiva di default. L'amministratore può disattivarla.
+- Il BYOK locale non consuma crediti Copilot. Il provider fattura le chiamate.
+- L'Enterprise BYOK (public preview) usa la policy <em>Enable custom models</em> (nella tabella delle superfici: <em>Configure custom models</em>).
+- Piani individuali: Free, Pro, Pro+, Max, Student.</p>
+<p><strong>Razionale.</strong> Il changelog GitHub è la fonte primaria più specifica e più recente sulla policy. Il documento segnala l'incoerenza con ⚠️, così la platea non resta bloccata se un tenant ha la policy disattivata.</p>
+<p><strong>Conseguenze.</strong> <a href="02-Configurazione-Copilot.html#25-policy-per-copilot-business-ed-enterprise">02-Configurazione-Copilot.md §2.5</a> è aggiornato.</p>
+<p><strong>Fonti.</strong> <a href="Sources.html#s-015">S-015</a>, <a href="Sources.html#s-018">S-018</a>, <a href="Sources.html#s-019">S-019</a>, <a href="Sources.html#s-100">S-100</a>, <a href="Sources.html#s-101">S-101</a>.</p>
+<hr />
+<p><a id="d-014"></a></p>
+<h2 id="d-014--opensuse-zypper-yast-rimosso-da-leap-16">D-014 — openSUSE: <code>zypper</code>; YaST rimosso da Leap 16</h2>
+<ul>
+<li><strong>Data:</strong> 2026-11-07 — <strong>Stato:</strong> Accepted — <strong>Decisore:</strong> PO (decisione invariata), contesto corretto dalla review P-06 — <strong>Sostituisce:</strong> <a href="#d-006">D-006</a></li>
+</ul>
+<p><strong>Contesto.</strong> D-006 descrive YaST come lo strumento di amministrazione di openSUSE. La review P-06 indica che Leap 16 ha rimosso YaST (installer Agama, gestione con Cockpit, software con Myrlyn). Su Tumbleweed YaST resta, ma non riceve più sviluppo.</p>
+<p><strong>Decisione.</strong> Usiamo <code>zypper</code> su Leap 16 e su Tumbleweed. Il documento cita Myrlyn (Leap 16) e YaST Software (Tumbleweed) come alternative grafiche.</p>
+<p><strong>Razionale.</strong> Il razionale di D-006 è più forte: <code>zypper</code> è l'unico strumento comune alle due distribuzioni.</p>
+<p><strong>Conseguenze.</strong> I pacchetti Docker sono diversi: su Tumbleweed <code>docker docker-compose docker-compose-switch</code>; su Leap 16 <code>docker docker-compose docker-buildx</code> (⚠️ fonti in conflitto, da provare).</p>
+<p><strong>Fonti.</strong> <a href="Sources.html#s-064">S-064</a>, <a href="Sources.html#s-067">S-067</a>.</p>
+<hr />
+<p><a id="d-015"></a></p>
+<h2 id="d-015--codex--gpt-61-sol-via-responses-api">D-015 — "Codex" = <code>gpt-6.1-sol</code> via Responses API</h2>
+<ul>
+<li><strong>Data:</strong> 2026-11-07 — <strong>Stato:</strong> Accepted (confermata dal PO il 2026-11-07) — <strong>Decisore:</strong> proposta dell'assistente, approvata dal PO</li>
+</ul>
+<p><strong>Contesto.</strong> Nel catalogo OpenAI tutti i modelli con "codex" nel nome sono <em>Shut down</em> o <em>Deprecated</em> (<code>gpt-5.3-codex</code>). I modelli raccomandati per Codex sono <code>gpt-6-astra</code>, <code>gpt-6.1-sol</code>, <code>gpt-6.1-terra</code>, <code>gpt-6-luna</code>. Codex supporta solo la Responses API.</p>
+<p><strong>Opzioni considerate.</strong> (1) <code>gpt-6.1-sol</code> via Responses. (2) <code>gpt-5.3-codex</code> (deprecato). (3) <code>gpt-6-astra</code>.</p>
+<p><strong>Decisione.</strong> Usiamo l'opzione 1. Nel talk "Codex" indica "il modello OpenAI raccomandato per Codex". In LiteLLM la route usa <code>openai/responses/gpt-6.1-sol</code>.</p>
+<p><strong>Razionale.</strong> <code>gpt-6.1-sol</code> è valido via API, supporta Responses e Chat Completions, ed è nella lista Codex. Un modello deprecato può sparire prima del talk.</p>
+<p><strong>Conseguenze.</strong> L'harness Codex di VS Code resta fuori scopo (D-003).</p>
+<p><strong>Fonti.</strong> <a href="Sources.html#s-042">S-042</a>, <a href="Sources.html#s-043">S-043</a>, <a href="Sources.html#s-102">S-102</a>.</p>
+<hr />
+<p><a id="d-016"></a></p>
+<h2 id="d-016--gemini-gemini-4-argon-stabile--gemini-31-pro-preview">D-016 — Gemini: <code>gemini-4-argon</code> stabile + <code>gemini-3.1-pro-preview</code></h2>
+<ul>
+<li><strong>Data:</strong> 2026-11-07 — <strong>Stato:</strong> Accepted — <strong>Decisore:</strong> PO</li>
+</ul>
+<p><strong>Contesto.</strong> L'unico modello "Pro" è <code>gemini-3.1-pro-preview</code> (preview). Il modello di punta stabile è <code>gemini-4-argon</code> (tier a pagamento). <code>gemini-2.5-pro</code> è deprecato.</p>
+<p><strong>Opzioni considerate.</strong> (1) Entrambi. (2) Solo Pro preview. (3) Solo <code>gemini-4-argon</code>.</p>
+<p><strong>Decisione.</strong> Usiamo l'opzione 1. Alias LiteLLM: <code>gemini</code> → <code>gemini-4-argon</code> (default stabile); <code>gemini-pro</code> → <code>gemini-3.1-pro-preview</code>.</p>
+<p><strong>Razionale.</strong> Il default stabile riduce il rischio in demo. L'alias <code>gemini-pro</code> mantiene il nome usato nel titolo del talk.</p>
+<p><strong>Conseguenze.</strong> Una chiave Gemini del solo tier gratuito non usa <code>gemini-4-argon</code> ⚠️.</p>
+<p><strong>Fonti.</strong> <a href="Sources.html#s-044">S-044</a>, <a href="Sources.html#s-103">S-103</a>.</p>
+<hr />
+<p><a id="d-017"></a></p>
+<h2 id="d-017--tesi-del-talk-confronto-con-criteri">D-017 — Tesi del talk: confronto con criteri</h2>
+<ul>
+<li><strong>Data:</strong> 2026-11-07 — <strong>Stato:</strong> Accepted — <strong>Decisore:</strong> PO (review P-08)</li>
+</ul>
+<p><strong>Contesto.</strong> Il contraddittorio P-08 valuta <em>parziale</em> la tesi "LiteLLM è preferibile per un team". Argomenti contro: due compromissioni supply chain di LiteLLM nel 2026, CVE critiche, concentrazione delle credenziali, perdita del thinking Anthropic con Chat Completions, bug di integrazione con VS Code. Argomenti a favore: virtual keys, budget, alias, un solo punto di log.</p>
+<p><strong>Opzioni considerate.</strong> (1) Confronto con criteri. (2) Tesi pro gateway con una slide sui rischi. (3) Solo tabella neutra.</p>
+<p><strong>Decisione.</strong> Usiamo l'opzione 1. Nativo per il singolo sviluppatore. Gateway quando serve governance di team, con rischi e misure di hardening esplicite.</p>
+<p><strong>Razionale.</strong> La raccomandazione dipende dal contesto. Una tesi assoluta pro gateway non resiste agli incidenti documentati del 2026.</p>
+<p><strong>Conseguenze.</strong> <a href="02-Configurazione-Copilot.html#41-quando-usare-un-gateway">02-Configurazione-Copilot.md §4.1</a> contiene criteri di scelta, rischi e hardening.</p>
+<p><strong>Fonti.</strong> <a href="Sources.html#s-104">S-104</a>, <a href="Sources.html#s-105">S-105</a>, <a href="Sources.html#s-106">S-106</a>, <a href="Sources.html#s-107">S-107</a>.</p>
+<hr />
+<p><a id="d-018"></a></p>
+<h2 id="d-018--litellm-versione-fissata-v11082-e-hardening">D-018 — LiteLLM: versione fissata <code>v1.108.2</code> e hardening</h2>
+<ul>
+<li><strong>Data:</strong> 2026-11-07 — <strong>Stato:</strong> Accepted (confermata dal PO il 2026-11-07) — <strong>Decisore:</strong> proposta dell'assistente, approvata dal PO</li>
+</ul>
+<p><strong>Contesto.</strong> Il tag <code>v1.90.2</code> degli esempi è vecchio. Le versioni <code>1.82.7</code>, <code>1.82.8</code> e <code>1.107.0</code> erano compromesse. Il 2026-10-21 anche i tag mobili <code>latest</code>, <code>main-latest</code>, <code>main-stable</code> puntavano a immagini compromesse. La chiave cosign è cambiata il 2026-10-23. Il default di <code>--host</code> è <code>0.0.0.0</code>.</p>
+<p><strong>Decisione.</strong> Adottiamo:
+- versione <code>1.108.2</code> (LTS) fissata per Docker e per <code>uv</code>; mai tag mobili; digest e firma cosign per l'uso in team;
+- bind solo su <code>127.0.0.1</code>;
+- agli sviluppatori solo virtual keys, mai la master key;
+- <code>general_settings.disable_env_credential_login: true</code>.</p>
+<p><strong>Razionale.</strong> Il pin evita che un tag mobile compromesso entri nella demo o nella produzione.</p>
+<p><strong>Conseguenze.</strong> Prima del talk, controlla la release LTS corrente e il suo digest ⚠️.</p>
+<p><strong>Fonti.</strong> <a href="Sources.html#s-023">S-023</a>, <a href="Sources.html#s-104">S-104</a>, <a href="Sources.html#s-105">S-105</a>, <a href="Sources.html#s-108">S-108</a>, <a href="Sources.html#s-109">S-109</a>.</p>
+<hr />
+<p><a id="d-019"></a></p>
+<h2 id="d-019--claude-via-litellm-con-apitype-messages-senza-discovery">D-019 — Claude via LiteLLM con <code>apiType: messages</code>, senza discovery</h2>
+<ul>
+<li><strong>Data:</strong> 2026-11-07 — <strong>Stato:</strong> Accepted (confermata dal PO il 2026-11-07) — <strong>Decisore:</strong> proposta dell'assistente, approvata dal PO</li>
+</ul>
+<p><strong>Contesto.</strong> Con Chat Completions, i modelli Anthropic con thinking e tool richiedono di inviare di nuovo i <code>thinking_blocks</code>; i client OpenAI-compatible spesso li perdono (errore 400 o thinking disattivato). La discovery dei modelli del Custom Endpoint dà "Invalid response format" con LiteLLM (issue aperta).</p>
+<p><strong>Decisione.</strong> Adottiamo: modelli Claude via LiteLLM nel gruppo <code>apiType: messages</code>; altri modelli in <code>chat-completions</code>; nessun <code>url</code> a livello di provider (niente discovery), un <code>url</code> esplicito per ogni modello.</p>
+<p><strong>Razionale.</strong> Il formato Messages è il formato nativo di Anthropic. Un URL esplicito evita il bug di discovery.</p>
+<p><strong>Conseguenze.</strong> VS Code invia <code>x-api-key</code> con Messages. La configurazione aggiunge <code>Authorization: Bearer ${apiKey}</code> in <code>requestHeaders</code> ⚠️ (da provare).</p>
+<p><strong>Fonti.</strong> <a href="Sources.html#s-001">S-001</a>, <a href="Sources.html#s-028">S-028</a>, <a href="Sources.html#s-110">S-110</a>, <a href="Sources.html#s-111">S-111</a>.</p>
+<hr />
+<p><a id="d-020"></a></p>
+<h2 id="d-020--tabella-breve-delle-alternative-a-litellm">D-020 — Tabella breve delle alternative a LiteLLM</h2>
+<ul>
+<li><strong>Data:</strong> 2026-11-07 — <strong>Stato:</strong> Accepted — <strong>Decisore:</strong> PO</li>
+</ul>
+<p><strong>Decisione.</strong> Il documento di configurazione contiene una tabella di 5 righe: Enterprise BYOK di GitHub, Portkey, Cloudflare AI Gateway, Azure APIM + Foundry, OpenRouter come gateway. Nessuna procedura.</p>
+<p><strong>Razionale.</strong> La platea deve sapere che LiteLLM non è l'unica scelta. In 30 minuti non c'è tempo per altre demo.</p>
+<p><strong>Fonti.</strong> <a href="Sources.html#s-015">S-015</a>, <a href="Sources.html#s-112">S-112</a>, <a href="Sources.html#s-113">S-113</a>, <a href="Sources.html#s-114">S-114</a>, <a href="Sources.html#s-115">S-115</a>.</p>
+<hr />
+<p><a id="d-021"></a></p>
+<h2 id="d-021--anthropic-version-2026-10-21-negli-esempi">D-021 — <code>anthropic-version: 2026-10-21</code> negli esempi</h2>
+<ul>
+<li><strong>Data:</strong> 2026-11-07 — <strong>Stato:</strong> Accepted (confermata dal PO il 2026-11-07) — <strong>Decisore:</strong> proposta dell'assistente, approvata dal PO</li>
+</ul>
+<p><strong>Contesto.</strong> L'ultima versione dell'API Anthropic è <code>2026-10-21</code> (raccomandata). Rimuove <code>temperature</code>, <code>top_p</code>, <code>top_k</code> (errore 400). <code>2023-06-01</code> è nello storico; la pagina non dice se è deprecata.</p>
+<p><strong>Decisione.</strong> Usiamo <code>2026-10-21</code> negli esempi <code>curl</code>. Gli esempi non inviano <code>temperature</code>, <code>top_p</code>, <code>top_k</code>.</p>
+<p><strong>Razionale.</strong> La versione raccomandata riduce il rischio di comportamenti legacy.</p>
+<p><strong>Fonti.</strong> <a href="Sources.html#s-116">S-116</a>.</p>
+<hr />
+<p><a id="d-022"></a></p>
+<h2 id="d-022--documento-di-best-practice-di-sicurezza">D-022 — Documento di best practice di sicurezza</h2>
+<ul>
+<li><strong>Data:</strong> 2026-11-07 — <strong>Stato:</strong> Accepted — <strong>Decisore:</strong> PO</li>
+</ul>
+<p><strong>Contesto.</strong> Il talk mostra configurazioni che gestiscono chiavi API e danno autonomia agli agenti. La platea deve avere un riferimento sui comportamenti corretti.</p>
+<p><strong>Decisione.</strong> Creiamo <a href="03-Security-Best-Practices.html">03-Security-Best-Practices.md</a> con le best practice di Microsoft (VS Code, GitHub Copilot) e LiteLLM: comportamenti corretti e configurazioni sicure. Aggiungiamo la baseline <a href="../../examples/vscode/settings.secure.jsonc"><code>examples/vscode/settings.secure.jsonc</code></a>.</p>
+<p><strong>Razionale.</strong> Le best practice sono distribuite su molte pagine e cambiano spesso. Un documento unico con le fonti riduce il rischio di configurazioni insicure copiate dal talk.</p>
+<p><strong>Conseguenze.</strong> Ogni nuova configurazione di esempio deve rispettare il documento.</p>
+<p><strong>Fonti.</strong> <a href="Sources.html#s-108">S-108</a>, <a href="Sources.html#s-109">S-109</a>, <a href="Sources.html#s-130">S-130</a>, <a href="Sources.html#s-131">S-131</a>, <a href="Sources.html#s-133">S-133</a>, <a href="Sources.html#s-134">S-134</a>.</p>
+<hr />
+<p><a id="d-023"></a></p>
+<h2 id="d-023--security-review-con-owasp-e-isoiec-27001">D-023 — Security review con OWASP e ISO/IEC 27001</h2>
+<ul>
+<li><strong>Data:</strong> 2026-11-07 — <strong>Stato:</strong> Superseded by <a href="#d-024">D-024</a> — <strong>Decisore:</strong> PO</li>
+</ul>
+<p><strong>Contesto.</strong> Le configurazioni di esempio vanno analizzate con framework riconosciuti, utili anche per un audit.</p>
+<p><strong>Opzioni considerate.</strong> OWASP: (1) LLM Top 10 + Agentic Top 10; (2) solo LLM Top 10; (3) LLM Top 10 + Top 10 web. ISO: (1) 2022 Annex A; (2) 2022 Annex A + clausole 4–10.</p>
+<p><strong>Decisione.</strong> OWASP Top 10 for LLM Applications 2025 come asse principale, OWASP Top 10 for Agentic Applications 2026 per gli agenti. ISO/IEC 27001:2022 Annex A e clausole 4–10. Il documento è <a href="04-Security-Review-OWASP-ISO27001.html">04-Security-Review-OWASP-ISO27001.md</a>.</p>
+<p><strong>Razionale.</strong> Il Top 10 LLM copre il singolo scambio con il modello; il Top 10 Agentic copre tool, permessi ed esecuzione. Le clausole 4–10 collegano i rilievi al sistema di gestione.</p>
+<p><strong>Conseguenze.</strong> I rilievi <code>F-NN</code> producono azioni <code>AZ-NN</code>. Le azioni che cambiano gli esempi richiedono l'approvazione del PO. Il testo della norma ISO non è riprodotto: il documento cita solo numero e titolo dei controlli.</p>
+<p><strong>Fonti.</strong> <a href="Sources.html#s-137">S-137</a>, <a href="Sources.html#s-138">S-138</a>, <a href="Sources.html#s-140">S-140</a>, <a href="Sources.html#s-141">S-141</a>.</p>
+<hr />
+<p><a id="d-024"></a></p>
+<h2 id="d-024--owasp-llm-top-10-edizione-2026">D-024 — OWASP LLM Top 10 edizione 2026</h2>
+<ul>
+<li><strong>Data:</strong> 2026-11-07 — <strong>Stato:</strong> Accepted (confermata dal PO il 2026-11-07) — <strong>Decisore:</strong> proposta dell'assistente, approvata dal PO — <strong>Sostituisce:</strong> <a href="#d-023">D-023</a> (solo l'edizione OWASP LLM)</li>
+</ul>
+<p><strong>Contesto.</strong> D-023 usa l'OWASP Top 10 for LLM Applications 2025. La review P-10 indica che il 2026-08-03 OWASP ha pubblicato l'edizione 2026, con un ordine diverso (es. Excessive Agency passa da LLM06 a LLM03; System Prompt Leakage diventa Hidden Context Exposure, LLM08). L'assistente ha verificato la data sulla pagina della risorsa e l'elenco sul repository canonico.</p>
+<p><strong>Opzioni considerate.</strong> (1) Edizione 2026. (2) Edizione 2025, già citata in D-023.</p>
+<p><strong>Decisione.</strong> Usiamo l'opzione 1. Il documento 04 riporta anche la corrispondenza con gli ID 2025. Restano invariati: Agentic Top 10 2026 e ISO/IEC 27001:2022 Annex A + clausole 4–10.</p>
+<p><strong>Razionale.</strong> Il pubblico del talk troverà l'edizione 2026 come edizione corrente. Gli ID 2025 vecchi creano confusione.</p>
+<p><strong>Conseguenze.</strong> I rilievi <code>F-NN</code> usano <code>LLMxx</code> = 2026.</p>
+<p><strong>Fonti.</strong> <a href="Sources.html#s-137">S-137</a>, <a href="Sources.html#s-146">S-146</a>, <a href="Sources.html#s-147">S-147</a>.</p>
+<hr />
+<p><a id="d-025"></a></p>
+<h2 id="d-025--applicazione-delle-azioni-az-01az-10">D-025 — Applicazione delle azioni AZ-01…AZ-10</h2>
+<ul>
+<li><strong>Data:</strong> 2026-11-07 — <strong>Stato:</strong> Accepted — <strong>Decisore:</strong> PO</li>
+</ul>
+<p><strong>Contesto.</strong> La security review (<a href="04-Security-Review-OWASP-ISO27001.html">04</a>) propone 10 azioni che cambiano gli esempi.</p>
+<p><strong>Decisione.</strong> Applichiamo tutte le azioni. Integriamo le correzioni di P-09 e P-10: la sandbox dell'agente è <code>off</code> di default e la baseline la attiva; il primo <code>proxy_admin</code> si crea con l'API (<code>/user/new</code>, <code>/user/update</code>) e la master key.</p>
+<p><strong>Razionale.</strong> Gli esempi sono pubblici e saranno copiati: devono essere sicuri di default.</p>
+<p><strong>Conseguenze.</strong> Nuovi file: <code>scripts/pin-images.sh</code>, <code>scripts/bootstrap-admin.sh</code>, <code>service/load-env.sh</code>. Tre punti restano ⚠️ da provare: tag <code>litellm-non_root:v1.108.2</code>, campi <code>provider</code> di OpenRouter, <code>turn_off_message_logging</code>.</p>
+<p><strong>Fonti.</strong> <a href="Sources.html#s-104">S-104</a>, <a href="Sources.html#s-108">S-108</a>, <a href="Sources.html#s-109">S-109</a>, <a href="Sources.html#s-144">S-144</a>, <a href="Sources.html#s-145">S-145</a>, <a href="Sources.html#s-148">S-148</a>, <a href="Sources.html#s-151">S-151</a>.</p>
+<hr />
+<p><a id="d-026"></a></p>
+<h2 id="d-026--runbook-unico-con-filtri-per-os-percorso-e-profilo">D-026 — Runbook unico con filtri per OS, percorso e profilo</h2>
+<ul>
+<li><strong>Data:</strong> 2026-11-07 — <strong>Stato:</strong> Accepted — <strong>Decisore:</strong> PO ("Tutto, con filtro OS"; evidenze "Parametri + esito + output")</li>
+</ul>
+<p><strong>Contesto.</strong> I documenti 01 e 02 descrivono 4 sistemi operativi, 2 percorsi LiteLLM (Docker, uv) e 2 profili (minimo, esteso). Il PO vuole un runbook da eseguire passo per passo, con evidenze.</p>
+<p><strong>Opzioni considerate.</strong> (1) Un runbook per ogni combinazione. (2) Un runbook unico con metadati di filtro per passo e per blocco di codice.</p>
+<p><strong>Decisione.</strong> Usiamo l'opzione 2: <code>docs/runbook/RUNBOOK.md</code>, fasi F1–F9, passi <code>S-nnn</code>. Ogni passo ha la riga <code>&lt;!-- step: os=… path=… profile=… evidence=… --&gt;</code>. I blocchi di codice hanno <code>os=…</code>. I comandi usano parametri <code>{{NOME}}</code> dichiarati in una tabella. L'evidenza registra parametri, esito e output.</p>
+<p><strong>Razionale.</strong> Una sola sorgente evita divergenze tra le copie. Il generatore controlla che ogni parametro usato sia dichiarato e che gli ID siano unici.</p>
+<p><strong>Conseguenze.</strong> Il runbook rimanda a 01 e 02 per le spiegazioni e non le ripete. I passi che producono segreti (S-202, S-203, S-501) hanno <code>evidence=no-output</code>.</p>
+<p><strong>Fonti.</strong> <a href="01-Installazione.html">01</a>, <a href="02-Configurazione-Copilot.html">02</a>, <a href="Sources.html#s-092">S-092</a>.</p>
+<hr />
+<p><a id="d-027"></a></p>
+<h2 id="d-027--nerd-fonts-in-woff2-nel-repository">D-027 — Nerd Fonts in WOFF2 nel repository</h2>
+<ul>
+<li><strong>Data:</strong> 2026-11-07 — <strong>Stato:</strong> Accepted — <strong>Decisore:</strong> PO ("WOFF2 nel repo")</li>
+</ul>
+<p><strong>Contesto.</strong> Il sito deve funzionare offline su una postazione che può non avere i font richiesti: BlexMono, FiraCode, GoogleSansCode, Monoid, OpenDyslexic, SauceCodePro, UbuntuSans (Nerd Fonts).</p>
+<p><strong>Opzioni considerate.</strong> (1) WOFF2 nel repository. (2) Download dei font a ogni generazione, senza commit. (3) Font di sistema.</p>
+<p><strong>Decisione.</strong> Usiamo l'opzione 1. <code>tools/fonts.py</code> converte i TTF in <code>site/assets/fonts/&lt;id&gt;-&lt;ruolo&gt;-&lt;peso&gt;.woff2</code> e copia la licenza di ogni famiglia in <code>site/assets/fonts/LICENSES/</code>. <code>tools/fonts.json</code> dichiara famiglie, zip di release e file. Il codice usa solo le varianti <code>Mono</code>.</p>
+<p><strong>Razionale.</strong> WOFF2 riduce la dimensione (circa 13 MB per 5 famiglie, licenze incluse). Il clone del repo basta per usare il sito.</p>
+<p><strong>Conseguenze.</strong> GoogleSansCode e UbuntuSans sono solo nelle release zip: il PO le aggiunge con <code>tools/update-site.sh --fonts</code>. La cartella <code>.cache/</code> (zip scaricati) è esclusa da git.</p>
+<p><strong>Fonti.</strong> <a href="Sources.html#s-152">S-152</a>, <a href="Sources.html#s-153">S-153</a>, <a href="Sources.html#s-156">S-156</a>.</p>
+<hr />
+<p><a id="d-028"></a></p>
+<h2 id="d-028--architettura-del-sito-offline-e-delle-evidenze">D-028 — Architettura del sito offline e delle evidenze</h2>
+<ul>
+<li><strong>Data:</strong> 2026-11-07 — <strong>Stato:</strong> Proposed — <strong>Decisore:</strong> proposta dell'assistente, da confermare dal PO</li>
+</ul>
+<p><strong>Contesto.</strong> Il sito si apre da <code>file://</code>, senza server e senza rete.</p>
+<p><strong>Opzioni considerate.</strong> (1) Pagine statiche generate in Python, dati del runbook nel HTML come JSON, sessioni in <code>localStorage</code>, export Markdown e JSON. (2) Static site generator esterno (es. MkDocs) più un'app JavaScript separata. (3) Applicazione con server locale.</p>
+<p><strong>Decisione.</strong> Usiamo l'opzione 1.</p>
+<ul>
+<li><code>tools/build_site.py</code> genera <code>site/index.html</code> (runbook interattivo) e <code>site/docs/*.html</code> (documenti di <code>docs/</code>, con i link <code>.md</code> riscritti).</li>
+<li>Dati nel HTML: il browser blocca <code>fetch</code> da <code>file://</code>.</li>
+<li>Sessioni multiple in <code>localStorage</code> (chiave <code>wpc2026.runbook</code>); export/import JSON per cambiare browser o macchina.</li>
+<li>Evidenza in Markdown: dati della sessione, parametri (valore e origine), riepilogo, comandi con i parametri risolti, esito, data e ora, output, note.</li>
+<li>Il sito oscura i segreti riconosciuti (<code>sk-…</code>, <code>hf_…</code>, <code>AIza…</code>, <code>Bearer …</code>, <code>*_API_KEY=…</code>) e rifiuta segreti nei parametri.</li>
+<li>highlight.js locale; temi chiaro, scuro e automatico.</li>
+<li><code>tools/update-site.sh</code> e <code>tools/update-site.ps1</code> rigenerano il sito; <code>--check</code> controlla che il sito sia aggiornato.</li>
+</ul>
+<p><strong>Razionale.</strong> Nessuna dipendenza a runtime. Un solo generatore piccolo e leggibile. Le evidenze restano sotto il controllo dell'operatore.</p>
+<p><strong>Conseguenze.</strong> <code>localStorage</code> appartiene a un browser e a un profilo: l'export JSON è il backup. L'oscuramento dei segreti è una protezione aggiuntiva, non sostituisce il controllo dell'operatore (S-902). La sessione registra la versione del runbook e il sito segnala una versione diversa.</p>
+<p><strong>Fonti.</strong> <a href="Sources.html#s-154">S-154</a>, <a href="Sources.html#s-155">S-155</a>, <a href="Sources.html#s-157">S-157</a>.</p>
+<hr />
+<p><a id="d-029"></a></p>
+<h2 id="d-029--deck-finale-come-artefatto-slides">D-029 — Deck finale come artefatto Slides</h2>
+<ul>
+<li><strong>Data:</strong> 2026-11-07 — <strong>Stato:</strong> Accepted — <strong>Decisore:</strong> PO ("Artefatto Slides")</li>
+</ul>
+<p><strong>Contesto.</strong> Le istruzioni del progetto chiedono un deck che racconti i punti principali e sia una mappa di quanto prodotto.</p>
+<p><strong>Decisione.</strong> Il deck è un artefatto Slides di claude.ai, esportabile in PowerPoint o PDF. Non è un file del repository.</p>
+<p><strong>Conseguenze.</strong> Il README riporta il collegamento al deck quando il PO lo condivide.</p>
+<p><strong>Fonti.</strong> —</p></article>
+<script type="application/json" id="fonts-data">[
+  {
+    "id": "blexmono",
+    "label": "BlexMono Nerd Font (IBM Plex Mono)",
+    "mono": true,
+    "body": false
+  },
+  {
+    "id": "firacode",
+    "label": "FiraCode Nerd Font",
+    "mono": true,
+    "body": false
+  },
+  {
+    "id": "monoid",
+    "label": "Monoid Nerd Font",
+    "mono": true,
+    "body": false
+  },
+  {
+    "id": "opendyslexic",
+    "label": "OpenDyslexic Nerd Font",
+    "mono": true,
+    "body": true
+  },
+  {
+    "id": "saucecodepro",
+    "label": "SauceCodePro Nerd Font (Source Code Pro)",
+    "mono": true,
+    "body": false
+  }
+]</script>
+<script src="../assets/vendor/highlight/highlight.min.js"></script>
+<script src="../assets/vendor/highlight/languages/bash.min.js"></script>
+<script src="../assets/vendor/highlight/languages/powershell.min.js"></script>
+<script src="../assets/vendor/highlight/languages/yaml.min.js"></script>
+<script src="../assets/vendor/highlight/languages/json.min.js"></script>
+<script src="../assets/vendor/highlight/languages/ini.min.js"></script>
+<script src="../assets/vendor/highlight/languages/dockerfile.min.js"></script>
+<script src="../assets/vendor/highlight/languages/plaintext.min.js"></script>
+<script src="../assets/common.js"></script>
+<script src="../assets/doc.js"></script>
+</body>
+</html>

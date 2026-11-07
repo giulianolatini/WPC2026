@@ -1,0 +1,1226 @@
+<!DOCTYPE html>
+<html lang="it" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="generator" content="tools/build_site.py — non modificare a mano">
+<title>02-Configurazione-Copilot — WPC2026</title>
+<link rel="stylesheet" href="../assets/fonts.css">
+<link rel="stylesheet" href="../assets/vendor/highlight/github.min.css" id="hl-light">
+<link rel="stylesheet" href="../assets/vendor/highlight/github-dark.min.css" id="hl-dark" disabled>
+<link rel="stylesheet" href="../assets/styles.css">
+
+<script>try{var p=JSON.parse(localStorage.getItem('wpc2026.prefs')||'{}');var t=p.theme||'auto';if(t==='auto')t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body>
+<div class="topbar">
+  <h1><a href="../index.html" style="color:inherit;text-decoration:none">WPC2026</a> <span class="ver">02-Configurazione-Copilot</span></h1>
+  <label>Tema <select id="pref-theme"><option value="auto">automatico</option><option value="light">chiaro</option><option value="dark">scuro</option></select></label>
+  <label>Testo <select id="pref-body"></select></label>
+  <label>Codice <select id="pref-code"></select></label>
+</div>
+<nav class="docnav"><a href="../index.html">← Runbook</a><ul><li><a href="01-Installazione.html">01-Installazione</a></li><li><a href="02-Configurazione-Copilot.html">02-Configurazione-Copilot</a></li><li><a href="03-Security-Best-Practices.html">03-Security-Best-Practices</a></li><li><a href="04-Security-Review-OWASP-ISO27001.html">04-Security-Review-OWASP-ISO27001</a></li><li><a href="Decisions.html">Decisions</a></li><li><a href="Sources.html">Sources</a></li><li><a href="Review-Perplexity.html">Review-Perplexity</a></li></ul></nav><article class="doc"><h1 id="02--configurazione-di-github-copilot-in-visual-studio-code-con-llm-via-api">02 — Configurazione di GitHub Copilot in Visual Studio Code con LLM via API</h1>
+<p>Questo documento descrive come GitHub Copilot in VS Code usa modelli di provider esterni.
+Confronta due percorsi: <strong>configurazione nativa</strong> (BYOK diretto verso ogni provider) e <strong>gateway LiteLLM</strong> (un solo endpoint locale verso tutti i provider).</p>
+<p>Prerequisiti: <a href="01-Installazione.html">01-Installazione.md</a>. Decisioni di riferimento: <a href="Decisions.html#d-003">D-003</a>, <a href="Decisions.html#d-007">D-007</a>, <a href="Decisions.html#d-008">D-008</a>, <a href="Decisions.html#d-013">D-013</a>, <a href="Decisions.html#d-015">D-015</a>…<a href="Decisions.html#d-021">D-021</a>.</p>
+<p>La review con Perplexity (P-01…P-08) ha corretto questa versione: vedi il registro in <a href="Review-Perplexity.html#registro-degli-esiti">Review-Perplexity.md</a>.</p>
+<h2 id="indice">Indice</h2>
+<ol>
+<li><a href="#1-uso-di-github-copilot-in-vs-code">Uso di GitHub Copilot in VS Code</a></li>
+<li><a href="#2-architettura-del-client-ed-elementi-configurabili">Architettura del client ed elementi configurabili</a></li>
+<li><a href="#3-configurazione-nativa-verso-i-provider">Configurazione nativa verso i provider</a></li>
+<li><a href="#4-github-copilot-con-litellm-come-gateway">GitHub Copilot con LiteLLM come gateway</a></li>
+<li><a href="#appendice-a--github-spec-kit-con-copilot">Appendice A — GitHub Spec Kit con Copilot</a></li>
+</ol>
+<hr />
+<h2 id="1-uso-di-github-copilot-in-vs-code">1. Uso di GitHub Copilot in VS Code</h2>
+<p>GitHub Copilot in VS Code offre queste funzioni:</p>
+<table>
+<thead>
+<tr>
+<th>Funzione</th>
+<th>Descrizione</th>
+<th>Modelli BYOK</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Inline suggestions, Next Edit Suggestions (NES)</strong></td>
+<td>Suggerimenti di codice durante la scrittura</td>
+<td>No: richiedono account GitHub e piano Copilot (<a href="Sources.html#s-001">S-001</a>, <a href="Sources.html#s-070">S-070</a>)</td>
+</tr>
+<tr>
+<td><strong>Chat view</strong></td>
+<td>Conversazione con il modello nella barra laterale</td>
+<td>Sì</td>
+</tr>
+<tr>
+<td><strong>Inline chat</strong></td>
+<td>Chat nell'editor, sul codice selezionato (<code>inlineChat.defaultModel</code>)</td>
+<td>Sì</td>
+</tr>
+<tr>
+<td><strong>Agents</strong></td>
+<td>Un agente esegue un'attività con strumenti (file, terminale, MCP). Chat view e <em>Agents window</em> eseguono agenti (<a href="Sources.html#s-008">S-008</a>)</td>
+<td>Sì, solo modelli con <em>tool calling</em></td>
+</tr>
+<tr>
+<td><strong>Utility tasks</strong></td>
+<td>Titoli, sommari, messaggi di commit, descrizioni di PR</td>
+<td>Sì, con <code>chat.utilityModel</code> / <code>chat.utilitySmallModel</code></td>
+</tr>
+<tr>
+<td><strong>Semantic search, embeddings</strong></td>
+<td>Indicizzazione e ricerca nel workspace</td>
+<td>No (<a href="Sources.html#s-001">S-001</a>)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Harness.</strong> Un <em>harness</em> è il motore che esegue l'agente. Il cambio di modello non cambia l'harness (<a href="Sources.html#s-068">S-068</a>).</p>
+<table>
+<thead>
+<tr>
+<th>Harness</th>
+<th>Dove esegue</th>
+<th>Accesso ai modelli</th>
+<th>BYOK</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Copilot</strong></td>
+<td>Copilot SDK nell'Agent Host; la sessione continua anche dopo la chiusura della finestra; Chat view e Agents window</td>
+<td>GitHub Copilot</td>
+<td>Sperimentale: <code>chat.agentHost.byokModels.enabled</code></td>
+</tr>
+<tr>
+<td><strong>Local</strong></td>
+<td>Harness integrato, nell'extension host; la sessione si ferma con la finestra; solo Chat view</td>
+<td>Provider configurati</td>
+<td>Sì, anche senza account GitHub e senza piano Copilot</td>
+</tr>
+<tr>
+<td><strong>Claude</strong></td>
+<td>Claude Agent SDK, nel workspace o in un worktree</td>
+<td>Credenziali Anthropic o modelli instradati da Copilot</td>
+<td>Credenziali proprie dell'harness</td>
+</tr>
+<tr>
+<td><strong>Codex</strong></td>
+<td>Estensione OpenAI Codex o integrazione sperimentale con l'Agent Host</td>
+<td>Abbonamento Copilot (Pro+) o account ChatGPT</td>
+<td>No</td>
+</tr>
+</tbody>
+</table>
+<p>Fonti: <a href="Sources.html#s-001">S-001</a>, <a href="Sources.html#s-068">S-068</a>. <strong>Cloud</strong> non è un harness: è una destinazione di esecuzione (sperimentale) dell'harness Copilot (<a href="Sources.html#s-068">S-068</a>).</p>
+<p><strong>La demo usa l'harness Local</strong> per i modelli BYOK: è il percorso completo e non sperimentale. Un modello BYOK <strong>non</strong> configura gli harness Claude e Codex (<a href="Sources.html#s-001">S-001</a>, <a href="Decisions.html#d-003">D-003</a>).</p>
+<p><strong>Messaggio chiave del talk.</strong> Il BYOK cambia il <em>modello</em>. Non cambia l'esperienza: chat, agenti, strumenti, istruzioni e skill restano gli stessi.</p>
+<hr />
+<h2 id="2-architettura-del-client-ed-elementi-configurabili">2. Architettura del client ed elementi configurabili</h2>
+<h3 id="21-livelli">2.1 Livelli</h3>
+<pre class="code"><code class="language-mermaid">flowchart TB
+  U[Sviluppatore] --&gt; UI[&quot;VS Code: Chat view · Inline chat · Agents window&quot;]
+  UI --&gt; H{&quot;Harness&lt;br/&gt;Local · Copilot · Claude · Codex&quot;}
+  H --&gt; C[&quot;Customizations&lt;br/&gt;instructions · prompt files · agents · skills · hooks · MCP&quot;]
+  H --&gt; M{&quot;Model picker&quot;}
+  M --&gt; G[&quot;Modelli GitHub Copilot&lt;br/&gt;(piano Copilot)&quot;]
+  M --&gt; B[&quot;BYOK built-in&lt;br/&gt;Anthropic · OpenAI · Gemini · Azure · OpenRouter&quot;]
+  M --&gt; E[&quot;BYOK da estensione&lt;br/&gt;es. Hugging Face&quot;]
+  M --&gt; X[&quot;Custom Endpoint&lt;br/&gt;chat-completions · responses · messages&quot;]
+  X --&gt; L[&quot;LiteLLM proxy :4000&quot;]
+  L --&gt; P1[Anthropic API]
+  L --&gt; P2[OpenAI API]
+  L --&gt; P3[Gemini API]
+  L --&gt; P4[OpenRouter]
+  L --&gt; P5[HF Inference Providers]
+  B --&gt; P1 &amp; P2 &amp; P3 &amp; P4
+  E --&gt; P5
+</code></pre>
+<p>Il modello è un elemento <strong>indipendente</strong> dalle customizations. Un'istruzione o una skill funziona con ogni modello che supporta gli strumenti richiesti.</p>
+<h3 id="22-tipi-di-modello-model-picker">2.2 Tipi di modello (model picker)</h3>
+<p>Il <strong>Language Models editor</strong> gestisce i modelli. Aprilo con l'icona a ingranaggio nel model picker, o con il comando <strong>Chat: Manage Language Models</strong> (<a href="Sources.html#s-001">S-001</a>).</p>
+<table>
+<thead>
+<tr>
+<th>Tipo</th>
+<th>Come si aggiunge</th>
+<th>Uso nel talk</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Built-in provider</strong></td>
+<td><em>Add Models</em> → provider (Anthropic, Azure, Gemini, OpenAI, OpenRouter) → chiave (<a href="Sources.html#s-070">S-070</a>)</td>
+<td>Claude, Codex, Gemini, OpenRouter nativi</td>
+</tr>
+<tr>
+<td><strong>Extension provider</strong></td>
+<td><em>Install Model Providers</em>, o ricerca <code>@tag:language-models</code> nella vista Extensions</td>
+<td>Hugging Face nativo</td>
+</tr>
+<tr>
+<td><strong>Custom Endpoint</strong></td>
+<td><em>Add Models</em> → <strong>Custom Endpoint</strong>; dettagli in <code>chatLanguageModels.json</code>. In Stable dalla versione 1.122 (<a href="Sources.html#s-070">S-070</a>)</td>
+<td>HF senza estensione, LiteLLM</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>Il provider <em>Custom Endpoint</em> sostituisce il provider <em>OpenAI Compatible</em> e l'impostazione <code>github.copilot.chat.customOAIModels</code>, ora deprecati (<a href="Sources.html#s-001">S-001</a>, <a href="Decisions.html#d-007">D-007</a>).
+Il provider built-in Ollama è deprecato: usa l'estensione ufficiale Ollama (<a href="Sources.html#s-001">S-001</a>).</p>
+</blockquote>
+<h3 id="23-elementi-configurabili-e-posizione-nel-filesystem">2.3 Elementi configurabili e posizione nel filesystem</h3>
+<p>La posizione dei file dipende dall'<strong>harness</strong> (<a href="Sources.html#s-068">S-068</a>, <a href="Sources.html#s-069">S-069</a>). La tabella mostra gli harness Copilot e Local.</p>
+<table>
+<thead>
+<tr>
+<th>Elemento</th>
+<th>Workspace (repo)</th>
+<th>Utente — harness Copilot</th>
+<th>Utente — harness Local</th>
+<th>Note</th>
+<th>Fonte</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Project instructions</td>
+<td><code>.github/copilot-instructions.md</code>, <code>AGENTS.md</code>; <code>CLAUDE.md</code> solo Local e Claude</td>
+<td><code>~/.copilot/copilot-instructions.md</code></td>
+<td>profilo utente VS Code (Agent Customizations editor)</td>
+<td>L'harness Copilot non legge <code>CLAUDE.md</code></td>
+<td><a href="Sources.html#s-069">S-069</a></td>
+</tr>
+<tr>
+<td>Targeted instructions</td>
+<td><code>.github/instructions/**/*.instructions.md</code> (frontmatter <code>applyTo</code>, <code>description</code>)</td>
+<td><code>~/.copilot/instructions/**/*.instructions.md</code></td>
+<td>profilo utente VS Code</td>
+<td><code>description</code> per la scelta del task solo in Local</td>
+<td><a href="Sources.html#s-003">S-003</a>, <a href="Sources.html#s-069">S-069</a></td>
+</tr>
+<tr>
+<td>Prompt files</td>
+<td><code>.github/prompts/*.prompt.md</code></td>
+<td>non supportati</td>
+<td>profilo utente VS Code</td>
+<td>Solo harness Local, Chat view</td>
+<td><a href="Sources.html#s-002">S-002</a>, P-03</td>
+</tr>
+<tr>
+<td>Custom agents</td>
+<td><code>.github/agents/*.agent.md</code> (anche <code>*.md</code>)</td>
+<td><code>~/.copilot/agents/</code></td>
+<td>profilo utente VS Code</td>
+<td><code>handoffs</code> solo in Local</td>
+<td><a href="Sources.html#s-007">S-007</a>, <a href="Sources.html#s-072">S-072</a></td>
+</tr>
+<tr>
+<td>Agent skills</td>
+<td><code>.github/skills/&lt;nome&gt;/SKILL.md</code> (anche <code>.claude/skills/</code>, <code>.agents/skills/</code>)</td>
+<td><code>~/.copilot/skills/</code></td>
+<td><code>~/.copilot/skills/</code>, <code>~/.claude/skills/</code>, <code>~/.agents/skills/</code></td>
+<td>Local legge tutte e sei le cartelle</td>
+<td><a href="Sources.html#s-004">S-004</a></td>
+</tr>
+<tr>
+<td>Hooks</td>
+<td><code>.github/hooks/*.json</code>; <code>hooks</code> in <code>.github/copilot/settings.json</code></td>
+<td><code>~/.copilot/hooks/</code> (o <code>$COPILOT_HOME/hooks/</code>), <code>~/.copilot/settings.json</code></td>
+<td>—</td>
+<td>Seguono l'harness selezionato</td>
+<td><a href="Sources.html#s-006">S-006</a>, <a href="Sources.html#s-073">S-073</a></td>
+</tr>
+<tr>
+<td>MCP servers</td>
+<td>Copilot: <code>.mcp.json</code> nella radice, chiave <code>mcpServers</code> (sperimentale: <code>chat.mcp.workspaceRootConfig.enabled</code>). Local: <code>.vscode/mcp.json</code>, chiave <code>servers</code> (deprecato, compatibilità)</td>
+<td><code>~/.copilot/mcp-config.json</code></td>
+<td><code>mcp.json</code> del profilo (deprecato)</td>
+<td>I due formati non sono intercambiabili</td>
+<td><a href="Sources.html#s-005">S-005</a>, P-03</td>
+</tr>
+<tr>
+<td>Language models (BYOK)</td>
+<td>—</td>
+<td>—</td>
+<td><code>chatLanguageModels.json</code> nella cartella <code>User</code> del profilo (vedi sotto)</td>
+<td>Non ereditato dai profili non default</td>
+<td><a href="Sources.html#s-001">S-001</a>, <a href="Sources.html#s-074">S-074</a></td>
+</tr>
+<tr>
+<td>Settings</td>
+<td><code>.vscode/settings.json</code></td>
+<td><code>settings.json</code> utente</td>
+<td><code>settings.json</code> utente</td>
+<td>—</td>
+<td><a href="Sources.html#s-001">S-001</a></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Percorso di <code>chatLanguageModels.json</code></strong> (VS Code Stable; la documentazione ufficiale non lo indica) ⚠️:</p>
+<table>
+<thead>
+<tr>
+<th>Sistema</th>
+<th>Percorso</th>
+<th>Fonte</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Windows</td>
+<td><code>%APPDATA%\Code\User\chatLanguageModels.json</code></td>
+<td><a href="Sources.html#s-074">S-074</a></td>
+</tr>
+<tr>
+<td>macOS</td>
+<td><code>~/Library/Application Support/Code/User/chatLanguageModels.json</code></td>
+<td>P-01 (fonti di terze parti)</td>
+</tr>
+<tr>
+<td>Linux</td>
+<td><code>~/.config/Code/User/chatLanguageModels.json</code></td>
+<td>P-01 (fonti di terze parti)</td>
+</tr>
+<tr>
+<td>Profilo non default</td>
+<td><code>User/profiles/&lt;profileId&gt;/chatLanguageModels.json</code></td>
+<td><a href="Sources.html#s-074">S-074</a></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>Usa l'<strong>Agent Customizations editor</strong> per creare file utente: l'editor sceglie il percorso corretto per l'harness.</p>
+</blockquote>
+<p><strong>Esempio di struttura del repo con customizations:</strong></p>
+<pre class="code"><code class="language-text">.
+├── AGENTS.md
+├── .github/
+│   ├── copilot-instructions.md
+│   ├── instructions/
+│   │   └── python.instructions.md      # applyTo: '**/*.py'
+│   ├── prompts/
+│   │   └── review.prompt.md
+│   ├── agents/
+│   │   └── reviewer.agent.md
+│   ├── skills/
+│   │   └── webapp-testing/
+│   │       └── SKILL.md
+│   └── hooks/
+│       └── audit.json
+└── .vscode/
+    ├── mcp.json
+    └── settings.json
+</code></pre>
+<p><strong>Esempio — skill</strong> (<code>.github/skills/webapp-testing/SKILL.md</code>) (<a href="Sources.html#s-004">S-004</a>):</p>
+<pre class="code"><code class="language-markdown">---
+name: webapp-testing
+description: Test the web app login flow with Playwright. Use when the user asks to test UI flows.
+argument-hint: &quot;[page or flow]&quot;
+---
+Run the Playwright tests in `tests/e2e`. Use the template in [test template](./test-template.js).
+</code></pre>
+<p>Il campo <code>name</code> deve corrispondere al nome della cartella (minuscole, numeri, trattini, massimo 64 caratteri). Se il nome è errato, la skill non si carica e VS Code non mostra errori (<a href="Sources.html#s-004">S-004</a>, P-03). <code>context: fork</code> è sperimentale e richiede <code>github.copilot.chat.skillTool.enabled</code>.</p>
+<p><strong>Esempio — hook</strong> (<code>.github/hooks/audit.json</code>) (<a href="Sources.html#s-006">S-006</a>). Eventi: <code>sessionStart</code>, <code>userPromptSubmitted</code>, <code>preToolUse</code>, <code>postToolUse</code>, <code>preCompact</code>, <code>subagentStart</code>, <code>subagentStop</code>, <code>agentStop</code>, <code>sessionEnd</code>, <code>errorOccurred</code> (<a href="Sources.html#s-073">S-073</a>):</p>
+<pre class="code"><code class="language-json">{
+  &quot;version&quot;: 1,
+  &quot;hooks&quot;: {
+    &quot;preToolUse&quot;: [
+      { &quot;type&quot;: &quot;command&quot;, &quot;command&quot;: &quot;node .github/hooks/log-tool-use.cjs&quot;, &quot;timeoutSec&quot;: 10 }
+    ]
+  }
+}
+</code></pre>
+<h3 id="24-impostazioni-per-byok">2.4 Impostazioni per BYOK</h3>
+<table>
+<thead>
+<tr>
+<th>Impostazione</th>
+<th>Funzione</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>chat.utilityModel</code></td>
+<td>Modello per titoli, sommari, settings search, Git review. Valore in formato <code>vendor/id</code> ⚠️ (<a href="Sources.html#s-075">S-075</a>)</td>
+</tr>
+<tr>
+<td><code>chat.utilitySmallModel</code></td>
+<td>Modello per messaggi di commit, descrizioni di PR, suggerimenti di nomi, intent detection. Formato <code>vendor/id</code></td>
+</tr>
+<tr>
+<td><code>chat.byokUtilityModelDefault</code></td>
+<td>Default per le utility: <code>none</code>, <code>mainAgent</code>, <code>copilot</code> (nella UI: None, Main Agent Model, GitHub Copilot)</td>
+</tr>
+<tr>
+<td><code>chat.agentHost.byokModels.enabled</code></td>
+<td>(Sperimentale) modelli BYOK nell'harness Copilot</td>
+</tr>
+<tr>
+<td><code>inlineChat.defaultModel</code></td>
+<td>Modello di default dell'inline chat</td>
+</tr>
+</tbody>
+</table>
+<p>Fonte: <a href="Sources.html#s-001">S-001</a>. Senza accesso GitHub i modelli di utilità built-in non sono disponibili: imposta <code>chat.utilityModel</code> e <code>chat.utilitySmallModel</code> su un modello BYOK. Scegli il modello dalla UI delle impostazioni: il valore scritto nel file è generato da VS Code.</p>
+<pre class="code"><code class="language-jsonc">// .vscode/settings.json — esempio. ⚠️ Formato vendor/id da confermare in prova (issue aperta S-075)
+{
+  &quot;chat.utilitySmallModel&quot;: &quot;customendpoint/codex&quot;,
+  &quot;chat.byokUtilityModelDefault&quot;: &quot;mainAgent&quot;
+}
+</code></pre>
+<blockquote>
+<p>L'issue <a href="Sources.html#s-075">S-075</a> propone di unificare questi setting in <code>chat.featureModels</code>: i nomi possono cambiare.</p>
+</blockquote>
+<h3 id="25-policy-per-copilot-business-ed-enterprise">2.5 Policy per Copilot Business ed Enterprise</h3>
+<table>
+<thead>
+<tr>
+<th>Meccanismo</th>
+<th>Dove si configura</th>
+<th>Effetto</th>
+<th>Fonte</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>BYOK configurato dall'utente</strong> (local BYOK)</td>
+<td>Policy <em>Bring Your Own Language Model Key in VS Code</em>. <strong>Attiva di default</strong>: l'amministratore la può disattivare</td>
+<td>Le chiavi restano sul client; le richieste vanno direttamente al provider</td>
+<td><a href="Sources.html#s-018">S-018</a>, <a href="Sources.html#s-015">S-015</a></td>
+</tr>
+<tr>
+<td><strong>BYOK configurato da enterprise/organizzazione</strong> (public preview)</td>
+<td>Enterprise: <strong>AI controls → Copilot → Configure custom models → Add API key</strong>. Delega alle organizzazioni con la policy <em>Enable custom models</em>; organizzazione: <strong>Settings → Copilot → Models → Custom models</strong></td>
+<td>Chiavi lato server; i modelli passano dalla Copilot API a tutti gli utenti con licenza</td>
+<td><a href="Sources.html#s-015">S-015</a>, <a href="Sources.html#s-019">S-019</a>, <a href="Sources.html#s-101">S-101</a></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>⚠️ <strong>Fonti non coerenti.</strong> Il changelog GitHub dice che la policy è "enabled by default" (<a href="Sources.html#s-018">S-018</a>). La FAQ di VS Code dice ancora che l'amministratore "must enable" la policy (<a href="Sources.html#s-071">S-071</a>). Se il model picker non mostra <strong>Manage Language Models</strong>, chiedi all'amministratore di controllare la policy (<a href="Decisions.html#d-013">D-013</a>).</p>
+</blockquote>
+<p><strong>Fatturazione.</strong> Il BYOK locale non consuma crediti Copilot: il provider fattura le chiamate (<a href="Sources.html#s-018">S-018</a>). Dal 2026-06-01 Copilot usa i GitHub AI Credits al posto delle premium requests (<a href="Sources.html#s-100">S-100</a>).</p>
+<p><strong>Piani individuali (Free, Pro, Pro+, Max, Student).</strong> Nessuna policy: il BYOK locale è disponibile nel Language Models editor. Il BYOK funziona anche senza piano Copilot, nell'harness Local (<a href="Sources.html#s-001">S-001</a>, P-02).</p>
+<p><strong>Altri client con BYOK locale:</strong> JetBrains, Xcode, Copilot CLI, GitHub Copilot app, Copilot SDK (<a href="Sources.html#s-015">S-015</a>). La policy IDE non controlla il BYOK di Copilot CLI (P-02).</p>
+<hr />
+<h2 id="3-configurazione-nativa-verso-i-provider">3. Configurazione nativa verso i provider</h2>
+<h3 id="30-procedura-comune">3.0 Procedura comune</h3>
+<ul>
+<li class="task"><input type="checkbox" disabled> Apri il Language Models editor: <strong>Chat: Manage Language Models</strong>.</li>
+<li class="task"><input type="checkbox" disabled> Seleziona <strong>Add Models</strong>.</li>
+<li class="task"><input type="checkbox" disabled> Seleziona il provider (built-in, da estensione, o <strong>Custom Endpoint</strong>).</li>
+<li class="task"><input type="checkbox" disabled> Inserisci un nome di gruppo.</li>
+<li class="task"><input type="checkbox" disabled> Inserisci la chiave API o i dettagli dell'endpoint.</li>
+<li class="task"><input type="checkbox" disabled> Se VS Code apre <code>chatLanguageModels.json</code>, completa i dettagli del modello.</li>
+<li class="task"><input type="checkbox" disabled> Seleziona il modello nel model picker della Chat view.</li>
+<li class="task"><input type="checkbox" disabled> Se il modello non è visibile, riavvia VS Code.</li>
+</ul>
+<p>Fonte: <a href="Sources.html#s-001">S-001</a>.</p>
+<blockquote>
+<p><strong>Chiavi nei comandi.</strong> Negli esempi <code>curl</code> la chiave passa da stdin (<code>printf … | curl -H @-</code>): non compare negli argomenti del processo (<a href="01-Installazione.html#7-verifica-finale">01 §7</a>).
+<strong>Chiavi API.</strong> Nei file JSON usa sempre una variabile di input (<code>"${input:nome}"</code>), non la chiave in chiaro (<a href="Sources.html#s-001">S-001</a>).
+<strong>Header di autenticazione.</strong> Con <code>apiType: messages</code> VS Code invia <code>x-api-key</code>; con URL Azure OpenAI invia <code>api-key</code>; negli altri casi <code>Authorization: Bearer &lt;apiKey&gt;</code>. Con <code>requestHeaders</code> puoi aggiungere header; il token <code>${apiKey}</code> diventa la chiave configurata (<a href="Sources.html#s-071">S-071</a>).
+<strong>Agenti.</strong> Solo i modelli con <em>tool calling</em> sono visibili per gli agenti (<a href="Sources.html#s-001">S-001</a>).
+<strong>Token.</strong> La somma di <code>maxInputTokens</code> e <code>maxOutputTokens</code> non deve superare la finestra di contesto del modello (<a href="Sources.html#s-001">S-001</a>).</p>
+</blockquote>
+<h3 id="31-claudeai-anthropic-api">3.1 Claude.AI (Anthropic API)</h3>
+<table>
+<thead>
+<tr>
+<th>Voce</th>
+<th>Valore</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Provider</td>
+<td><strong>Anthropic</strong> (built-in)</td>
+</tr>
+<tr>
+<td>Chiave</td>
+<td><code>ANTHROPIC_API_KEY</code> dalla Claude Console</td>
+</tr>
+<tr>
+<td>Modelli esempio</td>
+<td><code>claude-opus-5-5</code>, <code>claude-sonnet-5-5</code>, <code>claude-haiku-5-5</code> (<a href="Sources.html#s-040">S-040</a>)</td>
+</tr>
+<tr>
+<td>Endpoint</td>
+<td><code>https://api.anthropic.com/v1/messages</code> (<a href="Sources.html#s-040">S-040</a>)</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li class="task"><input type="checkbox" disabled> Esegui la procedura comune con il provider <strong>Anthropic</strong>.</li>
+<li class="task"><input type="checkbox" disabled> Verifica la chiave fuori da VS Code (<a href="Sources.html#s-040">S-040</a>):</li>
+</ul>
+<pre class="code"><code class="language-bash">printf 'x-api-key: %s\n' &quot;$ANTHROPIC_API_KEY&quot; \
+  | curl https://api.anthropic.com/v1/messages -H @- \
+  -H &quot;anthropic-version: 2026-10-21&quot; \
+  -H &quot;content-type: application/json&quot; \
+  -d '{&quot;model&quot;: &quot;claude-sonnet-5-5&quot;, &quot;max_tokens&quot;: 64, &quot;messages&quot;: [{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;Hello&quot;}]}'
+</code></pre>
+<blockquote>
+<p><code>2026-10-21</code> è la versione API raccomandata. Rimuove <code>temperature</code>, <code>top_p</code> e <code>top_k</code>: se li invii, l'API restituisce 400 (<a href="Sources.html#s-116">S-116</a>, <a href="Decisions.html#d-021">D-021</a>).</p>
+<p>Il livello di <em>thinking</em> si imposta dal model picker. L'impostazione <code>github.copilot.chat.anthropic.thinking.effort</code> è deprecata (<a href="Sources.html#s-001">S-001</a>).</p>
+</blockquote>
+<h3 id="32-codex-openai-api">3.2 Codex (OpenAI API)</h3>
+<table>
+<thead>
+<tr>
+<th>Voce</th>
+<th>Valore</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Provider</td>
+<td><strong>OpenAI</strong> (built-in)</td>
+</tr>
+<tr>
+<td>Chiave</td>
+<td><code>OPENAI_API_KEY</code></td>
+</tr>
+<tr>
+<td>Modelli esempio</td>
+<td><code>gpt-6.1-sol</code> (anche <code>gpt-6-astra</code>) (<a href="Sources.html#s-042">S-042</a>, <a href="Decisions.html#d-015">D-015</a>)</td>
+</tr>
+<tr>
+<td>API</td>
+<td>Responses API (<a href="Sources.html#s-042">S-042</a>, <a href="Sources.html#s-043">S-043</a>)</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Nessun modello "Codex" attivo via API.</strong> I modelli con "codex" nel nome sono <em>Shut down</em>; <code>gpt-5.3-codex</code> è <em>Deprecated</em> (<a href="Sources.html#s-102">S-102</a>). Nel talk "Codex" indica il modello raccomandato per Codex: <code>gpt-6.1-sol</code>.</p>
+</blockquote>
+<ul>
+<li class="task"><input type="checkbox" disabled> Esegui la procedura comune con il provider <strong>OpenAI</strong>.</li>
+<li class="task"><input type="checkbox" disabled> Verifica la chiave:</li>
+</ul>
+<pre class="code"><code class="language-bash">printf 'Authorization: Bearer %s\n' &quot;$OPENAI_API_KEY&quot; \
+  | curl https://api.openai.com/v1/responses -H @- \
+  -H &quot;Content-Type: application/json&quot; \
+  -d '{&quot;model&quot;: &quot;gpt-6.1-sol&quot;, &quot;input&quot;: &quot;Hello&quot;}'
+</code></pre>
+<blockquote>
+<p>La disponibilità di un modello con chiave API dipende dall'organizzazione e dal progetto OpenAI (<a href="Sources.html#s-042">S-042</a>). Verifica gli ID nel catalogo modelli prima del talk.
+<strong>Codex harness ≠ modello OpenAI BYOK.</strong> L'harness Codex di VS Code ha credenziali proprie (<a href="Sources.html#s-001">S-001</a>).</p>
+</blockquote>
+<h3 id="33-gemini-pro-google-ai-studio">3.3 Gemini Pro (Google AI Studio)</h3>
+<table>
+<thead>
+<tr>
+<th>Voce</th>
+<th>Valore</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Provider</td>
+<td><strong>Gemini</strong> (built-in)</td>
+</tr>
+<tr>
+<td>Chiave</td>
+<td><code>GEMINI_API_KEY</code> da Google AI Studio</td>
+</tr>
+<tr>
+<td>Modelli esempio</td>
+<td><code>gemini-4-argon</code> (punta, stabile, tier a pagamento); <code>gemini-3.1-pro-preview</code> (unico Pro, preview); <code>gemini-3.8-flash</code> (Flash, stabile) (<a href="Sources.html#s-044">S-044</a>, <a href="Sources.html#s-103">S-103</a>, <a href="Decisions.html#d-016">D-016</a>)</td>
+</tr>
+<tr>
+<td>Endpoint OpenAI-compatible</td>
+<td><code>https://generativelanguage.googleapis.com/v1beta/openai/</code> (<a href="Sources.html#s-045">S-045</a>)</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li class="task"><input type="checkbox" disabled> Esegui la procedura comune con il provider <strong>Gemini</strong>.</li>
+<li class="task"><input type="checkbox" disabled> Verifica la chiave con l'endpoint OpenAI-compatible:</li>
+</ul>
+<pre class="code"><code class="language-bash">printf 'Authorization: Bearer %s\n' &quot;$GEMINI_API_KEY&quot; \
+  | curl https://generativelanguage.googleapis.com/v1beta/openai/chat/completions -H @- \
+  -H &quot;Content-Type: application/json&quot; \
+  -d '{&quot;model&quot;: &quot;gemini-4-argon&quot;, &quot;messages&quot;: [{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;Hello&quot;}]}'
+</code></pre>
+<blockquote>
+<p><code>gemini-2.5-pro</code> è deprecato (review P-05). Non usarlo negli esempi.</p>
+</blockquote>
+<h3 id="34-openrouter-provider-built-in-o-custom-endpoint">3.4 OpenRouter (provider built-in o Custom Endpoint)</h3>
+<table>
+<thead>
+<tr>
+<th>Voce</th>
+<th>Valore</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Provider</td>
+<td><strong>OpenRouter</strong> (built-in dalla versione 1.122) (<a href="Sources.html#s-070">S-070</a>)</td>
+</tr>
+<tr>
+<td>Chiave</td>
+<td><code>OPENROUTER_API_KEY</code></td>
+</tr>
+<tr>
+<td>Base URL</td>
+<td><code>https://openrouter.ai/api/v1</code> (<a href="Sources.html#s-046">S-046</a>)</td>
+</tr>
+<tr>
+<td>Modello esempio</td>
+<td><code>openai/gpt-oss-120b</code> (P-05)</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li class="task"><input type="checkbox" disabled> Esegui la procedura comune con il provider <strong>OpenRouter</strong>.</li>
+</ul>
+<p><strong>Alternativa — Custom Endpoint</strong> (blocco in <a href="../../examples/vscode/chatLanguageModels.native.json"><code>examples/vscode/chatLanguageModels.native.json</code></a>). Gli header <code>HTTP-Referer</code> e <code>X-OpenRouter-Title</code> sono opzionali: servono per l'attribuzione dell'app nelle classifiche OpenRouter. <code>X-Title</code> è solo per compatibilità (<a href="Sources.html#s-121">S-121</a>).</p>
+<pre class="code"><code class="language-json">{
+  &quot;name&quot;: &quot;OpenRouter (Custom Endpoint, alternativa al provider built-in)&quot;,
+  &quot;vendor&quot;: &quot;customendpoint&quot;,
+  &quot;apiKey&quot;: &quot;${input:openrouterApiKey}&quot;,
+  &quot;apiType&quot;: &quot;chat-completions&quot;,
+  &quot;models&quot;: [
+    {
+      &quot;id&quot;: &quot;openai/gpt-oss-120b&quot;,
+      &quot;name&quot;: &quot;OpenRouter · gpt-oss-120b&quot;,
+      &quot;url&quot;: &quot;https://openrouter.ai/api/v1/chat/completions&quot;,
+      &quot;toolCalling&quot;: true,
+      &quot;vision&quot;: false,
+      &quot;maxInputTokens&quot;: 112000,
+      &quot;maxOutputTokens&quot;: 16000,
+      &quot;requestHeaders&quot;: {
+        &quot;HTTP-Referer&quot;: &quot;https://github.com/giulianolatini/WPC2026&quot;,
+        &quot;X-OpenRouter-Title&quot;: &quot;WPC2026 demo&quot;
+      }
+    }
+  ]
+}
+</code></pre>
+<ul>
+<li class="task"><input type="checkbox" disabled> Elenca gli ID disponibili:</li>
+</ul>
+<pre class="code"><code class="language-bash">curl -s https://openrouter.ai/api/v1/models | head -c 600
+</code></pre>
+<h3 id="35-hugging-face-estensione-ufficiale-o-custom-endpoint">3.5 Hugging Face (estensione ufficiale o Custom Endpoint)</h3>
+<p><strong>Percorso principale — estensione</strong> (<a href="Sources.html#s-048">S-048</a>, <a href="Decisions.html#d-008">D-008</a>):</p>
+<ul>
+<li class="task"><input type="checkbox" disabled> Crea un token <em>fine-grained</em> con il permesso <strong>Make calls to Inference Providers</strong> (<a href="Sources.html#s-047">S-047</a>).</li>
+<li class="task"><input type="checkbox" disabled> Installa l'estensione <em>Hugging Face Provider for GitHub Copilot Chat</em> (VS Code ≥ 1.104.0) (<a href="Sources.html#s-048">S-048</a>, <a href="Sources.html#s-049">S-049</a>).</li>
+<li class="task"><input type="checkbox" disabled> Apri il model picker → <strong>Manage Models…</strong> → <strong>Hugging Face</strong>.</li>
+<li class="task"><input type="checkbox" disabled> Inserisci il token.</li>
+<li class="task"><input type="checkbox" disabled> Seleziona i modelli da aggiungere al model picker.</li>
+</ul>
+<blockquote>
+<p>Se il provider Hugging Face non è visibile, aggiorna VS Code e ricarica la finestra (<a href="Sources.html#s-048">S-048</a>).</p>
+</blockquote>
+<p><strong>Percorso alternativo — Custom Endpoint</strong> verso il router OpenAI-compatible <code>https://router.huggingface.co/v1</code> (<a href="Sources.html#s-047">S-047</a>):</p>
+<pre class="code"><code class="language-json">{
+  &quot;name&quot;: &quot;Hugging Face Router&quot;,
+  &quot;vendor&quot;: &quot;customendpoint&quot;,
+  &quot;apiKey&quot;: &quot;${input:hfToken}&quot;,
+  &quot;apiType&quot;: &quot;chat-completions&quot;,
+  &quot;models&quot;: [
+    {
+      &quot;id&quot;: &quot;openai/gpt-oss-120b:groq&quot;,
+      &quot;name&quot;: &quot;HF · gpt-oss-120b (groq)&quot;,
+      &quot;url&quot;: &quot;https://router.huggingface.co/v1/chat/completions&quot;,
+      &quot;toolCalling&quot;: true,
+      &quot;vision&quot;: false,
+      &quot;maxInputTokens&quot;: 112000,
+      &quot;maxOutputTokens&quot;: 16000
+    }
+  ]
+}
+</code></pre>
+<p>Il suffisso dell'ID sceglie il provider di inferenza: <code>:fastest</code> (default), <code>:cheapest</code>, <code>:preferred</code>, oppure <code>:&lt;provider&gt;</code> (es. <code>:groq</code>) (<a href="Sources.html#s-047">S-047</a>). L'esempio fissa <code>:groq</code>: così sai quale provider tratta i dati (<a href="04-Security-Review-OWASP-ISO27001.html#9-azioni">04 AZ-06</a>).</p>
+<h3 id="36-riepilogo-della-configurazione-nativa">3.6 Riepilogo della configurazione nativa</h3>
+<table>
+<thead>
+<tr>
+<th>Provider</th>
+<th>Tipo di provider in VS Code</th>
+<th>Formato API</th>
+<th>Chiavi da gestire sul client</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Claude.AI</td>
+<td>Built-in Anthropic</td>
+<td>Messages</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Codex</td>
+<td>Built-in OpenAI</td>
+<td>Responses</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Gemini</td>
+<td>Built-in Gemini</td>
+<td>Gemini / OpenAI-compatible</td>
+<td>1</td>
+</tr>
+<tr>
+<td>OpenRouter</td>
+<td>Built-in OpenRouter (o Custom Endpoint)</td>
+<td>Chat Completions</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Hugging Face</td>
+<td>Estensione HF o Custom Endpoint</td>
+<td>Chat Completions</td>
+<td>1</td>
+</tr>
+<tr>
+<td><strong>Totale</strong></td>
+<td>4–5 configurazioni</td>
+<td>3 formati</td>
+<td><strong>5 chiavi su ogni client</strong></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="4-github-copilot-con-litellm-come-gateway">4. GitHub Copilot con LiteLLM come gateway</h2>
+<h3 id="41-quando-usare-un-gateway">4.1 Quando usare un gateway</h3>
+<p>LiteLLM proxy espone un solo endpoint locale. Traduce le richieste nei formati dei provider (<a href="Sources.html#s-022">S-022</a>). La scelta tra nativo e gateway dipende dal contesto (<a href="Decisions.html#d-017">D-017</a>).</p>
+<p><strong>Criteri di scelta</strong></p>
+<table>
+<thead>
+<tr>
+<th>Contesto</th>
+<th>Raccomandazione</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Singolo sviluppatore, pochi provider</td>
+<td><strong>Nativo.</strong> Nessun componente in più, nessun punto singolo di guasto</td>
+</tr>
+<tr>
+<td>Team con chiavi condivise, budget, allowlist di modelli, log centralizzati</td>
+<td><strong>Gateway</strong>, con hardening (sotto)</td>
+</tr>
+<tr>
+<td>Organizzazione su Copilot Business/Enterprise</td>
+<td>Valuta prima l'<strong>Enterprise BYOK</strong> di GitHub (§4.6)</td>
+</tr>
+<tr>
+<td>Uso di thinking Anthropic con tool</td>
+<td>Nativo, o gateway con <code>apiType: messages</code> (<a href="Decisions.html#d-019">D-019</a>)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Confronto</strong></p>
+<table>
+<thead>
+<tr>
+<th>Aspetto</th>
+<th>Nativo</th>
+<th>LiteLLM</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Chiavi dei provider</td>
+<td>Su ogni client VS Code (secret storage)</td>
+<td>Solo sul gateway (<code>.env</code> o DB)</td>
+</tr>
+<tr>
+<td>Chiave sul client</td>
+<td>5</td>
+<td>1 (virtual key)</td>
+</tr>
+<tr>
+<td>Impatto di una compromissione</td>
+<td>Una chiave di uno sviluppatore</td>
+<td>Tutte le chiavi di tutti i provider (<a href="Sources.html#s-104">S-104</a>)</td>
+</tr>
+<tr>
+<td>Nomi dei modelli</td>
+<td>ID del vendor</td>
+<td>Alias stabili (<code>model_name</code>)</td>
+</tr>
+<tr>
+<td>Formato API verso VS Code</td>
+<td>Nativo del provider</td>
+<td><code>chat-completions</code>, <code>responses</code>, <code>messages</code> tradotti (<a href="Sources.html#s-028">S-028</a>, <a href="Sources.html#s-029">S-029</a>)</td>
+</tr>
+<tr>
+<td>Thinking Anthropic con tool</td>
+<td>Preservato</td>
+<td>A rischio con <code>chat-completions</code> (<a href="Sources.html#s-110">S-110</a>)</td>
+</tr>
+<tr>
+<td>Cambio di modello</td>
+<td>Riconfigura ogni client</td>
+<td>Modifica <code>config.yaml</code> e riavvia</td>
+</tr>
+<tr>
+<td>Budget, spend log, chiavi per utente</td>
+<td>No</td>
+<td>Sì, profilo esteso con PostgreSQL (<a href="Sources.html#s-020">S-020</a>)</td>
+</tr>
+<tr>
+<td>Latenza aggiunta</td>
+<td>—</td>
+<td>Pochi ms dichiarati dal vendor; trascurabile (P-08)</td>
+</tr>
+<tr>
+<td>Componenti da gestire</td>
+<td>Nessuno</td>
+<td>Servizio, aggiornamenti di sicurezza, DB (profilo esteso)</td>
+</tr>
+<tr>
+<td>Punto singolo di guasto</td>
+<td>No</td>
+<td>Sì, compensato in parte da fallback e routing</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Rischi del gateway (2026)</strong></p>
+<ul>
+<li><strong>Supply chain:</strong> release compromesse <code>1.82.7</code>, <code>1.82.8</code> (marzo) e <code>1.107.0</code> (ottobre), con tag mobili Docker compromessi (<a href="Sources.html#s-104">S-104</a>, <a href="Sources.html#s-105">S-105</a>).</li>
+<li><strong>Vulnerabilità:</strong> CVE critiche nel proxy, tra cui CVE-2026-114612 (CVSS 9.9, escalation da utente interno) (<a href="Sources.html#s-106">S-106</a>, <a href="Sources.html#s-107">S-107</a>).</li>
+<li><strong>Traduzione dei formati:</strong> bug aperti su reasoning e tool call tra Responses, Messages e Chat Completions (P-08).</li>
+<li><strong>Integrazione con VS Code:</strong> la discovery dei modelli fallisce ("Invalid response format") (<a href="Sources.html#s-111">S-111</a>); il cambio Plan→Agent con <code>customendpoint</code> ha un'issue aperta (<a href="Sources.html#s-076">S-076</a>); i modelli BYOK custom endpoint possono non essere disponibili in WSL, SSH e Dev Container (riguarda tutto il BYOK) (<a href="Sources.html#s-077">S-077</a>).</li>
+</ul>
+<p><strong>Hardening minimo</strong> (<a href="Decisions.html#d-018">D-018</a>, <a href="Sources.html#s-108">S-108</a>)</p>
+<ul>
+<li class="task"><input type="checkbox" disabled> Versione fissata (<code>1.108.2</code>); mai <code>latest</code>, <code>main-latest</code>, <code>main-stable</code>; digest e firma cosign in team.</li>
+<li class="task"><input type="checkbox" disabled> Bind su <code>127.0.0.1</code> (il default è <code>0.0.0.0</code>) (<a href="Sources.html#s-118">S-118</a>). In rete: TLS e rete privata.</li>
+<li class="task"><input type="checkbox" disabled> Agli sviluppatori solo virtual keys con scope e budget, mai la master key.</li>
+<li class="task"><input type="checkbox" disabled> <code>general_settings.disable_env_credential_login: true</code>; SSO per l'Admin UI.</li>
+<li class="task"><input type="checkbox" disabled> Ruota le chiavi se hai eseguito una versione compromessa.</li>
+</ul>
+<h3 id="42-configurazione-del-gateway-configyaml">4.2 Configurazione del gateway (<code>config.yaml</code>)</h3>
+<p>File completo: <a href="../../examples/litellm/config.yaml"><code>examples/litellm/config.yaml</code></a>. Estratto senza le impostazioni di hardening (<code>extra_body.provider</code>, <code>turn_off_message_logging</code>, <code>max_request_size_mb</code>, <code>allowed_file_extensions</code>), descritte in <a href="04-Security-Review-OWASP-ISO27001.html#9-azioni">04 §9</a>:</p>
+<pre class="code"><code class="language-yaml">model_list:
+  - model_name: claude-sonnet               # alias usato da VS Code
+    litellm_params:
+      model: anthropic/claude-sonnet-5-5    # prefisso provider / ID vendor
+      api_key: os.environ/ANTHROPIC_API_KEY
+  - model_name: codex
+    litellm_params:
+      model: openai/responses/gpt-6.1-sol   # Responses API (D-015)
+      api_key: os.environ/OPENAI_API_KEY
+  - model_name: gemini                      # default stabile (D-016)
+    litellm_params:
+      model: gemini/gemini-4-argon          # gemini/ = AI Studio; senza prefisso = Vertex AI
+      api_key: os.environ/GEMINI_API_KEY
+  - model_name: gemini-pro                  # preview
+    litellm_params:
+      model: gemini/gemini-3.1-pro-preview
+      api_key: os.environ/GEMINI_API_KEY
+  - model_name: openrouter-gpt-oss
+    litellm_params:
+      model: openrouter/openai/gpt-oss-120b
+      api_key: os.environ/OPENROUTER_API_KEY
+  - model_name: hf-gpt-oss
+    litellm_params:
+      model: huggingface/groq/openai/gpt-oss-120b   # huggingface/&lt;provider&gt;/&lt;org&gt;/&lt;model&gt;
+      api_key: os.environ/HF_TOKEN
+
+litellm_settings:
+  drop_params: true
+
+general_settings:
+  master_key: os.environ/LITELLM_MASTER_KEY
+  disable_env_credential_login: true
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Prefisso</th>
+<th>Provider</th>
+<th>Variabile</th>
+<th>Fonte</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>anthropic/</code></td>
+<td>Anthropic API</td>
+<td><code>ANTHROPIC_API_KEY</code></td>
+<td><a href="Sources.html#s-024">S-024</a></td>
+</tr>
+<tr>
+<td><code>openai/</code></td>
+<td>OpenAI API, Chat Completions</td>
+<td><code>OPENAI_API_KEY</code></td>
+<td><a href="Sources.html#s-020">S-020</a></td>
+</tr>
+<tr>
+<td><code>openai/responses/</code></td>
+<td>OpenAI API, Responses API</td>
+<td><code>OPENAI_API_KEY</code></td>
+<td><a href="Sources.html#s-120">S-120</a></td>
+</tr>
+<tr>
+<td><code>gemini/</code></td>
+<td>Google AI Studio</td>
+<td><code>GEMINI_API_KEY</code></td>
+<td><a href="Sources.html#s-025">S-025</a></td>
+</tr>
+<tr>
+<td><code>openrouter/</code></td>
+<td>OpenRouter</td>
+<td><code>OPENROUTER_API_KEY</code></td>
+<td><a href="Sources.html#s-026">S-026</a></td>
+</tr>
+<tr>
+<td><code>huggingface/</code></td>
+<td>HF Inference Providers</td>
+<td><code>HF_TOKEN</code></td>
+<td><a href="Sources.html#s-027">S-027</a></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li class="task"><input type="checkbox" disabled> Avvia il proxy (profilo minimo): <a href="01-Installazione.html#51-profilo-minimo-senza-database">01-Installazione.md §5.1</a> o <a href="01-Installazione.html#6-litellm-come-servizio-locale-con-uv">§6</a>.</li>
+<li class="task"><input type="checkbox" disabled> Verifica gli alias (la chiave passa da stdin, non dagli argomenti di <code>curl</code>):</li>
+</ul>
+<pre class="code"><code class="language-bash">printf 'Authorization: Bearer %s\n' &quot;$LITELLM_MASTER_KEY&quot; | curl -s http://localhost:4000/v1/models -H @-
+</code></pre>
+<h3 id="43-configurazione-di-vs-code-verso-litellm">4.3 Configurazione di VS Code verso LiteLLM</h3>
+<ul>
+<li class="task"><input type="checkbox" disabled> Esegui la procedura comune (§3.0) con <strong>Custom Endpoint</strong>.</li>
+<li class="task"><input type="checkbox" disabled> Inserisci in <code>chatLanguageModels.json</code> il contenuto di <a href="../../examples/vscode/chatLanguageModels.litellm.json"><code>examples/vscode/chatLanguageModels.litellm.json</code></a>.</li>
+<li class="task"><input type="checkbox" disabled> Alla prima richiesta, inserisci nel prompt <code>litellmKey</code> la master key (profilo minimo) o una virtual key (profilo esteso).</li>
+</ul>
+<p><strong>Gruppo in formato OpenAI</strong> (<code>apiType: chat-completions</code>) per Codex, Gemini, OpenRouter, Hugging Face. Estratto: il file completo contiene anche <code>openrouter-gpt-oss</code> e <code>hf-gpt-oss</code>:</p>
+<pre class="code"><code class="language-json">{
+  &quot;name&quot;: &quot;LiteLLM (OpenAI format)&quot;,
+  &quot;vendor&quot;: &quot;customendpoint&quot;,
+  &quot;apiKey&quot;: &quot;${input:litellmKey}&quot;,
+  &quot;apiType&quot;: &quot;chat-completions&quot;,
+  &quot;models&quot;: [
+    { &quot;id&quot;: &quot;codex&quot;,      &quot;name&quot;: &quot;LiteLLM · Codex (gpt-6.1-sol)&quot;,      &quot;url&quot;: &quot;http://localhost:4000/v1/chat/completions&quot;, &quot;toolCalling&quot;: true, &quot;vision&quot;: true, &quot;maxInputTokens&quot;: 112000, &quot;maxOutputTokens&quot;: 16000 },
+    { &quot;id&quot;: &quot;gemini&quot;,     &quot;name&quot;: &quot;LiteLLM · Gemini 4 Argon&quot;,           &quot;url&quot;: &quot;http://localhost:4000/v1/chat/completions&quot;, &quot;toolCalling&quot;: true, &quot;vision&quot;: true, &quot;maxInputTokens&quot;: 112000, &quot;maxOutputTokens&quot;: 16000 },
+    { &quot;id&quot;: &quot;gemini-pro&quot;, &quot;name&quot;: &quot;LiteLLM · Gemini 3.1 Pro (preview)&quot;, &quot;url&quot;: &quot;http://localhost:4000/v1/chat/completions&quot;, &quot;toolCalling&quot;: true, &quot;vision&quot;: true, &quot;maxInputTokens&quot;: 112000, &quot;maxOutputTokens&quot;: 16000 }
+  ]
+}
+</code></pre>
+<p><strong>Gruppo in formato Anthropic</strong> (<code>apiType: messages</code>) per Claude. Estratto: il file completo contiene anche <code>claude-opus</code>. Il formato Messages evita la perdita dei <code>thinking_blocks</code> con tool (<a href="Decisions.html#d-019">D-019</a>, <a href="Sources.html#s-110">S-110</a>):</p>
+<pre class="code"><code class="language-json">{
+  &quot;name&quot;: &quot;LiteLLM (Anthropic format)&quot;,
+  &quot;vendor&quot;: &quot;customendpoint&quot;,
+  &quot;apiKey&quot;: &quot;${input:litellmKey}&quot;,
+  &quot;apiType&quot;: &quot;messages&quot;,
+  &quot;models&quot;: [
+    {
+      &quot;id&quot;: &quot;claude-sonnet&quot;,
+      &quot;name&quot;: &quot;LiteLLM · Claude Sonnet (messages)&quot;,
+      &quot;url&quot;: &quot;http://localhost:4000/v1/messages&quot;,
+      &quot;toolCalling&quot;: true, &quot;vision&quot;: true,
+      &quot;maxInputTokens&quot;: 112000, &quot;maxOutputTokens&quot;: 16000,
+      &quot;requestHeaders&quot;: { &quot;Authorization&quot;: &quot;Bearer ${apiKey}&quot; }
+    }
+  ]
+}
+</code></pre>
+<blockquote>
+<p><strong>Autenticazione con Messages.</strong> VS Code invia <code>x-api-key</code> (<a href="Sources.html#s-071">S-071</a>). LiteLLM su <code>/v1/messages</code> documenta <code>Authorization: Bearer</code> e <code>x-litellm-api-key</code> (P-04); l'esempio LiteLLM usa <code>x-api-key</code> (<a href="Sources.html#s-028">S-028</a>). L'header <code>Authorization: Bearer ${apiKey}</code> copre i due casi. ⚠️ Non attivare <code>forward_llm_provider_auth_headers</code>: con questa opzione LiteLLM inoltra <code>x-api-key</code> al provider (P-04).</p>
+<p><strong>Discovery.</strong> Non impostare <code>url</code> a livello di provider: la discovery dei modelli LiteLLM fallisce (<a href="Sources.html#s-111">S-111</a>). Usa un <code>url</code> esplicito per ogni modello (<a href="Decisions.html#d-019">D-019</a>).</p>
+<p><strong>Token.</strong> I valori di <code>maxInputTokens</code>/<code>maxOutputTokens</code> sono prudenziali: adattali alla finestra di contesto reale. La somma non deve superare la finestra.</p>
+</blockquote>
+<p><strong>Gruppo in formato Responses</strong> (opzionale): usa <code>"apiType": "responses"</code> e <code>"url": "http://localhost:4000/v1/responses"</code>. LiteLLM traduce Responses → Chat Completions per Anthropic e Gemini (<a href="Sources.html#s-029">S-029</a>).</p>
+<h3 id="44-profilo-esteso-virtual-keys-per-utente">4.4 Profilo esteso: virtual keys per utente</h3>
+<p>Con PostgreSQL (<a href="01-Installazione.html#52-profilo-esteso-postgresql--admin-ui--virtual-keys">01-Installazione.md §5.2</a>) il gateway genera chiavi per utente con budget (<a href="Sources.html#s-020">S-020</a>, <a href="Sources.html#s-031">S-031</a>).</p>
+<ul>
+<li class="task"><input type="checkbox" disabled> Genera una virtual key ⚠️ (parametri da verificare in <a href="Sources.html#s-031">S-031</a>):</li>
+</ul>
+<pre class="code"><code class="language-bash">printf 'Authorization: Bearer %s\n' &quot;$LITELLM_MASTER_KEY&quot; \
+  | curl -s http://localhost:4000/key/generate -H @- \
+  -H &quot;Content-Type: application/json&quot; \
+  -d '{&quot;models&quot;: [&quot;claude-sonnet&quot;, &quot;gemini-pro&quot;], &quot;max_budget&quot;: 5, &quot;metadata&quot;: {&quot;user&quot;: &quot;demo-wpc&quot;}}'
+</code></pre>
+<ul>
+<li class="task"><input type="checkbox" disabled> Usa il valore <code>key</code> della risposta nel prompt <code>litellmKey</code> di VS Code.</li>
+<li class="task"><input type="checkbox" disabled> Controlla la spesa nell'Admin UI: <code>http://localhost:4000/ui</code>.</li>
+</ul>
+<h3 id="45-sequenza-di-una-richiesta">4.5 Sequenza di una richiesta</h3>
+<pre class="code"><code class="language-mermaid">sequenceDiagram
+  participant VS as VS Code (Custom Endpoint)
+  participant LL as LiteLLM :4000
+  participant PR as Provider (Anthropic/OpenAI/Gemini/OpenRouter/HF)
+  VS-&gt;&gt;LL: POST /v1/chat/completions {model: &quot;gemini-pro&quot;} + litellmKey
+  LL-&gt;&gt;LL: verifica chiave, risolve alias → gemini/gemini-3.1-pro-preview
+  LL-&gt;&gt;PR: richiesta nel formato del provider + GEMINI_API_KEY
+  PR--&gt;&gt;LL: risposta (stream)
+  LL--&gt;&gt;VS: risposta in formato OpenAI (stream)
+</code></pre>
+<h3 id="46-alternative-a-litellm">4.6 Alternative a LiteLLM</h3>
+<table>
+<thead>
+<tr>
+<th>Opzione</th>
+<th>Formati esposti</th>
+<th>Deployment</th>
+<th>Nota</th>
+<th>Fonte</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Enterprise BYOK di GitHub</strong></td>
+<td>Modelli serviti dalla Copilot API</td>
+<td>GitHub (lato server)</td>
+<td>Public preview; richiede licenza Copilot Business/Enterprise</td>
+<td><a href="Sources.html#s-015">S-015</a></td>
+</tr>
+<tr>
+<td><strong>Portkey</strong></td>
+<td>Chat, Responses, Messages</td>
+<td>Gateway open source o SaaS</td>
+<td>Non tutti i provider supportano tutti gli endpoint</td>
+<td><a href="Sources.html#s-112">S-112</a></td>
+</tr>
+<tr>
+<td><strong>Cloudflare AI Gateway</strong></td>
+<td><code>/chat/completions</code>, <code>/responses</code>, <code>/messages</code></td>
+<td>Solo SaaS</td>
+<td>Il traffico passa da Cloudflare</td>
+<td><a href="Sources.html#s-113">S-113</a></td>
+</tr>
+<tr>
+<td><strong>Azure APIM + Foundry</strong></td>
+<td><code>/chat/completions</code>, <code>/responses</code></td>
+<td>Azure, managed identity</td>
+<td>Copre solo modelli su Foundry; chiavi per organizzazione</td>
+<td><a href="Sources.html#s-114">S-114</a></td>
+</tr>
+<tr>
+<td><strong>OpenRouter come gateway</strong></td>
+<td>Chat Completions</td>
+<td>SaaS</td>
+<td>Budget, allowlist, ZDR; LiteLLM davanti a OpenRouter aggiunge un doppio salto</td>
+<td><a href="Sources.html#s-115">S-115</a></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="appendice-a--github-spec-kit-con-copilot">Appendice A — GitHub Spec Kit con Copilot</h2>
+<p>Spec Kit implementa lo <em>spec-driven development</em>: la specifica guida l'agente nelle fasi constitution → specify → plan → tasks → implement (<a href="Sources.html#s-080">S-080</a>).</p>
+<h3 id="a1-requisiti">A.1 Requisiti</h3>
+<ul>
+<li>Python 3.11+, <code>uv</code>, un agente supportato (GitHub Copilot), su Linux, macOS o Windows (<a href="Sources.html#s-080">S-080</a>).</li>
+</ul>
+<h3 id="a2-installazione-della-cli-specify">A.2 Installazione della CLI <code>specify</code></h3>
+<ul>
+<li class="task"><input type="checkbox" disabled> Installa la CLI (<a href="Sources.html#s-081">S-081</a>):</li>
+</ul>
+<pre class="code"><code class="language-bash">uv tool install specify-cli
+</code></pre>
+<ul>
+<li class="task"><input type="checkbox" disabled> (Raccomandato per il talk) Fissa una release. Ultima release: <code>v1.3.2</code> (2026-11-06) (<a href="Sources.html#s-085">S-085</a>):</li>
+</ul>
+<pre class="code"><code class="language-bash">uv tool install specify-cli --from git+https://github.com/github/spec-kit.git@v1.3.2
+# oppure da PyPI
+uv tool install specify-cli==1.3.2
+</code></pre>
+<ul>
+<li class="task"><input type="checkbox" disabled> Verifica: <code>specify version</code>. Controlla gli aggiornamenti: <code>specify self check</code> (<a href="Sources.html#s-081">S-081</a>).</li>
+<li class="task"><input type="checkbox" disabled> Controlla i tool degli agenti installati: <code>specify check</code> (<a href="Sources.html#s-084">S-084</a>).</li>
+<li class="task"><input type="checkbox" disabled> Aggiorna, se necessario: <code>uv tool install --force specify-cli</code> (<a href="Sources.html#s-081">S-081</a>).</li>
+</ul>
+<h3 id="a3-integrazione-con-github-copilot">A.3 Integrazione con GitHub Copilot</h3>
+<ul>
+<li class="task"><input type="checkbox" disabled> Crea un nuovo progetto con l'integrazione Copilot (<a href="Sources.html#s-080">S-080</a>, <a href="Sources.html#s-081">S-081</a>):</li>
+</ul>
+<pre class="code"><code class="language-bash">specify init my-project --integration copilot
+cd my-project
+code .
+</code></pre>
+<ul>
+<li class="task"><input type="checkbox" disabled> Oppure inizializza la cartella corrente (repository esistente):</li>
+</ul>
+<pre class="code"><code class="language-bash">specify init --here --force --integration copilot
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Opzione</th>
+<th>Funzione</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--integration copilot</code></td>
+<td>Genera i comandi per GitHub Copilot</td>
+</tr>
+<tr>
+<td><code>--script sh</code> | <code>ps</code> | <code>py</code></td>
+<td>Tipo di script; default <code>ps</code> su Windows, <code>sh</code> sugli altri sistemi</td>
+</tr>
+<tr>
+<td><code>--here</code></td>
+<td>Usa la cartella corrente</td>
+</tr>
+<tr>
+<td><code>--force</code></td>
+<td>Conferma il merge in una cartella non vuota</td>
+</tr>
+<tr>
+<td><code>--non-interactive</code></td>
+<td>Nessun selettore interattivo (CI); senza <code>--integration</code> il default è Copilot</td>
+</tr>
+<tr>
+<td><code>--integration-options="--commands"</code></td>
+<td>Layout a comandi (agents + prompt files) al posto delle skill</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>L'opzione <code>--ai</code> non esiste più: è stata rimossa nella 0.10.0. Usa <code>--integration</code> (<a href="Sources.html#s-084">S-084</a>, P-07).</p>
+</blockquote>
+<ul>
+<li class="task"><input type="checkbox" disabled> Prima del primo commit, controlla i file generati (<a href="04-Security-Review-OWASP-ISO27001.html#9-azioni">04 AZ-10</a>). Gli script in <code>.specify/scripts/</code> e le skill sono eseguiti dall'agente:</li>
+</ul>
+<pre class="code"><code class="language-bash">git status --short
+git diff --stat
+</code></pre>
+<p>Gli script vanno in <code>.specify/scripts/bash/</code>, <code>.specify/scripts/powershell/</code> o <code>.specify/scripts/python/</code> (<a href="Sources.html#s-081">S-081</a>).
+<strong>File generati per Copilot</strong> (<a href="Sources.html#s-083">S-083</a>):</p>
+<table>
+<thead>
+<tr>
+<th>Layout</th>
+<th>File</th>
+<th>Invocazione</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Skills (default)</td>
+<td><code>.github/skills/speckit-&lt;comando&gt;/SKILL.md</code></td>
+<td><code>/speckit-&lt;comando&gt;</code></td>
+</tr>
+<tr>
+<td>Commands (<code>--integration-options="--commands"</code>)</td>
+<td><code>.github/agents/speckit.&lt;comando&gt;.agent.md</code>, <code>.github/prompts/speckit.&lt;comando&gt;.prompt.md</code>, merge di <code>.vscode/settings.json</code></td>
+<td>agente <code>speckit.&lt;comando&gt;</code></td>
+</tr>
+</tbody>
+</table>
+<p>Le skill funzionano negli harness Copilot e Local (§2.3). Il layout a comandi usa prompt files: solo harness Local.</p>
+<h3 id="a4-flusso-di-lavoro-in-copilot-chat">A.4 Flusso di lavoro in Copilot Chat</h3>
+<p>I comandi si eseguono nella chat dell'agente, non nel terminale (<a href="Sources.html#s-080">S-080</a>):</p>
+<table>
+<thead>
+<tr>
+<th>Passo</th>
+<th>Comando</th>
+<th>Risultato</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>/speckit-constitution</code></td>
+<td>Principi del progetto</td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>/speckit-specify</code></td>
+<td>Cosa e perché (requisiti)</td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>/speckit-clarify</code></td>
+<td>Chiarimento dei punti ambigui</td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>/speckit-plan</code></td>
+<td>Come (piano tecnico)</td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>/speckit-tasks</code></td>
+<td>Elenco di task</td>
+</tr>
+<tr>
+<td>6</td>
+<td><code>/speckit-analyze</code></td>
+<td>Controllo di coerenza tra gli artefatti</td>
+</tr>
+<tr>
+<td>7</td>
+<td><code>/speckit-implement</code></td>
+<td>Implementazione dei task</td>
+</tr>
+<tr>
+<td>—</td>
+<td><code>/speckit-checklist</code>, <code>/speckit-converge</code></td>
+<td>Checklist di qualità; riallineamento (<a href="Sources.html#s-081">S-081</a>)</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>Dalla v1.3.0 <code>/speckit.taskstoissues</code> non esiste più: usa l'estensione <code>github</code> (P-07).</p>
+</blockquote>
+<p><strong>Esempio di sessione:</strong></p>
+<pre class="code"><code class="language-text">/speckit-constitution Il codice usa Python 3.12, test con pytest, nessuna dipendenza non necessaria.
+/speckit-specify Una CLI che legge un config.yaml di LiteLLM e verifica che ogni alias risponda a /v1/chat/completions.
+/speckit-plan Usa httpx e PyYAML. Output in tabella Markdown.
+/speckit-tasks
+/speckit-implement
+</code></pre>
+<h3 id="a5-spec-kit-con-modelli-byok-e-litellm">A.5 Spec Kit con modelli BYOK e LiteLLM</h3>
+<ul>
+<li class="task"><input type="checkbox" disabled> Seleziona nel model picker un modello BYOK con <em>tool calling</em> (nativo o <code>LiteLLM · …</code>).</li>
+<li class="task"><input type="checkbox" disabled> Esegui i comandi <code>/speckit-*</code> come in A.4.</li>
+</ul>
+<p>Spec Kit non dipende dal modello: i comandi sono customizations di Copilot (§2.3). Così la demo mostra lo stesso flusso con Claude, Codex e Gemini attraverso LiteLLM.</p></article>
+<script type="application/json" id="fonts-data">[
+  {
+    "id": "blexmono",
+    "label": "BlexMono Nerd Font (IBM Plex Mono)",
+    "mono": true,
+    "body": false
+  },
+  {
+    "id": "firacode",
+    "label": "FiraCode Nerd Font",
+    "mono": true,
+    "body": false
+  },
+  {
+    "id": "monoid",
+    "label": "Monoid Nerd Font",
+    "mono": true,
+    "body": false
+  },
+  {
+    "id": "opendyslexic",
+    "label": "OpenDyslexic Nerd Font",
+    "mono": true,
+    "body": true
+  },
+  {
+    "id": "saucecodepro",
+    "label": "SauceCodePro Nerd Font (Source Code Pro)",
+    "mono": true,
+    "body": false
+  }
+]</script>
+<script src="../assets/vendor/highlight/highlight.min.js"></script>
+<script src="../assets/vendor/highlight/languages/bash.min.js"></script>
+<script src="../assets/vendor/highlight/languages/powershell.min.js"></script>
+<script src="../assets/vendor/highlight/languages/yaml.min.js"></script>
+<script src="../assets/vendor/highlight/languages/json.min.js"></script>
+<script src="../assets/vendor/highlight/languages/ini.min.js"></script>
+<script src="../assets/vendor/highlight/languages/dockerfile.min.js"></script>
+<script src="../assets/vendor/highlight/languages/plaintext.min.js"></script>
+<script src="../assets/common.js"></script>
+<script src="../assets/doc.js"></script>
+</body>
+</html>
