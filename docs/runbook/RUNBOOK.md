@@ -17,7 +17,7 @@ Il sito offline in `site/` si genera da questo file con `tools/update-site.sh` (
   - `evidence=no-output`: il sito non salva l'output di quel passo (es. generazione di segreti).
 - Un blocco di codice con `os=` nell'intestazione (es. ` ```bash os=macos `) appare solo per quei sistemi.
 - `{{NOME}}` nei comandi è un parametro della tabella **Parametri**. Il sito lo sostituisce con il valore inserito.
-- Nei comandi bash e PowerShell un parametro che contiene un percorso o un testo libero sta sempre tra virgolette doppie (es. `"{{WPC_DIR}}"`): così un percorso con spazi resta un solo argomento. Per la home usa `$HOME`, non `~`: tra virgolette `~` non si espande. Il sito rifiuta valori con virgolette o con `; | & < >`.
+- Nei comandi bash e PowerShell un parametro che contiene un percorso o un testo libero sta sempre tra virgolette doppie (es. `"{{WPC_DIR}}"`): così un percorso con spazi resta un solo argomento. Per la home usa `$HOME`, non `~`: tra virgolette `~` non si espande. Il sito rifiuta valori con virgolette, parentesi, backtick, `$` (salvo `$HOME` all'inizio) o con `; | & < >`.
 - Nessun segreto nei comandi: le chiavi stanno solo in `.env` e nel secret storage di VS Code.
 
 ## Parametri
