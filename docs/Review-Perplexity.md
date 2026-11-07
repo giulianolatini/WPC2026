@@ -143,6 +143,40 @@ A5. Alternative a LiteLLM come gateway per Copilot BYOK (es. Portkey, Azure AI F
 
 ---
 
+## P-09 — Best practice di sicurezza (VS Code, Copilot, LiteLLM)
+
+```text
+Verifica (novembre 2026) le best practice di sicurezza per GitHub Copilot in VS Code e LiteLLM proxy.
+A1. VS Code: livelli di permesso dell'agente "Manual permissions", "Assisted permissions", "Allow all", "Autopilot"; setting "chat.tools.global.autoApprove" e "chat.tools.edits.autoApprove" (glob → false).
+A2. Sandbox dell'agente attiva di default su Windows, macOS, Linux; "chat.agent.sandbox.network.allowNetwork" default true. Come si consentono domini specifici?
+A3. Policy enterprise: ChatToolsAutoApprove, ChatToolsEligibleForAutoApproval, ChatToolsTerminalEnableAutoApprove, ChatMCP (registryOnly/off), McpGalleryServiceUrl, ChatAgentNetworkFilter, ChatAllowManagedHooksOnly, ChatApprovedAccountOrganizations. L'harness Copilot non applica completamente ChatAgentMode, ChatMCP, ChatToolsEligibleForAutoApproval?
+A4. Workspace Trust: setting security.workspace.trust.startupPrompt (default never), emptyWindow (default true). Le config MCP del repo (.vscode/mcp.json, .mcp.json) ereditano Workspace Trust?
+A5. Content exclusion di Copilot: si applica agli agenti in VS Code e ai modelli BYOK?
+A6. LiteLLM: disable_env_credential_login, trusted_proxy_ranges, NO_DOCS/NO_REDOC/NO_OPENAPI, allowed_file_extensions, max_request_size_mb, PROXY_BASE_URL; immagine litellm-non_root disponibile per v1.108.2; comando cosign verify con chiave del commit e82a3c6.
+A7. Con disable_env_credential_login: true, qual è la procedura ufficiale per creare il primo proxy_admin?
+Fonti di partenza: https://code.visualstudio.com/docs/copilot/security ; https://docs.litellm.ai/docs/proxy/security_best_practices
+[INCOLLA QUI LE ISTRUZIONI COMUNI]
+```
+
+## P-10 — Mappatura OWASP e ISO/IEC 27001
+
+```text
+Agisci da auditor ISO/IEC 27001 e security reviewer OWASP.
+A1. Elenco ufficiale e titoli esatti di OWASP Top 10 for Agentic Applications 2026 (ASI01…ASI10). Esiste una versione 2026 dell'OWASP Top 10 for LLM Applications che sostituisce la 2025?
+A2. La mappatura seguente è corretta? Proponi controlli Annex A mancanti o errati:
+  - chiavi API in .env in chiaro → A.5.17, A.8.3
+  - immagini container con tag non per digest → A.5.21, A.8.8, A.8.19
+  - provider LLM come fornitori/subprocessor → A.5.19, A.5.21, A.5.23, A.5.34
+  - permessi autonomi dell'agente di coding → A.8.2, A.5.15
+  - log del proxy LLM → A.8.15, A.8.11
+A3. Come si inserisce l'uso di assistenti di coding AI con BYOK nel risk assessment (6.1.2) e nello Statement of Applicability (6.1.3)? Serve riferirsi a ISO/IEC 42001?
+A4. L'Amendment 1:2024 di ISO/IEC 27001 (cambiamento climatico in 4.1 e 4.2) ha impatti su questo ambito?
+A5. Rischi mancanti nel registro: furto chiavi dal gateway, prompt injection, lettura .env, costi non controllati, codice trattato da provider terzi, script non verificati, indisponibilità del gateway.
+[INCOLLA QUI LE ISTRUZIONI COMUNI]
+```
+
+---
+
 ## Registro degli esiti
 
 Risposte ricevute il 2026-11-07. L'assistente ha riletto direttamente le fonti primarie dei punti critici (colonna **Verifica diretta**).
@@ -157,6 +191,9 @@ Risposte ricevute il 2026-11-07. L'assistente ha riletto direttamente le fonti p
 | P-06 | 4 confermate, 2 parziali, 1 confutata (YaST Leap 16) | Non riletta (fonti P-06 in [Sources.md](Sources.md)) | `--scope machine`; Docker Desktop solo machine; Debian; Leap 16 vs Tumbleweed; nota YaST | [D-014](Decisions.md#d-014) |
 | P-07 | 3 confermate, 1 parziale, 1 confutata (`specify check` esiste) | Layout skills di default e `--commands`: confermato ([S-083](Sources.md#s-083)) | Release `v1.3.2`; tabella layout; `--ai` rimossa; `specify check` | — |
 | P-08 | Tesi PARZIALE | Perdita `thinking_blocks` con Chat Completions: confermato ([S-110](Sources.md#s-110)) | §4.1 riscritta (criteri, rischi, hardening); §4.6 alternative | [D-017](Decisions.md#d-017), [D-019](Decisions.md#d-019), [D-020](Decisions.md#d-020) |
+
+| P-09 | — | — | — | — |
+| P-10 | — | — | — | — |
 
 **Punti ancora aperti (⚠️), da provare prima del talk**
 
