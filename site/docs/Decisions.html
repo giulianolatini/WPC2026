@@ -200,7 +200,7 @@ Il formato segue il template ADR di Nygard, con una sezione <strong>Razionale</s
 <td><a href="#d-027">D-027</a></td>
 <td>2026-11-07</td>
 <td>Nerd Fonts in WOFF2 nel repository</td>
-<td>Accepted</td>
+<td>Superseded by D-032</td>
 </tr>
 <tr>
 <td><a href="#d-028">D-028</a></td>
@@ -224,6 +224,12 @@ Il formato segue il template ADR di Nygard, con una sezione <strong>Razionale</s
 <td><a href="#d-031">D-031</a></td>
 <td>2026-11-07</td>
 <td>Diagrammi Mermaid disegnati nel sito offline</td>
+<td>Accepted</td>
+</tr>
+<tr>
+<td><a href="#d-032">D-032</a></td>
+<td>2026-11-07</td>
+<td>Nerd Fonts in WOFF2: sette famiglie e release fissata</td>
 <td>Accepted</td>
 </tr>
 </tbody>
@@ -575,7 +581,7 @@ Il formato segue il template ADR di Nygard, con una sezione <strong>Razionale</s
 <p><a id="d-027"></a></p>
 <h2 id="d-027--nerd-fonts-in-woff2-nel-repository">D-027 — Nerd Fonts in WOFF2 nel repository</h2>
 <ul>
-<li><strong>Data:</strong> 2026-11-07 — <strong>Stato:</strong> Accepted — <strong>Decisore:</strong> PO ("WOFF2 nel repo")</li>
+<li><strong>Data:</strong> 2026-11-07 — <strong>Stato:</strong> Superseded by <a href="#d-032">D-032</a> — <strong>Decisore:</strong> PO ("WOFF2 nel repo")</li>
 </ul>
 <p><strong>Contesto.</strong> Il sito deve funzionare offline su una postazione che può non avere i font richiesti: BlexMono, FiraCode, GoogleSansCode, Monoid, OpenDyslexic, SauceCodePro, UbuntuSans (Nerd Fonts).</p>
 <p><strong>Opzioni considerate.</strong> (1) WOFF2 nel repository. (2) Download dei font a ogni generazione, senza commit. (3) Font di sistema.</p>
@@ -644,7 +650,25 @@ Il formato segue il template ADR di Nygard, con una sezione <strong>Razionale</s
 <p><strong>Decisione.</strong> Usiamo l'opzione 1: <code>mermaid@12.3.0</code> in <code>tools/site/vendor/mermaid/</code>, caricato solo dalle pagine con diagrammi, <code>securityLevel: 'strict'</code>. Il diagramma segue tema e font scelti; la sorgente resta visibile in un pannello con il pulsante Copia.</p>
 <p><strong>Razionale.</strong> Una sola sorgente (il Markdown): nessuna immagine da rigenerare quando il diagramma cambia. Mermaid CLI richiede un browser headless sul computer che genera il sito. Il tema scuro funziona anche per i diagrammi.</p>
 <p><strong>Conseguenze.</strong> Il repository cresce di circa 5,5 MB. Un aggiornamento di Mermaid sostituisce il file in <code>vendor/</code> e aggiorna <code>VERSION</code> (sha256 e integrity npm); <code>--check</code> confronta i file di <code>vendor/</code>.</p>
-<p><strong>Fonti.</strong> <a href="Sources.html#s-164">S-164</a>.</p></article>
+<p><strong>Fonti.</strong> <a href="Sources.html#s-164">S-164</a>.</p>
+<hr />
+<p><a id="d-032"></a></p>
+<h2 id="d-032--nerd-fonts-in-woff2-sette-famiglie-e-release-fissata">D-032 — Nerd Fonts in WOFF2: sette famiglie e release fissata</h2>
+<ul>
+<li><strong>Data:</strong> 2026-11-07 — <strong>Stato:</strong> Accepted — <strong>Decisore:</strong> PO (richiesta dopo la review R4-agy-09) — <strong>Sostituisce:</strong> <a href="#d-027">D-027</a></li>
+</ul>
+<p><strong>Contesto.</strong> D-027 descrive 5 famiglie (circa 13 MB) e rimanda GoogleSansCode e UbuntuSans a un passo successivo. Il PO ha eseguito <code>tools/update-site.sh --fonts</code>: il sito contiene ora tutte le 7 famiglie. La review della PR #2 (R4-agy-04) ha fissato la release e i checksum degli zip. Il registro è <em>append-only</em>: una nuova decisione aggiorna D-027.</p>
+<p><strong>Opzioni considerate.</strong> (1) Nuova decisione che sostituisce D-027 con i dati attuali. (2) Lasciare D-027 con i dati di quel momento.</p>
+<p><strong>Decisione.</strong> Usiamo l'opzione 1. Restano valide le scelte di D-027: WOFF2 nel repository, conversione con <code>tools/fonts.py</code>, licenza di ogni famiglia in <code>site/assets/fonts/LICENSES/</code>, varianti <code>Mono</code> per il codice. Cambiano i dati:</p>
+<ul>
+<li>7 famiglie: BlexMono, FiraCode, GoogleSansCode, Monoid, OpenDyslexic, SauceCodePro, UbuntuSans.</li>
+<li>17 file WOFF2 (circa 19 MB): varianti <code>Mono</code> 400/700 di ogni famiglia (OpenDyslexic solo 400), varianti per il testo di OpenDyslexic e UbuntuSans.</li>
+<li>Release Nerd Fonts fissata a <code>v3.5.1</code>, con lo sha256 di ogni zip in <code>tools/fonts.json</code>. <code>tools/update-site.sh --fonts</code> (o <code>-Fonts</code>) verifica l'hash prima di estrarre.</li>
+<li>Conversione riproducibile: due esecuzioni producono gli stessi byte (<code>recalcTimestamp=False</code>).</li>
+</ul>
+<p><strong>Razionale.</strong> Il registro deve descrivere il repository com'è. Le altre parti di D-027 non cambiano.</p>
+<p><strong>Conseguenze.</strong> Un aggiornamento dei font cambia la versione in <code>tools/fonts.json</code>, aggiorna gli sha256 e rigenera i WOFF2 con <code>--fonts</code>.</p>
+<p><strong>Fonti.</strong> <a href="Sources.html#s-152">S-152</a>, <a href="Sources.html#s-153">S-153</a>, <a href="Sources.html#s-156">S-156</a>.</p></article>
 <script type="application/json" id="fonts-data">[
   {
     "id": "blexmono",
