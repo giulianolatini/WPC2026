@@ -19,11 +19,11 @@ Il formato segue il template ADR di Nygard, con una sezione **Razionale** esplic
 | [D-003](#d-003) | 2026-11-07 | Provider: solo API dirette dei vendor | Accepted |
 | [D-004](#d-004) | 2026-11-07 | Piani Copilot: individuali e di organizzazione | Accepted |
 | [D-005](#d-005) | 2026-11-07 | LiteLLM: profilo minimo e profilo esteso | Accepted |
-| [D-006](#d-006) | 2026-11-07 | openSUSE: `zypper` al posto di YaST | Proposed |
-| [D-007](#d-007) | 2026-11-07 | Provider *Custom Endpoint* al posto di `customOAIModels` | Proposed |
-| [D-008](#d-008) | 2026-11-07 | Hugging Face nativo: estensione ufficiale HF | Proposed |
-| [D-009](#d-009) | 2026-11-07 | Installazione di `uv` su Linux con installer ufficiale | Proposed |
-| [D-010](#d-010) | 2026-11-07 | File di esempio in `examples/` | Proposed |
+| [D-006](#d-006) | 2026-11-07 | openSUSE: `zypper` al posto di YaST | Accepted |
+| [D-007](#d-007) | 2026-11-07 | Provider *Custom Endpoint* al posto di `customOAIModels` | Accepted |
+| [D-008](#d-008) | 2026-11-07 | Hugging Face nativo: estensione ufficiale HF | Accepted |
+| [D-009](#d-009) | 2026-11-07 | Installazione di `uv` su Linux con installer ufficiale | Accepted |
+| [D-010](#d-010) | 2026-11-07 | File di esempio in `examples/` | Accepted |
 | [D-011](#d-011) | 2026-11-07 | GitHub Flow con rebase merge su `main` protetto | Accepted |
 | [D-012](#d-012) | 2026-11-07 | Lingua italiana con regole ASD-STE100 adattate | Accepted |
 
@@ -135,13 +135,13 @@ Il formato segue il template ADR di Nygard, con una sezione **Razionale** esplic
 <a id="d-006"></a>
 ## D-006 — openSUSE: `zypper` al posto di YaST
 
-- **Data:** 2026-11-07 — **Stato:** Proposed — **Decisore:** assistente, conferma PO
+- **Data:** 2026-11-07 — **Stato:** Accepted (confermata dal PO il 2026-11-07) — **Decisore:** proposta dell\'assistente, approvata dal PO
 
 **Contesto.** La richiesta cita `yast`. YaST è lo strumento di amministrazione (GUI/TUI) di openSUSE. Il package manager a riga di comando è `zypper`; YaST usa la stessa libreria.
 
 **Opzioni considerate.** (1) Comandi `zypper`, con nota su YaST Software Management. (2) Procedura grafica YaST.
 
-**Decisione.** Proponiamo l'opzione 1.
+**Decisione.** Usiamo l'opzione 1.
 
 **Razionale.** Un comando è copiabile, ripetibile e registrabile nelle evidenze. La documentazione VS Code e la wiki openSUSE usano `zypper` ([S-009](Sources.md#s-009), [S-064](Sources.md#s-064)).
 
@@ -154,13 +154,13 @@ Il formato segue il template ADR di Nygard, con una sezione **Razionale** esplic
 <a id="d-007"></a>
 ## D-007 — Provider *Custom Endpoint* al posto di `customOAIModels`
 
-- **Data:** 2026-11-07 — **Stato:** Proposed — **Decisore:** assistente, conferma PO
+- **Data:** 2026-11-07 — **Stato:** Accepted (confermata dal PO il 2026-11-07) — **Decisore:** proposta dell\'assistente, approvata dal PO
 
 **Contesto.** Molte guide in rete usano l'impostazione `github.copilot.chat.customOAIModels` o il provider *OpenAI Compatible*. La documentazione VS Code attuale li dichiara deprecati e li sostituisce con il provider *Custom Endpoint* (`vendor: customendpoint`), che supporta le API `chat-completions`, `responses` e `messages`.
 
 **Opzioni considerate.** (1) Custom Endpoint. (2) `customOAIModels` deprecato.
 
-**Decisione.** Proponiamo l'opzione 1 per OpenRouter, Hugging Face (alternativa all'estensione) e LiteLLM.
+**Decisione.** Usiamo l'opzione 1 per OpenRouter, Hugging Face (alternativa all'estensione) e LiteLLM.
 
 **Razionale.** Una configurazione deprecata può smettere di funzionare dopo il talk. Custom Endpoint permette di scegliere il formato API: con LiteLLM possiamo mostrare la stessa route in formato OpenAI e in formato Anthropic.
 
@@ -173,13 +173,13 @@ Il formato segue il template ADR di Nygard, con una sezione **Razionale** esplic
 <a id="d-008"></a>
 ## D-008 — Hugging Face nativo: estensione ufficiale HF
 
-- **Data:** 2026-11-07 — **Stato:** Proposed — **Decisore:** assistente, conferma PO
+- **Data:** 2026-11-07 — **Stato:** Accepted (confermata dal PO il 2026-11-07) — **Decisore:** proposta dell\'assistente, approvata dal PO
 
 **Contesto.** VS Code non ha un provider built-in Hugging Face. Hugging Face pubblica l'estensione *Hugging Face Provider for GitHub Copilot Chat*, che aggiunge un provider al Language Models editor. Il router HF è anche OpenAI-compatible.
 
 **Opzioni considerate.** (1) Estensione ufficiale HF come configurazione "nativa". (2) Solo Custom Endpoint verso `router.huggingface.co/v1`. (3) Entrambe.
 
-**Decisione.** Proponiamo l'opzione 3: l'estensione come percorso principale, il Custom Endpoint come alternativa senza estensione.
+**Decisione.** Usiamo l'opzione 3: l'estensione come percorso principale, il Custom Endpoint come alternativa senza estensione.
 
 **Razionale.** L'estensione usa l'API ufficiale *Language Model Chat Provider* di VS Code ed è il percorso documentato da HF. Il Custom Endpoint mostra che lo stesso risultato non dipende da un'estensione.
 
@@ -192,13 +192,13 @@ Il formato segue il template ADR di Nygard, con una sezione **Razionale** esplic
 <a id="d-009"></a>
 ## D-009 — Installazione di `uv` su Linux con installer ufficiale
 
-- **Data:** 2026-11-07 — **Stato:** Proposed — **Decisore:** assistente, conferma PO
+- **Data:** 2026-11-07 — **Stato:** Accepted (confermata dal PO il 2026-11-07) — **Decisore:** proposta dell\'assistente, approvata dal PO
 
 **Contesto.** La richiesta chiede i package manager `apt` e `zypper`. La documentazione di `uv` non cita pacchetti di distribuzione Linux; cita `winget` e `brew`.
 
 **Opzioni considerate.** (1) Installer ufficiale `astral.sh` su Linux. (2) Pacchetti di distribuzione, se presenti. (3) `pipx install uv`.
 
-**Decisione.** Proponiamo l'opzione 1 su Linux; `winget` su Windows; `brew` su macOS.
+**Decisione.** Usiamo l'opzione 1 su Linux; `winget` su Windows; `brew` su macOS.
 
 **Razionale.** LiteLLM ≥ 1.84.0 richiede Python ≥ 3.10; `uv tool install` installa un Python compatibile ([S-021](Sources.md#s-021)). Un pacchetto di distribuzione può essere vecchio o assente.
 
@@ -211,13 +211,13 @@ Il formato segue il template ADR di Nygard, con una sezione **Razionale** esplic
 <a id="d-010"></a>
 ## D-010 — File di esempio in `examples/`
 
-- **Data:** 2026-11-07 — **Stato:** Proposed — **Decisore:** assistente, conferma PO
+- **Data:** 2026-11-07 — **Stato:** Accepted (confermata dal PO il 2026-11-07) — **Decisore:** proposta dell\'assistente, approvata dal PO
 
 **Contesto.** I documenti contengono configurazioni lunghe (`config.yaml`, Compose, `chatLanguageModels.json`, unit di servizio). Il pubblico deve poterle scaricare e usare.
 
 **Opzioni considerate.** (1) Solo blocchi di codice nei documenti. (2) File pronti in `examples/` e blocchi di codice brevi nei documenti.
 
-**Decisione.** Proponiamo l'opzione 2.
+**Decisione.** Usiamo l'opzione 2.
 
 **Razionale.** Un file versionato è testabile e non contiene errori di copia. `docs/` resta riservata al Markdown (D-001).
 
