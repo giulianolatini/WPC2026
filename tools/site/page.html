@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="it" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="generator" content="tools/build_site.py — non modificare a mano">
+<title>{{TITLE}} — WPC2026</title>
+<link rel="stylesheet" href="{{ASSETS}}fonts.css">
+<link rel="stylesheet" href="{{ASSETS}}vendor/highlight/github.min.css" id="hl-light">
+<link rel="stylesheet" href="{{ASSETS}}vendor/highlight/github-dark.min.css" id="hl-dark" disabled>
+<link rel="stylesheet" href="{{ASSETS}}styles.css">
+{{EXTRA_HEAD}}
+<script>try{var p=JSON.parse(localStorage.getItem('wpc2026.prefs')||'{}');var t=p.theme||'auto';if(t==='auto')t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body>
+<div class="topbar">
+  <h1><a href="{{HOME}}" style="color:inherit;text-decoration:none">WPC2026</a> <span class="ver">{{TITLE}}</span></h1>
+  <label>Tema <select id="pref-theme"><option value="auto">automatico</option><option value="light">chiaro</option><option value="dark">scuro</option></select></label>
+  <label>Testo <select id="pref-body"></select></label>
+  <label>Codice <select id="pref-code"></select></label>
+</div>
+{{BODY}}
+<script type="application/json" id="fonts-data">{{FONTS_JSON}}</script>
+<script src="{{ASSETS}}vendor/highlight/highlight.min.js"></script>
+<script src="{{ASSETS}}vendor/highlight/languages/bash.min.js"></script>
+<script src="{{ASSETS}}vendor/highlight/languages/powershell.min.js"></script>
+<script src="{{ASSETS}}vendor/highlight/languages/yaml.min.js"></script>
+<script src="{{ASSETS}}vendor/highlight/languages/json.min.js"></script>
+<script src="{{ASSETS}}vendor/highlight/languages/ini.min.js"></script>
+<script src="{{ASSETS}}vendor/highlight/languages/dockerfile.min.js"></script>
+<script src="{{ASSETS}}vendor/highlight/languages/plaintext.min.js"></script>
+<script src="{{ASSETS}}common.js"></script>
+<script src="{{ASSETS}}doc.js"></script>
+</body>
+</html>
