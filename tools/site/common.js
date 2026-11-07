@@ -50,9 +50,9 @@
     code.innerHTML = '<option value="">monospace di sistema</option>' + fam.filter(f => f.mono).map(f => `<option value="${esc(f.id)}">${esc(f.label)}</option>`).join('');
     if (!THEMES.includes(prefs.theme)) prefs.theme = 'auto';
     theme.value = prefs.theme; body.value = prefs.body; code.value = prefs.code;
-    const save = () => { prefs.theme = theme.value; prefs.body = body.value; prefs.code = code.value; store(PREFS_KEY, prefs); applyTheme(prefs.theme); applyFonts(prefs); };
+    const save = () => { prefs.theme = theme.value; prefs.body = body.value; prefs.code = code.value; store(PREFS_KEY, prefs); applyTheme(prefs.theme); applyFonts(prefs); document.dispatchEvent(new Event('wpc-prefs')); };
     [theme, body, code].forEach(el => el.addEventListener('change', save));
-    matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => applyTheme(prefs.theme));
+    matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { applyTheme(prefs.theme); document.dispatchEvent(new Event('wpc-prefs')); });
     applyTheme(prefs.theme); applyFonts(prefs);
   }
 
