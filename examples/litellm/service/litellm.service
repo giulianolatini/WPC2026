@@ -2,16 +2,19 @@
 # Installazione: cp litellm.service ~/.config/systemd/user/ && systemctl --user enable --now litellm.service
 # Proposta del progetto: la documentazione LiteLLM non descrive systemd (docs/Sources.md#s-023).
 # AZ-07: direttive di hardening (docs/Sources.md#s-144). Verifica con: systemd-analyze --user security litellm.service
+# R-agy-03: avvio tramite start-litellm.sh (controllo dei permessi di .env, LITELLM_PORT), cache scrivibile.
 [Unit]
 Description=LiteLLM proxy (WPC2026)
-After=network-online.target
+# Nessun After=network-online.target: in una unit utente non ordina rispetto alle unit di sistema.
 
 [Service]
 Type=simple
 WorkingDirectory=%h/wpc2026-litellm
-# EnvironmentFile legge CHIAVE=valore, non esegue il file. Permessi: chmod 600 (AZ-01)
-EnvironmentFile=%h/wpc2026-litellm/.env
-ExecStart=%h/.local/bin/litellm --config %h/wpc2026-litellm/config.yaml --host 127.0.0.1 --port 4000
+# start-litellm.sh legge .env come CHIAVE=valore e rifiuta permessi diversi da 0600 (AZ-01, AZ-08).
+ExecStart=%h/wpc2026-litellm/service/start-litellm.sh
+# Cache dentro la cartella scrivibile: con ProtectHome=read-only ~/.cache non è scrivibile.
+Environment=XDG_CACHE_HOME=%h/wpc2026-litellm/.cache
+Environment=TIKTOKEN_CACHE_DIR=%h/wpc2026-litellm/.cache/tiktoken
 Restart=on-failure
 RestartSec=5
 UMask=0077
@@ -19,14 +22,14 @@ NoNewPrivileges=true
 PrivateTmp=true
 ProtectSystem=strict
 ProtectHome=read-only
-ReadWritePaths=%h/wpc2026-litellm
+ReadWritePaths=-%h/wpc2026-litellm
 ProtectKernelTunables=true
 ProtectKernelModules=true
 ProtectControlGroups=true
 RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
 RestrictSUIDSGID=true
 LockPersonality=true
-# ⚠️ Con ProtectHome=read-only, uv e Python devono poter leggere ~/.local: verifica l'avvio dopo ogni aggiornamento.
+# ⚠️ In una unit utente alcune direttive di sandboxing richiedono i namespace utente: verifica con systemd-analyze e con l'avvio reale.
 
 [Install]
 WantedBy=default.target

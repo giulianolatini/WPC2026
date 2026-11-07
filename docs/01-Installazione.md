@@ -467,7 +467,7 @@ systemd-analyze --user security litellm.service   # valuta le direttive di harde
 
 - [ ] (Opzionale) Avvia il servizio anche senza login: `sudo loginctl enable-linger $USER`.
 
-File: [`examples/litellm/service/litellm.service`](../examples/litellm/service/litellm.service).
+File: [`examples/litellm/service/litellm.service`](../examples/litellm/service/litellm.service). La unit avvia `service/start-litellm.sh`: così vale anche qui il controllo dei permessi di `.env`. La cache di LiteLLM va in `~/wpc2026-litellm/.cache`.
 
 ### 6.3 Servizio su macOS (launchd, LaunchAgent)
 
