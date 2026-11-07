@@ -1,0 +1,27 @@
+// Baseline di sicurezza per VS Code + GitHub Copilot (WPC2026).
+// Fonti: docs/03-Security-Best-Practices.md, docs/Sources.md#s-130, #s-133.
+// Copia il contenuto in .vscode/settings.json (workspace) o nelle impostazioni utente.
+{
+  // --- Workspace Trust (S-133)
+  "security.workspace.trust.enabled": true,
+  "security.workspace.trust.startupPrompt": "once",
+  "security.workspace.trust.emptyWindow": false,
+  "security.workspace.trust.untrustedFiles": "prompt",
+  "terminal.integrated.allowInUntrustedWorkspace": false,
+
+  // --- Approvazioni dell'agente (S-130)
+  "chat.tools.global.autoApprove": false,
+  "chat.tools.edits.autoApprove": {
+    "**/.env": false,
+    "**/.env.*": false,
+    "**/*.pem": false,
+    "**/*.key": false,
+    "**/.github/workflows/**": false,
+    "**/.github/hooks/**": false,
+    "**/.vscode/*.json": false,
+    "**/.mcp.json": false
+  },
+
+  // --- Sandbox: rete in uscita limitata (default true) (S-130)
+  "chat.agent.sandbox.network.allowNetwork": false
+}
