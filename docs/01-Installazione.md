@@ -147,7 +147,7 @@ sudo zypper install code
 Scegli il percorso:
 
 - **Percorso A — Docker:** installa Docker (3.1). `uv` non è necessario.
-- **Percorso B — servizio locale:** installa `uv` (3.2). Docker non è necessario.
+- **Percorso B — servizio locale:** installa `uv` (3.3) e, su Windows, PowerShell 7 (3.2). Docker non è necessario.
 
 ### 3.1 Docker
 
@@ -246,7 +246,19 @@ docker version
 docker compose version
 ```
 
-### 3.2 uv
+### 3.2 PowerShell 7 (solo Windows)
+
+Il servizio Windows (§6.4) e la generazione delle chiavi (§4) usano PowerShell 7 (`pwsh.exe`). Windows include solo Windows PowerShell 5.1.
+
+- [ ] Installa PowerShell 7:
+
+```powershell
+winget install --id Microsoft.PowerShell -e
+```
+
+- [ ] Verifica: `pwsh -Version`.
+
+### 3.3 uv
 
 | Sistema | Comando | Fonte |
 |---------|---------|-------|
