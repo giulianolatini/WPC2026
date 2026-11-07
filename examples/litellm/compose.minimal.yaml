@@ -1,0 +1,13 @@
+# Profilo minimo: solo config.yaml + master key, nessun database.
+# Avvio: docker compose -f compose.minimal.yaml up -d
+# Fonte: docs/Sources.md#s-020
+services:
+  litellm:
+    image: ${LITELLM_IMAGE:-ghcr.io/berriai/litellm:v1.90.2}   # ⚠️ verifica il tag stabile corrente
+    command: ["--config", "/app/config.yaml", "--port", "4000"]
+    env_file: .env
+    volumes:
+      - ./config.yaml:/app/config.yaml:ro
+    ports:
+      - "127.0.0.1:${LITELLM_PORT:-4000}:4000"   # solo loopback
+    restart: unless-stopped

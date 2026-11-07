@@ -1,0 +1,36 @@
+[
+  {
+    "name": "OpenRouter",
+    "vendor": "customendpoint",
+    "apiKey": "${input:openrouterApiKey}",
+    "apiType": "chat-completions",
+    "models": [
+      {
+        "id": "openai/gpt-oss-120b",
+        "name": "OpenRouter · gpt-oss-120b",
+        "url": "https://openrouter.ai/api/v1/chat/completions",
+        "toolCalling": true,
+        "vision": false,
+        "maxInputTokens": 112000,
+        "maxOutputTokens": 16000
+      }
+    ]
+  },
+  {
+    "name": "Hugging Face Router",
+    "vendor": "customendpoint",
+    "apiKey": "${input:hfToken}",
+    "apiType": "chat-completions",
+    "models": [
+      {
+        "id": "openai/gpt-oss-120b:fastest",
+        "name": "HF · gpt-oss-120b (fastest)",
+        "url": "https://router.huggingface.co/v1/chat/completions",
+        "toolCalling": true,
+        "vision": false,
+        "maxInputTokens": 112000,
+        "maxOutputTokens": 16000
+      }
+    ]
+  }
+]

@@ -1,0 +1,47 @@
+# LiteLLM proxy — route verso i cinque provider del talk WPC2026.
+# Fonti: docs/Sources.md#s-022 (formato), #s-024..#s-027 (provider).
+# model_name = alias che il client (VS Code) invia. model = <prefisso-provider>/<id-modello>.
+# ⚠️ Gli ID dei modelli cambiano spesso: verifica gli ID correnti prima del talk.
+
+model_list:
+  # --- Claude.AI -> Anthropic API (docs/Sources.md#s-024, #s-040)
+  - model_name: claude-opus
+    litellm_params:
+      model: anthropic/claude-opus-5-5
+      api_key: os.environ/ANTHROPIC_API_KEY
+  - model_name: claude-sonnet
+    litellm_params:
+      model: anthropic/claude-sonnet-5-5
+      api_key: os.environ/ANTHROPIC_API_KEY
+
+  # --- Codex -> OpenAI API (docs/Sources.md#s-042)
+  - model_name: codex
+    litellm_params:
+      model: openai/gpt-6.1-sol
+      api_key: os.environ/OPENAI_API_KEY
+
+  # --- Gemini Pro -> Google AI Studio (prefisso gemini/, NON vertex_ai/) (docs/Sources.md#s-025, #s-044)
+  - model_name: gemini-pro
+    litellm_params:
+      model: gemini/gemini-3.1-pro-preview
+      api_key: os.environ/GEMINI_API_KEY
+
+  # --- OpenRouter (docs/Sources.md#s-026)
+  - model_name: openrouter-gpt-oss
+    litellm_params:
+      model: openrouter/openai/gpt-oss-120b
+      api_key: os.environ/OPENROUTER_API_KEY
+
+  # --- Hugging Face Inference Providers: huggingface/<provider>/<org>/<model> (docs/Sources.md#s-027, #s-047)
+  - model_name: hf-gpt-oss
+    litellm_params:
+      model: huggingface/groq/openai/gpt-oss-120b
+      api_key: os.environ/HF_TOKEN
+
+litellm_settings:
+  # Scarta i parametri non supportati da un provider invece di restituire errore.
+  drop_params: true
+
+general_settings:
+  # Tutte le chiamate devono presentare questa chiave (o una virtual key nel profilo esteso).
+  master_key: os.environ/LITELLM_MASTER_KEY

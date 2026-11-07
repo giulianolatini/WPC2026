@@ -1,0 +1,17 @@
+# systemd user unit per LiteLLM proxy (installato con uv tool).
+# Installazione: cp litellm.service ~/.config/systemd/user/ && systemctl --user enable --now litellm.service
+# ⚠️ Proposta del progetto: la documentazione LiteLLM non descrive systemd (docs/Sources.md#s-023).
+[Unit]
+Description=LiteLLM proxy (WPC2026)
+After=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/wpc2026-litellm
+EnvironmentFile=%h/wpc2026-litellm/.env
+ExecStart=%h/.local/bin/litellm --config %h/wpc2026-litellm/config.yaml --host 127.0.0.1 --port 4000
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target
