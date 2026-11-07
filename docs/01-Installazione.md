@@ -268,9 +268,16 @@ docker compose version
 
 ```bash
 mkdir -p ~/wpc2026-litellm
-cp -r examples/litellm/* ~/wpc2026-litellm/
+cp -R examples/litellm/. ~/wpc2026-litellm/     # il "." copia anche i file nascosti (.env.example)
 cd ~/wpc2026-litellm
 cp .env.example .env
+```
+
+```powershell
+New-Item -ItemType Directory -Force "$HOME\wpc2026-litellm" | Out-Null
+Copy-Item -Recurse -Force examples\litellm\* "$HOME\wpc2026-litellm\"
+Set-Location "$HOME\wpc2026-litellm"
+Copy-Item .env.example .env
 ```
 
 - [ ] Genera la master key e la salt key ([S-020](Sources.md#s-020)):
