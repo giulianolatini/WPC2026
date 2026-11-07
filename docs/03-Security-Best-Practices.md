@@ -42,7 +42,7 @@ L'analisi delle configurazioni di esempio rispetto a OWASP e ISO/IEC 27001 è in
 - [ ] Tieni i repository sconosciuti in una cartella padre separata e non fidata ([S-133](Sources.md#s-133)).
 - [ ] Prima di concedere la fiducia, leggi `.vscode/mcp.json` e `.mcp.json`: le configurazioni MCP del repo ereditano Workspace Trust ([S-130](Sources.md#s-130)).
 
-**Configurazione sicura** ([S-133](Sources.md#s-133))
+**Configurazione sicura** ([S-133](Sources.md#s-133)) — nelle **impostazioni utente**: a livello di workspace queste impostazioni non hanno effetto.
 
 | Setting | Valore sicuro | Default |
 |---------|---------------|---------|
@@ -236,7 +236,7 @@ Fonti: [S-108](Sources.md#s-108) (Security Best Practices), [S-109](Sources.md#s
 
 ## 7. Baseline di configurazione
 
-File: [`examples/vscode/settings.secure.jsonc`](../examples/vscode/settings.secure.jsonc). Copialo in `.vscode/settings.json` o nelle impostazioni utente.
+File: [`examples/vscode/settings.secure.jsonc`](../examples/vscode/settings.secure.jsonc). Copialo nelle **impostazioni utente** (*Preferences: Open User Settings (JSON)*). Non usare `.vscode/settings.json`: le impostazioni `security.workspace.trust.*` hanno scope applicazione e VS Code le ignora a livello di workspace ⚠️ (scope dichiarato nel codice sorgente di VS Code, non nella documentazione).
 
 > La baseline **attiva** la sandbox (default `off`) e blocca la rete dell'agente. Se un agente deve scaricare pacchetti, imposta `allowNetwork: true` con `allowedDomains` espliciti invece della rete completa ([S-145](Sources.md#s-145)).
 
