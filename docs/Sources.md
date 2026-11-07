@@ -158,6 +158,17 @@ Gli altri documenti puntano alla fonte con un link del tipo `Sources.md#s-001`.
 | <a id="s-150"></a>S-150 | [ISO — ISO/IEC 27000:2026](https://www.iso.org/standard/27000) | PRIMARY | P-10 |
 | <a id="s-151"></a>S-151 | [OpenRouter — Provider routing (`provider.data_collection`, `allow_fallbacks`)](https://openrouter.ai/docs/guides/routing/provider-selection) | PRIMARY | ⚠️ non consultata |
 
+## Sito offline (runbook, font, evidenze)
+
+| ID | Titolo | Tipo | Verifica |
+|----|--------|------|----------|
+| <a id="s-152"></a>S-152 | [Nerd Fonts — release (zip delle famiglie)](https://github.com/ryanoasis/nerd-fonts/releases) | PRIMARY | 2026-11-07 (download diretto da provare sul Mac del PO) |
+| <a id="s-153"></a>S-153 | [Nerd Fonts — repository e cartella `patched-fonts/` (licenze per famiglia)](https://github.com/ryanoasis/nerd-fonts) | PRIMARY | 2026-11-07 |
+| <a id="s-154"></a>S-154 | [highlight.js 11.12.0 — CDN assets (file locali del sito)](https://github.com/highlightjs/cdn-release) | PRIMARY | 2026-11-07 |
+| <a id="s-155"></a>S-155 | [Python-Markdown — documentazione ed estensioni](https://python-markdown.github.io/) | PRIMARY | 2026-11-07 |
+| <a id="s-156"></a>S-156 | [fontTools — conversione in WOFF2 (`flavor="woff2"`)](https://fonttools.readthedocs.io/en/latest/ttLib/woff2.html) | PRIMARY | 2026-11-07 |
+| <a id="s-157"></a>S-157 | [MDN — Window.localStorage](https://developer.mozilla.org/docs/Web/API/Window/localStorage) | VENDOR-DOC | 2026-11-07 |
+
 ## Metodo (decisioni e scrittura)
 
 | ID | Titolo | Tipo | Verifica |

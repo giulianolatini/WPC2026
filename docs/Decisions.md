@@ -39,6 +39,10 @@ Il formato segue il template ADR di Nygard, con una sezione **Razionale** esplic
 | [D-023](#d-023) | 2026-11-07 | Security review con OWASP e ISO/IEC 27001 | Superseded by D-024 |
 | [D-024](#d-024) | 2026-11-07 | OWASP LLM Top 10 edizione 2026 | Accepted |
 | [D-025](#d-025) | 2026-11-07 | Applicazione delle azioni AZ-01…AZ-10 | Accepted |
+| [D-026](#d-026) | 2026-11-07 | Runbook unico con filtri per OS, percorso e profilo | Accepted |
+| [D-027](#d-027) | 2026-11-07 | Nerd Fonts in WOFF2 nel repository | Accepted |
+| [D-028](#d-028) | 2026-11-07 | Architettura del sito offline e delle evidenze | Proposed |
+| [D-029](#d-029) | 2026-11-07 | Deck finale come artefatto Slides | Accepted |
 
 ---
 
@@ -507,3 +511,83 @@ Il formato segue il template ADR di Nygard, con una sezione **Razionale** esplic
 **Conseguenze.** Nuovi file: `scripts/pin-images.sh`, `scripts/bootstrap-admin.sh`, `service/load-env.sh`. Tre punti restano ⚠️ da provare: tag `litellm-non_root:v1.108.2`, campi `provider` di OpenRouter, `turn_off_message_logging`.
 
 **Fonti.** [S-104](Sources.md#s-104), [S-108](Sources.md#s-108), [S-109](Sources.md#s-109), [S-144](Sources.md#s-144), [S-145](Sources.md#s-145), [S-148](Sources.md#s-148), [S-151](Sources.md#s-151).
+
+---
+
+<a id="d-026"></a>
+## D-026 — Runbook unico con filtri per OS, percorso e profilo
+
+- **Data:** 2026-11-07 — **Stato:** Accepted — **Decisore:** PO ("Tutto, con filtro OS"; evidenze "Parametri + esito + output")
+
+**Contesto.** I documenti 01 e 02 descrivono 4 sistemi operativi, 2 percorsi LiteLLM (Docker, uv) e 2 profili (minimo, esteso). Il PO vuole un runbook da eseguire passo per passo, con evidenze.
+
+**Opzioni considerate.** (1) Un runbook per ogni combinazione. (2) Un runbook unico con metadati di filtro per passo e per blocco di codice.
+
+**Decisione.** Usiamo l'opzione 2: `docs/runbook/RUNBOOK.md`, fasi F1–F9, passi `S-nnn`. Ogni passo ha la riga `<!-- step: os=… path=… profile=… evidence=… -->`. I blocchi di codice hanno `os=…`. I comandi usano parametri `{{NOME}}` dichiarati in una tabella. L'evidenza registra parametri, esito e output.
+
+**Razionale.** Una sola sorgente evita divergenze tra le copie. Il generatore controlla che ogni parametro usato sia dichiarato e che gli ID siano unici.
+
+**Conseguenze.** Il runbook rimanda a 01 e 02 per le spiegazioni e non le ripete. I passi che producono segreti (S-202, S-203, S-501) hanno `evidence=no-output`.
+
+**Fonti.** [01](01-Installazione.md), [02](02-Configurazione-Copilot.md), [S-092](Sources.md#s-092).
+
+---
+
+<a id="d-027"></a>
+## D-027 — Nerd Fonts in WOFF2 nel repository
+
+- **Data:** 2026-11-07 — **Stato:** Accepted — **Decisore:** PO ("WOFF2 nel repo")
+
+**Contesto.** Il sito deve funzionare offline su una postazione che può non avere i font richiesti: BlexMono, FiraCode, GoogleSansCode, Monoid, OpenDyslexic, SauceCodePro, UbuntuSans (Nerd Fonts).
+
+**Opzioni considerate.** (1) WOFF2 nel repository. (2) Download dei font a ogni generazione, senza commit. (3) Font di sistema.
+
+**Decisione.** Usiamo l'opzione 1. `tools/fonts.py` converte i TTF in `site/assets/fonts/<id>-<ruolo>-<peso>.woff2` e copia la licenza di ogni famiglia in `site/assets/fonts/LICENSES/`. `tools/fonts.json` dichiara famiglie, zip di release e file. Il codice usa solo le varianti `Mono`.
+
+**Razionale.** WOFF2 riduce la dimensione (circa 13 MB per 5 famiglie, licenze incluse). Il clone del repo basta per usare il sito.
+
+**Conseguenze.** GoogleSansCode e UbuntuSans sono solo nelle release zip: il PO le aggiunge con `tools/update-site.sh --fonts`. La cartella `.cache/` (zip scaricati) è esclusa da git.
+
+**Fonti.** [S-152](Sources.md#s-152), [S-153](Sources.md#s-153), [S-156](Sources.md#s-156).
+
+---
+
+<a id="d-028"></a>
+## D-028 — Architettura del sito offline e delle evidenze
+
+- **Data:** 2026-11-07 — **Stato:** Proposed — **Decisore:** proposta dell'assistente, da confermare dal PO
+
+**Contesto.** Il sito si apre da `file://`, senza server e senza rete.
+
+**Opzioni considerate.** (1) Pagine statiche generate in Python, dati del runbook nel HTML come JSON, sessioni in `localStorage`, export Markdown e JSON. (2) Static site generator esterno (es. MkDocs) più un'app JavaScript separata. (3) Applicazione con server locale.
+
+**Decisione.** Usiamo l'opzione 1.
+
+- `tools/build_site.py` genera `site/index.html` (runbook interattivo) e `site/docs/*.html` (documenti di `docs/`, con i link `.md` riscritti).
+- Dati nel HTML: il browser blocca `fetch` da `file://`.
+- Sessioni multiple in `localStorage` (chiave `wpc2026.runbook`); export/import JSON per cambiare browser o macchina.
+- Evidenza in Markdown: dati della sessione, parametri (valore e origine), riepilogo, comandi con i parametri risolti, esito, data e ora, output, note.
+- Il sito oscura i segreti riconosciuti (`sk-…`, `hf_…`, `AIza…`, `Bearer …`, `*_API_KEY=…`) e rifiuta segreti nei parametri.
+- highlight.js locale; temi chiaro, scuro e automatico.
+- `tools/update-site.sh` e `tools/update-site.ps1` rigenerano il sito; `--check` controlla che il sito sia aggiornato.
+
+**Razionale.** Nessuna dipendenza a runtime. Un solo generatore piccolo e leggibile. Le evidenze restano sotto il controllo dell'operatore.
+
+**Conseguenze.** `localStorage` appartiene a un browser e a un profilo: l'export JSON è il backup. L'oscuramento dei segreti è una protezione aggiuntiva, non sostituisce il controllo dell'operatore (S-902). La sessione registra la versione del runbook e il sito segnala una versione diversa.
+
+**Fonti.** [S-154](Sources.md#s-154), [S-155](Sources.md#s-155), [S-157](Sources.md#s-157).
+
+---
+
+<a id="d-029"></a>
+## D-029 — Deck finale come artefatto Slides
+
+- **Data:** 2026-11-07 — **Stato:** Accepted — **Decisore:** PO ("Artefatto Slides")
+
+**Contesto.** Le istruzioni del progetto chiedono un deck che racconti i punti principali e sia una mappa di quanto prodotto.
+
+**Decisione.** Il deck è un artefatto Slides di claude.ai, esportabile in PowerPoint o PDF. Non è un file del repository.
+
+**Conseguenze.** Il README riporta il collegamento al deck quando il PO lo condivide.
+
+**Fonti.** —
