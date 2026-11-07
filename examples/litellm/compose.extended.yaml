@@ -4,7 +4,9 @@
 # Fonti: docs/Sources.md#s-020, #s-023
 services:
   db:
-    image: postgres:16
+    image: ${POSTGRES_IMAGE:-postgres:16}   # AZ-02: in team usa il digest (scripts/pin-images.sh)
+    security_opt:
+      - no-new-privileges:true
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-litellm}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
@@ -19,7 +21,11 @@ services:
     restart: unless-stopped
 
   litellm:
-    image: ${LITELLM_IMAGE:-ghcr.io/berriai/litellm:v1.108.2}   # LTS fissata, mai tag mobili (docs/Decisions.md#d-018)
+    image: ${LITELLM_IMAGE:-ghcr.io/berriai/litellm-non_root:v1.108.2}   # AZ-02/AZ-03: non-root, LTS; in team usa il digest
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
     command: ["--config", "/app/config.yaml", "--port", "4000"]
     env_file: .env
     environment:
