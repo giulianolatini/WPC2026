@@ -1,0 +1,13 @@
+# Segreti: non fare mai commit delle chiavi API
+.env
+*.env
+!.env.example
+!*.env.example
+
+# Dati locali LiteLLM / PostgreSQL
+pgdata/
+*.log
+
+# Sistema operativo / editor
+.DS_Store
+Thumbs.db
