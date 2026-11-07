@@ -69,10 +69,14 @@
   const ID_RE = /^s[a-z0-9]{1,20}$/;
   const isoOr = (v, d) => (typeof v === 'string' && !isNaN(Date.parse(v))) ? new Date(v).toISOString() : d;
   const str = (v, max) => (typeof v === 'string' ? v : '').slice(0, max);
+  // Un parametro entra tra virgolette doppie nei comandi bash e PowerShell: lì "$" e "`" espandono ancora.
+  // Unica espansione ammessa: $HOME all'inizio (codex review P2, R2-agy-03). Niente $( ${ $VAR, backtick,
+  // virgolette, parentesi, ; | & < > o a capo.
   function cleanParam(name, v) {
     v = str(v, 300).trim();
     if (!v) return '';
-    if (/["'`\n\r;|&<>]/.test(v) || redact(v) !== v || redact(name + '=' + v) !== name + '=' + v) return null;
+    const rest = v.replace(/^\$HOME(?=$|[\\/])/, '');
+    if (/[$`"'()\n\r;|&<>]/.test(rest) || redact(v) !== v || redact(name + '=' + v) !== name + '=' + v) return null;
     return v;
   }
   // Comandi importati: restano solo se la redazione non li cambia. Un comando legittimo può contenere
@@ -285,7 +289,11 @@
     $('#params').addEventListener('change', e => {
       const name = e.target.dataset.param; if (!name) return;
       const v = cleanParam(name, e.target.value);
-      if (v === null) { e.target.value = ''; WPC.toast('Valore rifiutato: niente segreti, virgolette o caratteri ; | & < >'); return; }
+      if (v === null) {
+        e.target.value = cur().params[name] ?? '';   // torna al valore accettato: campo, comandi ed evidenze restano coerenti
+        WPC.toast('Valore rifiutato: niente segreti, virgolette, $( ), backtick o ; | & < >. Solo $HOME all\'inizio.');
+        return;
+      }
       cur().params[name] = v; save(); decorateCode();
     });
     $('#export-md').addEventListener('click', () => download(fileBase() + '.md', exportMarkdown(), 'text/markdown'));
