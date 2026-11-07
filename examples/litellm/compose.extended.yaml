@@ -19,7 +19,7 @@ services:
     restart: unless-stopped
 
   litellm:
-    image: ${LITELLM_IMAGE:-ghcr.io/berriai/litellm:v1.90.2}   # ⚠️ verifica il tag stabile corrente
+    image: ${LITELLM_IMAGE:-ghcr.io/berriai/litellm:v1.108.2}   # LTS fissata, mai tag mobili (docs/Decisions.md#d-018)
     command: ["--config", "/app/config.yaml", "--port", "4000"]
     env_file: .env
     environment:
