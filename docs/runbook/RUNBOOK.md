@@ -17,22 +17,23 @@ Il sito offline in `site/` si genera da questo file con `tools/update-site.sh` (
   - `evidence=no-output`: il sito non salva l'output di quel passo (es. generazione di segreti).
 - Un blocco di codice con `os=` nell'intestazione (es. ` ```bash os=macos `) appare solo per quei sistemi.
 - `{{NOME}}` nei comandi è un parametro della tabella **Parametri**. Il sito lo sostituisce con il valore inserito.
-- Nei comandi bash e PowerShell un parametro che contiene un percorso o un testo libero sta sempre tra virgolette doppie (es. `"{{WPC_DIR}}"`): così un percorso con spazi resta un solo argomento. Per la home usa `$HOME`, non `~`: tra virgolette `~` non si espande. Il sito rifiuta valori con virgolette, parentesi, backtick, `$` (salvo `$HOME` all'inizio) o con `; | & < >`.
+- La colonna **Tipo** della tabella limita i valori: `path` (percorso), `port` (1–65535), `major` (numero), `version` (lettere, cifre, `.`, `_`, `-`), `name` (lettere, cifre, `.`, `_`, `-`), `email`. Un URL con un parametro sta tra virgolette doppie.
+- Nei comandi bash e PowerShell un parametro che contiene un percorso o un testo libero sta sempre tra virgolette doppie (es. `"{{WPC_DIR}}"`): così un percorso con spazi resta un solo argomento. Per la home usa `$HOME`, non `~`: tra virgolette `~` non si espande. Per un `path` il sito rifiuta virgolette, parentesi, backtick, `$` (salvo `$HOME` all'inizio), `; | & < >`, un `-` iniziale e un `\` finale.
 - Nessun segreto nei comandi: le chiavi stanno solo in `.env` e nel secret storage di VS Code.
 
 ## Parametri
 
-| Nome | Default | Default Windows | Descrizione |
-|------|---------|-----------------|-------------|
-| WPC_DIR | $HOME/wpc2026-litellm | $HOME\wpc2026-litellm | Cartella di lavoro di LiteLLM |
-| REPO_DIR | $HOME/Sviluppo/GITHUB/WPC2026 | $HOME\Sviluppo\GITHUB\WPC2026 | Clone locale del repository WPC2026 |
-| LITELLM_PORT | 4000 | 4000 | Porta del proxy LiteLLM (solo `127.0.0.1`) |
-| LITELLM_VERSION | 1.108.2 | 1.108.2 | Versione LTS di LiteLLM ([D-018](../Decisions.md#d-018)) |
-| ADMIN_ID | wpc-admin | wpc-admin | Utente `proxy_admin` (profilo esteso) |
-| ADMIN_EMAIL | tu@example.com | tu@example.com | Email del `proxy_admin` (profilo esteso) |
-| SPECKIT_VERSION | 1.3.2 | 1.3.2 | Versione di Spec Kit ([S-085](../Sources.md#s-085)) |
-| SPECKIT_PROJECT | wpc-speckit-demo | wpc-speckit-demo | Cartella del progetto di prova Spec Kit |
-| PG_MAJOR | 16 | 16 | Versione principale di PostgreSQL per uv + profilo esteso, come `postgres:16` del profilo Docker ([D-030](../Decisions.md#d-030)) |
+| Nome | Tipo | Default | Default Windows | Descrizione |
+|------|------|---------|-----------------|-------------|
+| WPC_DIR | path | $HOME/wpc2026-litellm | $HOME\wpc2026-litellm | Cartella di lavoro di LiteLLM |
+| REPO_DIR | path | $HOME/Sviluppo/GITHUB/WPC2026 | $HOME\Sviluppo\GITHUB\WPC2026 | Clone locale del repository WPC2026 |
+| LITELLM_PORT | port | 4000 | 4000 | Porta del proxy LiteLLM (solo `127.0.0.1`) |
+| LITELLM_VERSION | version | 1.108.2 | 1.108.2 | Versione LTS di LiteLLM ([D-018](../Decisions.md#d-018)) |
+| ADMIN_ID | name | wpc-admin | wpc-admin | Utente `proxy_admin` (profilo esteso) |
+| ADMIN_EMAIL | email | tu@example.com | tu@example.com | Email del `proxy_admin` (profilo esteso) |
+| SPECKIT_VERSION | version | 1.3.2 | 1.3.2 | Versione di Spec Kit ([S-085](../Sources.md#s-085)) |
+| SPECKIT_PROJECT | name | wpc-speckit-demo | wpc-speckit-demo | Cartella del progetto di prova Spec Kit |
+| PG_MAJOR | major | 16 | 16 | Versione principale di PostgreSQL del profilo esteso: immagine Docker (S-301) e installazione con uv (S-402) ([D-030](../Decisions.md#d-030)) |
 
 ## F1 — Prerequisiti
 
@@ -460,7 +461,7 @@ $env:LITELLM_MASTER_KEY = ((Select-String -Path "{{WPC_DIR}}\.env" -Pattern '^LI
 <!-- step: os=all path=all profile=all -->
 
 ```bash os=all
-curl -s http://localhost:{{LITELLM_PORT}}/health/liveliness
+curl -s "http://localhost:{{LITELLM_PORT}}/health/liveliness"
 ```
 
 **Esito atteso:** risposta positiva senza chiave ([S-117](../Sources.md#s-117)).
@@ -469,11 +470,11 @@ curl -s http://localhost:{{LITELLM_PORT}}/health/liveliness
 <!-- step: os=all path=all profile=all -->
 
 ```bash os=macos,debian,opensuse
-printf 'Authorization: Bearer %s\n' "$LITELLM_MASTER_KEY" | curl -s http://localhost:{{LITELLM_PORT}}/v1/models -H @-
+printf 'Authorization: Bearer %s\n' "$LITELLM_MASTER_KEY" | curl -s "http://localhost:{{LITELLM_PORT}}/v1/models" -H @-
 ```
 
 ```powershell os=windows
-Invoke-RestMethod -Uri http://localhost:{{LITELLM_PORT}}/v1/models -Headers @{ Authorization = "Bearer $env:LITELLM_MASTER_KEY" } | ConvertTo-Json -Depth 5
+Invoke-RestMethod -Uri "http://localhost:{{LITELLM_PORT}}/v1/models" -Headers @{ Authorization = "Bearer $env:LITELLM_MASTER_KEY" } | ConvertTo-Json -Depth 5
 ```
 
 **Esito atteso:** gli alias `claude-opus`, `claude-sonnet`, `codex`, `gemini`, `gemini-pro`, `openrouter-gpt-oss`, `hf-gpt-oss`.
@@ -483,14 +484,14 @@ Invoke-RestMethod -Uri http://localhost:{{LITELLM_PORT}}/v1/models -Headers @{ A
 
 ```bash os=macos,debian,opensuse
 printf 'Authorization: Bearer %s\n' "$LITELLM_MASTER_KEY" \
-  | curl -s http://localhost:{{LITELLM_PORT}}/v1/chat/completions -H @- \
+  | curl -s "http://localhost:{{LITELLM_PORT}}/v1/chat/completions" -H @- \
   -H "Content-Type: application/json" \
   -d '{"model": "claude-sonnet", "messages": [{"role": "user", "content": "Say hello in five words."}]}'
 ```
 
 ```powershell os=windows
 $body = @{ model = 'claude-sonnet'; messages = @(@{ role = 'user'; content = 'Say hello in five words.' }) } | ConvertTo-Json -Depth 5
-Invoke-RestMethod -Method Post -Uri http://localhost:{{LITELLM_PORT}}/v1/chat/completions -Headers @{ Authorization = "Bearer $env:LITELLM_MASTER_KEY" } -ContentType 'application/json' -Body $body
+Invoke-RestMethod -Method Post -Uri "http://localhost:{{LITELLM_PORT}}/v1/chat/completions" -Headers @{ Authorization = "Bearer $env:LITELLM_MASTER_KEY" } -ContentType 'application/json' -Body $body
 ```
 
 **Esito atteso:** una risposta del modello. `401`: controlla la master key. Errore del provider: controlla la chiave del provider in `.env`.
@@ -574,14 +575,14 @@ cd "{{WPC_DIR}}" && WPC_DIR="{{WPC_DIR}}" ADMIN_ID="{{ADMIN_ID}}" ADMIN_EMAIL="{
 
 ```bash os=macos,debian,opensuse
 printf 'Authorization: Bearer %s\n' "$LITELLM_MASTER_KEY" \
-  | curl -s http://localhost:{{LITELLM_PORT}}/key/generate -H @- \
+  | curl -s "http://localhost:{{LITELLM_PORT}}/key/generate" -H @- \
   -H "Content-Type: application/json" \
   -d '{"models": ["claude-sonnet", "gemini-pro"], "max_budget": 5, "metadata": {"user": "demo-wpc"}}'
 ```
 
 ```powershell os=windows
 $body = @{ models = @('claude-sonnet','gemini-pro'); max_budget = 5; metadata = @{ user = 'demo-wpc' } } | ConvertTo-Json
-Invoke-RestMethod -Method Post -Uri http://localhost:{{LITELLM_PORT}}/key/generate -Headers @{ Authorization = "Bearer $env:LITELLM_MASTER_KEY" } -ContentType 'application/json' -Body $body
+Invoke-RestMethod -Method Post -Uri "http://localhost:{{LITELLM_PORT}}/key/generate" -Headers @{ Authorization = "Bearer $env:LITELLM_MASTER_KEY" } -ContentType 'application/json' -Body $body
 ```
 
 **Esito atteso:** la risposta contiene `key`. ⚠️ Non incollare la chiave nelle evidenze: il sito oscura i valori `sk-…`.

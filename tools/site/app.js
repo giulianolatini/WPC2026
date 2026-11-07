@@ -75,16 +75,30 @@
   const ID_RE = /^s[a-z0-9]{1,20}$/;
   const isoOr = (v, d) => (typeof v === 'string' && !isNaN(Date.parse(v))) ? new Date(v).toISOString() : d;
   const str = (v, max) => (typeof v === 'string' ? v : '').slice(0, max);
-  // Un parametro entra tra virgolette doppie nei comandi bash e PowerShell: lì "$" e "`" espandono ancora.
-  // Unica espansione ammessa: $HOME all'inizio (codex review P2, R2-agy-03). Niente $( ${ $VAR, backtick,
-  // virgolette, parentesi, ; | & < > o a capo.
+  // Valori ammessi per tipo di parametro (colonna Tipo del runbook). Un parametro entra nei comandi bash e
+  // PowerShell: un valore libero può aggiungere argomenti (es. LITELLM_PORT="4000 --next https://…", R4-codex-01)
+  // o espandere codice tra virgolette doppie ($( ), backtick). Unica espansione ammessa: $HOME all'inizio di un path.
+  const PARAM_TYPES = {
+    port: v => /^(?:[1-9]\d{0,3}|[1-5]\d{4}|6[0-4]\d{3}|65[0-4]\d{2}|655[0-2]\d|6553[0-5])$/.test(v),
+    major: v => /^[1-9]\d{0,2}$/.test(v),
+    version: v => /^[0-9A-Za-z][0-9A-Za-z._-]{0,40}$/.test(v),
+    name: v => /^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$/.test(v),
+    email: v => /^[A-Za-z0-9._%+-]{1,64}@[A-Za-z0-9.-]{1,190}\.[A-Za-z]{2,24}$/.test(v),
+    path: v => {
+      const rest = v.replace(/^\$HOME(?=$|[\\/])/, '');
+      return !/[$`"'()\n\r;|&<>]/.test(rest) && !/^-/.test(v) && !/\\$/.test(v);
+    }
+  };
+  const PARAM_BY_NAME = Object.fromEntries(RB.params.map(p => [p.name, p]));
   function cleanParam(name, v) {
     v = str(v, 300).trim();
     if (!v) return '';
-    const rest = v.replace(/^\$HOME(?=$|[\\/])/, '');
-    if (/[$`"'()\n\r;|&<>]/.test(rest) || redact(v) !== v || redact(name + '=' + v) !== name + '=' + v) return null;
+    const p = PARAM_BY_NAME[name];
+    const ok = p && (PARAM_TYPES[p.type] || PARAM_TYPES.path)(v);
+    if (!ok || redact(v) !== v || redact(name + '=' + v) !== name + '=' + v) return null;
     return v;
   }
+
   // Comandi registrati (localStorage o JSON importato). Un comando resta se corrisponde a un blocco del
   // runbook con parametri validi (anche se contiene nomi come POSTGRES_PASSWORD: S-202, S-404, S-501),
   // oppure se la redazione non lo cambia (es. runbook di una versione precedente). Altrimenti la lista
@@ -181,7 +195,7 @@
   function renderParams() {
     const s = cur();
     $('#params').innerHTML = RB.params.map(p => `
-      <label class="field" title="${esc(p.description)}"><span>${esc(p.name)} — ${esc(p.description.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1'))}</span>
+      <label class="field" title="${esc(p.description)}"><span>${esc(p.name)} <small>(${esc(p.type)})</small> — ${esc(p.description.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1'))}</span>
       <input type="text" class="mono" data-param="${esc(p.name)}" value="${esc(s.params[p.name] ?? '')}" placeholder="${esc(s.os === 'windows' ? p.defaultWindows : p.default)}"></label>`).join('');
   }
 
@@ -325,7 +339,7 @@
       const v = cleanParam(name, e.target.value);
       if (v === null) {
         e.target.value = cur().params[name] ?? '';   // torna al valore accettato: campo, comandi ed evidenze restano coerenti
-        WPC.toast('Valore rifiutato: niente segreti, virgolette, $( ), backtick o ; | & < >. Solo $HOME all\'inizio.');
+        WPC.toast('Valore rifiutato per il tipo «' + (PARAM_BY_NAME[name] || {}).type + '»: vedi le regole del runbook.');
         return;
       }
       cur().params[name] = v; save(); renderPhases();   // aggiorna comandi e testo dei passi
