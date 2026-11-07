@@ -428,6 +428,7 @@ systemd-analyze --user security litellm.service
 ```
 
 ```bash os=macos
+mkdir -p ~/Library/LaunchAgents
 sed "s/USERNAME/$(whoami)/g" "{{WPC_DIR}}/service/com.wpc2026.litellm.plist" > ~/Library/LaunchAgents/com.wpc2026.litellm.plist
 launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.wpc2026.litellm.plist
 launchctl print gui/$(id -u)/com.wpc2026.litellm | head -20
