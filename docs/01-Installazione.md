@@ -32,7 +32,7 @@ Le procedure usano questi parametri. Registra il valore che usi: il valore serve
 | `WPC_DIR` | `~/wpc2026-litellm` (Windows: `$HOME\wpc2026-litellm`) | Cartella di lavoro di LiteLLM |
 | `LITELLM_PORT` | `4000` | Porta del proxy ([S-020](Sources.md#s-020)) |
 | `LITELLM_VERSION` | `1.108.2` | Versione LTS fissata ([D-018](Decisions.md#d-018), [S-119](Sources.md#s-119)). ⚠️ Controlla la LTS corrente prima del talk |
-| `LITELLM_IMAGE` | `ghcr.io/berriai/litellm:v1.108.2` | Immagine Docker con tag fisso. Non usare tag mobili ([S-104](Sources.md#s-104)) |
+| `LITELLM_IMAGE` | `ghcr.io/berriai/litellm-non_root:v1.108.2` | Immagine Docker non-root con tag fisso; in team il digest da `scripts/pin-images.sh`. Non usare tag mobili ([S-104](Sources.md#s-104), [S-109](Sources.md#s-109)) |
 | `LITELLM_MASTER_KEY` | generata | Chiave root del proxy, inizia con `sk-` ([S-020](Sources.md#s-020)) |
 | `LITELLM_SALT_KEY` | generata | Solo profilo esteso. Non rigenerarla ([S-020](Sources.md#s-020)) |
 | `POSTGRES_PASSWORD` | generata (`openssl rand -hex 24`) | Solo profilo esteso. Solo caratteri `[0-9a-f]`: entra in `DATABASE_URL` |
