@@ -1,6 +1,7 @@
 # systemd user unit per LiteLLM proxy (installato con uv tool).
 # Installazione: cp litellm.service ~/.config/systemd/user/ && systemctl --user enable --now litellm.service
-# ⚠️ Proposta del progetto: la documentazione LiteLLM non descrive systemd (docs/Sources.md#s-023).
+# Proposta del progetto: la documentazione LiteLLM non descrive systemd (docs/Sources.md#s-023).
+# AZ-07: direttive di hardening (docs/Sources.md#s-144). Verifica con: systemd-analyze --user security litellm.service
 [Unit]
 Description=LiteLLM proxy (WPC2026)
 After=network-online.target
@@ -8,10 +9,24 @@ After=network-online.target
 [Service]
 Type=simple
 WorkingDirectory=%h/wpc2026-litellm
+# EnvironmentFile legge CHIAVE=valore, non esegue il file. Permessi: chmod 600 (AZ-01)
 EnvironmentFile=%h/wpc2026-litellm/.env
 ExecStart=%h/.local/bin/litellm --config %h/wpc2026-litellm/config.yaml --host 127.0.0.1 --port 4000
 Restart=on-failure
 RestartSec=5
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=%h/wpc2026-litellm
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+RestrictSUIDSGID=true
+LockPersonality=true
+# ⚠️ Con ProtectHome=read-only, uv e Python devono poter leggere ~/.local: verifica l'avvio dopo ogni aggiornamento.
 
 [Install]
 WantedBy=default.target

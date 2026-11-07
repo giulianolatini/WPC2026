@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<!-- LaunchAgent per LiteLLM proxy. Sostituisci USERNAME con il tuo nome utente. -->
+<!-- LaunchAgent per LiteLLM proxy. Sostituisci USERNAME con il tuo nome utente.
+     AZ-09: log in ~/Library/Logs (solo utente, umask 077 nello script di avvio). -->
 <plist version="1.0">
 <dict>
   <key>Label</key>
@@ -14,9 +15,11 @@
   <true/>
   <key>KeepAlive</key>
   <true/>
+  <key>Umask</key>
+  <integer>63</integer>
   <key>StandardOutPath</key>
-  <string>/Users/USERNAME/wpc2026-litellm/litellm.log</string>
+  <string>/Users/USERNAME/Library/Logs/wpc2026-litellm.log</string>
   <key>StandardErrorPath</key>
-  <string>/Users/USERNAME/wpc2026-litellm/litellm.log</string>
+  <string>/Users/USERNAME/Library/Logs/wpc2026-litellm.log</string>
 </dict>
 </plist>
