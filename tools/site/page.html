@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="{{ASSETS}}vendor/highlight/github-dark.min.css" id="hl-dark" disabled>
 <link rel="stylesheet" href="{{ASSETS}}styles.css">
 {{EXTRA_HEAD}}
-<script>try{var p=JSON.parse(localStorage.getItem('wpc2026.prefs')||'{}');var t=p.theme||'auto';if(t==='auto')t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.dataset.theme=t;}catch(e){}</script>
+<script>try{var p=JSON.parse(localStorage.getItem('wpc2026.prefs')||'{}');var t=p.theme;if(t!=='light'&&t!=='dark')t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.dataset.theme=t;}catch(e){}</script>
 </head>
 <body>
 <div class="topbar">
