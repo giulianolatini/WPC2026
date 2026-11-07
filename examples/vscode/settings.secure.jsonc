@@ -22,6 +22,13 @@
     "**/.mcp.json": false
   },
 
-  // --- Sandbox: rete in uscita limitata (default true) (S-130)
-  "chat.agent.sandbox.network.allowNetwork": false
+  // --- Sandbox dell'agente: il default è "off" su tutte le piattaforme (S-145)
+  // Requisiti: macOS 15+; Linux glibc o WSL2 con bubblewrap >= 0.5.0; Windows 11 (sperimentale).
+  "chat.agent.sandbox.enabled": "on",
+  // Rete in uscita bloccata (default true). Per consentire solo alcuni domini, imposta true e usa
+  // "chat.agent.sandbox.network.allowedDomains" / "deniedDomains" (i negati prevalgono);
+  // verifica la policy effettiva con /sandbox policy in chat.
+  "chat.agent.sandbox.network.allowNetwork": false,
+  // Server MCP avviati in locale eseguiti nella sandbox (default true)
+  "chat.agent.sandbox.mcpServers": true
 }

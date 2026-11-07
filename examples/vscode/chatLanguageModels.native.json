@@ -27,8 +27,8 @@
     "apiType": "chat-completions",
     "models": [
       {
-        "id": "openai/gpt-oss-120b:fastest",
-        "name": "HF · gpt-oss-120b (fastest)",
+        "id": "openai/gpt-oss-120b:groq",
+        "name": "HF · gpt-oss-120b (groq)",
         "url": "https://router.huggingface.co/v1/chat/completions",
         "toolCalling": true,
         "vision": false,
