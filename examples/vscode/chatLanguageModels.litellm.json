@@ -1,0 +1,25 @@
+[
+  {
+    "name": "LiteLLM (OpenAI format)",
+    "vendor": "customendpoint",
+    "apiKey": "${input:litellmKey}",
+    "apiType": "chat-completions",
+    "models": [
+      { "id": "claude-sonnet",      "name": "LiteLLM · Claude Sonnet",   "url": "http://localhost:4000/v1/chat/completions", "toolCalling": true, "vision": true,  "maxInputTokens": 112000, "maxOutputTokens": 16000 },
+      { "id": "codex",              "name": "LiteLLM · Codex",           "url": "http://localhost:4000/v1/chat/completions", "toolCalling": true, "vision": true,  "maxInputTokens": 112000, "maxOutputTokens": 16000 },
+      { "id": "gemini-pro",         "name": "LiteLLM · Gemini Pro",      "url": "http://localhost:4000/v1/chat/completions", "toolCalling": true, "vision": true,  "maxInputTokens": 112000, "maxOutputTokens": 16000 },
+      { "id": "openrouter-gpt-oss", "name": "LiteLLM · OpenRouter gpt-oss", "url": "http://localhost:4000/v1/chat/completions", "toolCalling": true, "vision": false, "maxInputTokens": 112000, "maxOutputTokens": 16000 },
+      { "id": "hf-gpt-oss",         "name": "LiteLLM · HF gpt-oss",      "url": "http://localhost:4000/v1/chat/completions", "toolCalling": true, "vision": false, "maxInputTokens": 112000, "maxOutputTokens": 16000 }
+    ]
+  },
+  {
+    "name": "LiteLLM (Anthropic format)",
+    "vendor": "customendpoint",
+    "apiKey": "${input:litellmKey}",
+    "apiType": "messages",
+    "models": [
+      { "id": "claude-opus", "name": "LiteLLM · Claude Opus (messages)", "url": "http://localhost:4000/v1/messages", "toolCalling": true, "vision": true, "maxInputTokens": 112000, "maxOutputTokens": 16000 },
+      { "id": "gemini-pro",  "name": "LiteLLM · Gemini Pro (messages)",  "url": "http://localhost:4000/v1/messages", "toolCalling": true, "vision": true, "maxInputTokens": 112000, "maxOutputTokens": 16000 }
+    ]
+  }
+]

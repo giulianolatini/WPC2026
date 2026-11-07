@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- LaunchAgent per LiteLLM proxy. Sostituisci USERNAME con il tuo nome utente. -->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.wpc2026.litellm</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <string>/Users/USERNAME/wpc2026-litellm/service/start-litellm.sh</string>
+  </array>
+  <key>RunAtLoad</key>
+  <true/>
+  <key>KeepAlive</key>
+  <true/>
+  <key>StandardOutPath</key>
+  <string>/Users/USERNAME/wpc2026-litellm/litellm.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/USERNAME/wpc2026-litellm/litellm.log</string>
+</dict>
+</plist>

@@ -1,0 +1,38 @@
+# Profilo esteso: LiteLLM + PostgreSQL (Admin UI, virtual keys, budget, spend log).
+# Avvio: docker compose -f compose.extended.yaml up -d
+# Admin UI: http://localhost:4000/ui  (utente admin, password = LITELLM_MASTER_KEY)
+# Fonti: docs/Sources.md#s-020, #s-023
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-litellm}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:-litellm}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-litellm} -d ${POSTGRES_DB:-litellm}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  litellm:
+    image: ${LITELLM_IMAGE:-ghcr.io/berriai/litellm:v1.90.2}   # ⚠️ verifica il tag stabile corrente
+    command: ["--config", "/app/config.yaml", "--port", "4000"]
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-litellm}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-litellm}
+      STORE_MODEL_IN_DB: "True"     # permette di gestire i modelli anche dall'Admin UI
+    volumes:
+      - ./config.yaml:/app/config.yaml:ro
+    ports:
+      - "127.0.0.1:${LITELLM_PORT:-4000}:4000"
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  pgdata:
