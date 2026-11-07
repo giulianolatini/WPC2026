@@ -7,10 +7,11 @@
   const STATUS = [['ok', 'OK'], ['ko', 'KO'], ['skip', 'Saltato'], ['na', 'Non applicabile']];
   const STATUS_LABEL = Object.fromEntries(STATUS);
   const $ = (s, el = document) => el.querySelector(s);
+  // Ogni valore dinamico che entra in innerHTML passa da esc(), anche negli attributi (R2-codex-01).
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
   /* ------------------------------------------------------------ stato */
-  let state = WPC.store(KEY) || { current: null, sessions: {} };
+  let state = { current: null, sessions: {} };   // caricato e validato all'avvio (loadState)
   const save = () => { const s = cur(); if (s) s.updatedAt = new Date().toISOString(); WPC.store(KEY, state); };
   const cur = () => state.sessions[state.current];
 
@@ -43,16 +44,87 @@
   function usedParams(code) { return [...new Set([...code.matchAll(PARAM_RE)].map(m => m[1]))]; }
 
   /* ------------------------------------------------------------ redazione dei segreti */
+  // Pattern dei segreti noti (R2-codex-03: anche campi JSON tra virgolette e valori tra virgolette con spazi).
+  // Ogni sostituzione è idempotente: redact(redact(x)) === redact(x).
+  const SECRET_NAME = '(?:[A-Za-z0-9_-]*?(?:password|passwd|secret|token|api[_-]?key|master[_-]?key|salt[_-]?key|private[_-]?key|access[_-]?key)|key)';
   const REDACT = [
     [/\b(sk-(?:ant-|or-|proj-)?)[A-Za-z0-9_\-]{8,}/g, '$1[REDATTO]'],
     [/\bhf_[A-Za-z0-9]{10,}/g, 'hf_[REDATTO]'],
     [/\bAIza[0-9A-Za-z_\-]{20,}/g, 'AIza[REDATTO]'],
     [/(Bearer\s+)[A-Za-z0-9._~+\/\-]{8,}=*/gi, '$1[REDATTO]'],
     [/(x-api-key:\s*)\S+/gi, '$1[REDATTO]'],
-    [/\b((?:[A-Z][A-Z0-9_]*_)?(?:API_KEY|MASTER_KEY|SALT_KEY|TOKEN|PASSWORD|SECRET)\s*[=:]\s*)["']?[^\s"']+["']?/g, '$1[REDATTO]'],
+    // JSON: "POSTGRES_PASSWORD": "valore", "key": "valore"
+    [new RegExp('("' + SECRET_NAME + '"\\s*:\\s*)"(?:[^"\\\\]|\\\\.)*"', 'gi'), '$1"[REDATTO]"'],
+    // CHIAVE=valore, CHIAVE: valore, anche con valore tra virgolette e spazi
+    [/\b((?:[A-Za-z][A-Za-z0-9_]*_)?(?:API_?KEY|MASTER_KEY|SALT_KEY|ACCESS_KEY|PRIVATE_KEY|TOKEN|PASSWORD|PASSWD|SECRET)\s*[=:]\s*)(?:"[^"\n]*"|'[^'\n]*'|[^\s"',}]+)/gi, '$1[REDATTO]'],
     [/(postgres(?:ql)?:\/\/[^:\s\/]+:)[^@\s]+@/gi, '$1[REDATTO]@']
   ];
   function redact(text) { let t = text || ''; for (const [re, rep] of REDACT) t = t.replace(re, rep); return t; }
+
+  /* ------------------------------------------------------------ validazione delle sessioni
+     I dati da localStorage e da un JSON importato sono dati non fidati (R2-codex-01, R2-codex-02):
+     la sessione si ricostruisce campo per campo, con valori ammessi, segreti oscurati e nessun
+     output per i passi evidence=no-output. Una sessione non valida non entra nello stato. */
+  const STEPS = Object.fromEntries(RB.phases.flatMap(p => p.steps).map(s => [s.id, s]));
+  const ID_RE = /^s[a-z0-9]{1,20}$/;
+  const isoOr = (v, d) => (typeof v === 'string' && !isNaN(Date.parse(v))) ? new Date(v).toISOString() : d;
+  const str = (v, max) => (typeof v === 'string' ? v : '').slice(0, max);
+  function cleanParam(name, v) {
+    v = str(v, 300).trim();
+    if (!v) return '';
+    if (/["'`\n\r;|&<>]/.test(v) || redact(v) !== v || redact(name + '=' + v) !== name + '=' + v) return null;
+    return v;
+  }
+  function sanitizeSession(raw) {
+    if (!raw || typeof raw !== 'object' || !ID_RE.test(raw.id)) throw new Error('id');
+    const now = new Date().toISOString();
+    const pick = (v, allowed, d) => allowed.includes(v) ? v : d;
+    const s = {
+      id: raw.id,
+      name: str(raw.name, 120).trim() || 'Sessione importata',
+      operator: str(raw.operator, 120),
+      os: pick(raw.os, Object.keys(RB.osLabels), 'debian'),
+      path: pick(raw.path, ['docker', 'uv'], 'docker'),
+      profile: pick(raw.profile, ['minimal', 'extended'], 'minimal'),
+      params: {}, steps: {},
+      createdAt: isoOr(raw.createdAt, now), updatedAt: isoOr(raw.updatedAt, now),
+      runbookVersion: /^[0-9a-f]{12}$/.test(raw.runbookVersion) ? raw.runbookVersion : ''
+    };
+    const params = raw.params && typeof raw.params === 'object' ? raw.params : {};
+    for (const p of RB.params) {
+      const v = cleanParam(p.name, params[p.name]);
+      if (v) s.params[p.name] = v;            // un parametro rifiutato torna al default
+    }
+    const steps = raw.steps && typeof raw.steps === 'object' ? raw.steps : {};
+    for (const [id, st] of Object.entries(STEPS)) {
+      const x = steps[id]; if (!x || typeof x !== 'object') continue;
+      const noOut = st.evidence === 'no-output';
+      const status = pick(x.status, STATUS.map(a => a[0]), '');
+      s.steps[id] = {
+        status,
+        checks: Array.from({ length: st.checks || 0 }, (_, i) => Array.isArray(x.checks) && x.checks[i] === true),
+        output: noOut ? '' : redact(str(x.output, 100000)),
+        note: redact(str(x.note, 10000)),
+        at: status ? isoOr(x.at, '') : '',
+        commands: status && Array.isArray(x.commands)
+          ? x.commands.slice(0, 20).filter(c => c && typeof c.code === 'string')
+              .map(c => ({ lang: /^[\w-]{1,20}$/.test(c.lang) ? c.lang : 'plaintext', code: redact(c.code.slice(0, 20000)) }))
+          : ''
+      };
+    }
+    return s;
+  }
+  function loadState() {
+    const raw = WPC.store(KEY);
+    const st = { current: null, sessions: {} };
+    if (raw && raw.sessions && typeof raw.sessions === 'object') {
+      for (const v of Object.values(raw.sessions)) {
+        try { const s = sanitizeSession(v); st.sessions[s.id] = s; } catch (e) { /* sessione non valida: scartata */ }
+      }
+      if (st.sessions[raw.current]) st.current = raw.current;
+    }
+    return st;
+  }
 
   /* ------------------------------------------------------------ filtri */
   const visibleStep = (st, s = cur()) => st.os.includes(s.os) && (st.path === 'all' || st.path === s.path) && (st.profile === 'all' || st.profile === s.profile);
@@ -63,11 +135,11 @@
   function renderSessionBar() {
     const sel = $('#session-select');
     sel.innerHTML = Object.values(state.sessions).sort((a, b) => b.createdAt.localeCompare(a.createdAt))
-      .map(s => `<option value="${s.id}">${esc(s.name)}</option>`).join('');
+      .map(s => `<option value="${esc(s.id)}">${esc(s.name)}</option>`).join('');
     sel.value = state.current;
     const s = cur();
     $('#s-name').value = s.name; $('#s-operator').value = s.operator;
-    $('#s-os').innerHTML = Object.entries(RB.osLabels).map(([k, v]) => `<option value="${k}">${esc(v)}</option>`).join('');
+    $('#s-os').innerHTML = Object.entries(RB.osLabels).map(([k, v]) => `<option value="${esc(k)}">${esc(v)}</option>`).join('');
     $('#s-os').value = s.os; $('#s-path').value = s.path; $('#s-profile').value = s.profile;
     $('#version-warning').classList.toggle('hidden', s.runbookVersion === RB.hash);
   }
@@ -86,7 +158,7 @@
     for (const ph of RB.phases) {
       const steps = ph.steps.filter(st => visibleStep(st, s));
       if (!steps.length) continue;
-      out += `<section class="phase" id="${ph.id}"><h2>${esc(ph.id)} — ${esc(ph.title)}</h2>`;
+      out += `<section class="phase" id="${esc(ph.id)}"><h2>${esc(ph.id)} — ${esc(ph.title)}</h2>`;
       for (const st of steps) out += renderStep(st);
       out += '</section>';
     }
@@ -104,17 +176,17 @@
       if (b.type === 'prose') body += `<div class="prose">${b.html}</div>`;
       else if (visibleBlock(b)) {
         const params = usedParams(b.code);
-        body += `<pre class="code" data-code="${esc(b.code)}" data-os="${b.os.join(',')}"><code class="language-${esc(b.lang)}"></code></pre>`
+        body += `<pre class="code" data-code="${esc(b.code)}" data-os="${esc(b.os.join(','))}"><code class="language-${esc(b.lang)}"></code></pre>`
              + (params.length ? `<p class="hint">Parametri: ${params.map(n => `<code>${esc(n)}</code>`).join(' ')}</p>` : '');
       }
     }
     const noOut = st.evidence === 'no-output';
-    return `<article class="card step" id="${st.id}" data-step="${st.id}" data-status="${ss.status}">
-      <header><h3><span class="sid">${st.id}</span>${esc(st.title)}</h3>
+    return `<article class="card step" id="${esc(st.id)}" data-step="${esc(st.id)}" data-status="${esc(ss.status)}">
+      <header><h3><span class="sid">${esc(st.id)}</span>${esc(st.title)}</h3>
         <div class="badges">${badges.map(b => `<span class="badge">${esc(b)}</span>`).join('')}${noOut ? '<span class="badge secret">segreti: output non salvato</span>' : ''}</div></header>
       ${body}
       <details class="evidence" ${ss.status ? '' : 'open'}><summary>Evidenza${ss.status ? ' — ' + esc(STATUS_LABEL[ss.status]) : ''}</summary>
-        <div class="status">${STATUS.map(([v, l]) => `<button type="button" data-v="${v}" aria-pressed="${ss.status === v}">${l}</button>`).join('')}
+        <div class="status">${STATUS.map(([v, l]) => `<button type="button" data-v="${esc(v)}" aria-pressed="${ss.status === v}">${esc(l)}</button>`).join('')}
           <span class="when">${ss.at ? new Date(ss.at).toLocaleString('it-IT') : ''}</span></div>
         ${noOut ? '<p class="hint">Questo passo produce segreti: il sito non salva l\'output.</p>'
                 : `<label class="field"><span>Output del comando (i segreti riconosciuti sono oscurati)</span><textarea class="mono" data-f="output" spellcheck="false">${esc(ss.output)}</textarea></label>
@@ -149,7 +221,7 @@
       if (!steps.length) return '';
       const d = steps.filter(st => DONE.includes(stepState(st.id).status)).length;
       all += steps.length; done += d;
-      return `<li><a href="#${ph.id}"><span>${esc(ph.id)} — ${esc(ph.title)}</span><span class="count">${d}/${steps.length}</span></a></li>`;
+      return `<li><a href="#${esc(ph.id)}"><span>${esc(ph.id)} — ${esc(ph.title)}</span><span class="count">${d}/${steps.length}</span></a></li>`;
     }).join('');
     $('#progress-bar').style.width = all ? (100 * done / all) + '%' : '0';
     $('#progress-text').textContent = `${done} di ${all} passi completati (OK, saltati o non applicabili).`;
@@ -202,8 +274,8 @@
     ['os', 'path', 'profile'].forEach(k => $('#s-' + k).addEventListener('change', e => { cur()[k] = e.target.value; save(); renderParams(); renderPhases(); }));
     $('#params').addEventListener('change', e => {
       const name = e.target.dataset.param; if (!name) return;
-      const v = e.target.value.trim();
-      if (redact(name + '=' + v) !== name + '=' + v || redact(v) !== v) { e.target.value = ''; WPC.toast('Non inserire segreti nei parametri'); return; }
+      const v = cleanParam(name, e.target.value);
+      if (v === null) { e.target.value = ''; WPC.toast('Valore rifiutato: niente segreti, virgolette o caratteri ; | & < >'); return; }
       cur().params[name] = v; save(); decorateCode();
     });
     $('#export-md').addEventListener('click', () => download(fileBase() + '.md', exportMarkdown(), 'text/markdown'));
@@ -213,9 +285,11 @@
       const f = e.target.files[0]; e.target.value = ''; if (!f) return;
       try {
         const d = JSON.parse(await f.text());
-        if (d.format !== 'wpc2026-runbook-session' || !d.session || !d.session.id) throw new Error('formato');
-        if (state.sessions[d.session.id] && !confirm('La sessione esiste già in questo browser. Sostituirla?')) return;
-        state.sessions[d.session.id] = d.session; state.current = d.session.id; save(); renderAll(); WPC.toast('Sessione importata');
+        if (!d || d.format !== 'wpc2026-runbook-session') throw new Error('formato');
+        const s = sanitizeSession(d.session);   // valida PRIMA di salvare (review codex P2)
+        if (state.sessions[s.id] && !confirm('La sessione esiste già in questo browser. Sostituirla?')) return;
+        state.sessions[s.id] = s; state.current = s.id; save(); renderAll();
+        WPC.toast(JSON.stringify(s) === JSON.stringify(d.session) ? 'Sessione importata' : 'Sessione importata: valori non validi o segreti rimossi');
       } catch (err) { alert('File non valido: serve un export JSON di questo runbook.'); }
     });
   }
@@ -272,6 +346,7 @@
   /* ------------------------------------------------------------ avvio */
   function renderAll() { renderSessionBar(); renderParams(); renderPhases(); }
   WPC.initPrefs();
+  state = loadState(); WPC.store(KEY, state);   // riscrive lo stato già validato
   if (!cur()) { const ids = Object.keys(state.sessions); if (ids.length) state.current = ids[0]; else newSession(); }
   bindGlobal(); renderAll();
   if (location.hash) { const t = document.getElementById(location.hash.slice(1)); if (t) t.scrollIntoView(); }
