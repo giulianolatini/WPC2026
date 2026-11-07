@@ -17,14 +17,15 @@ Il sito offline in `site/` si genera da questo file con `tools/update-site.sh` (
   - `evidence=no-output`: il sito non salva l'output di quel passo (es. generazione di segreti).
 - Un blocco di codice con `os=` nell'intestazione (es. ` ```bash os=macos `) appare solo per quei sistemi.
 - `{{NOME}}` nei comandi è un parametro della tabella **Parametri**. Il sito lo sostituisce con il valore inserito.
+- Nei comandi bash e PowerShell un parametro che contiene un percorso o un testo libero sta sempre tra virgolette doppie (es. `"{{WPC_DIR}}"`): così un percorso con spazi resta un solo argomento. Per la home usa `$HOME`, non `~`: tra virgolette `~` non si espande. Il sito rifiuta valori con virgolette o con `; | & < >`.
 - Nessun segreto nei comandi: le chiavi stanno solo in `.env` e nel secret storage di VS Code.
 
 ## Parametri
 
 | Nome | Default | Default Windows | Descrizione |
 |------|---------|-----------------|-------------|
-| WPC_DIR | ~/wpc2026-litellm | $HOME\wpc2026-litellm | Cartella di lavoro di LiteLLM |
-| REPO_DIR | ~/Sviluppo/GITHUB/WPC2026 | $HOME\Sviluppo\GITHUB\WPC2026 | Clone locale del repository WPC2026 |
+| WPC_DIR | $HOME/wpc2026-litellm | $HOME\wpc2026-litellm | Cartella di lavoro di LiteLLM |
+| REPO_DIR | $HOME/Sviluppo/GITHUB/WPC2026 | $HOME\Sviluppo\GITHUB\WPC2026 | Clone locale del repository WPC2026 |
 | LITELLM_PORT | 4000 | 4000 | Porta del proxy LiteLLM (solo `127.0.0.1`) |
 | LITELLM_VERSION | 1.108.2 | 1.108.2 | Versione LTS di LiteLLM ([D-018](../Decisions.md#d-018)) |
 | ADMIN_ID | wpc-admin | wpc-admin | Utente `proxy_admin` (profilo esteso) |
@@ -169,9 +170,9 @@ Copia [`settings.secure.jsonc`](../../examples/vscode/settings.secure.jsonc) nel
 <!-- step: os=all path=all profile=all -->
 
 ```bash os=macos,debian,opensuse
-mkdir -p {{WPC_DIR}}
-cp -R {{REPO_DIR}}/examples/litellm/. {{WPC_DIR}}/
-cd {{WPC_DIR}} && cp .env.example .env
+mkdir -p "{{WPC_DIR}}"
+cp -R "{{REPO_DIR}}/examples/litellm/." "{{WPC_DIR}}/"
+cd "{{WPC_DIR}}" && cp .env.example .env
 ```
 
 ```powershell os=windows
@@ -216,7 +217,7 @@ function New-Hex([int]$n) { -join ([System.Security.Cryptography.RandomNumberGen
 <!-- step: os=all path=all profile=all -->
 
 ```bash os=macos,debian,opensuse
-chmod 600 {{WPC_DIR}}/.env && ls -l {{WPC_DIR}}/.env
+chmod 600 "{{WPC_DIR}}/.env" && ls -l "{{WPC_DIR}}/.env"
 ```
 
 ```powershell os=windows
@@ -234,7 +235,7 @@ chmod 600 {{WPC_DIR}}/.env && ls -l {{WPC_DIR}}/.env
 Richiede `cosign`. Lo script verifica l'impronta della chiave, scarica l'immagine e verifica la firma sul digest ([03 §5.1](../03-Security-Best-Practices.md#51-release-e-immagini)).
 
 ```bash os=macos,debian,opensuse
-cd {{WPC_DIR}} && LITELLM_TAG=v{{LITELLM_VERSION}} ./scripts/pin-images.sh
+cd "{{WPC_DIR}}" && LITELLM_TAG="v{{LITELLM_VERSION}}" ./scripts/pin-images.sh
 ```
 
 - [ ] Copia in `.env` le righe `LITELLM_IMAGE=…@sha256:…` e `POSTGRES_IMAGE=…@sha256:…`.
@@ -245,7 +246,7 @@ cd {{WPC_DIR}} && LITELLM_TAG=v{{LITELLM_VERSION}} ./scripts/pin-images.sh
 <!-- step: os=all path=docker profile=minimal -->
 
 ```bash os=macos,debian,opensuse
-cd {{WPC_DIR}} && docker compose -f compose.minimal.yaml up -d && docker compose -f compose.minimal.yaml ps
+cd "{{WPC_DIR}}" && docker compose -f compose.minimal.yaml up -d && docker compose -f compose.minimal.yaml ps
 ```
 
 ```powershell os=windows
@@ -258,7 +259,7 @@ Set-Location "{{WPC_DIR}}"; docker compose -f compose.minimal.yaml up -d; docker
 <!-- step: os=all path=docker profile=extended -->
 
 ```bash os=macos,debian,opensuse
-cd {{WPC_DIR}} && docker compose -f compose.extended.yaml up -d && docker compose -f compose.extended.yaml ps
+cd "{{WPC_DIR}}" && docker compose -f compose.extended.yaml up -d && docker compose -f compose.extended.yaml ps
 ```
 
 ```powershell os=windows
@@ -273,11 +274,11 @@ Set-Location "{{WPC_DIR}}"; docker compose -f compose.extended.yaml up -d; docke
 La password è chiesta in modo interattivo: almeno 12 caratteri con maiuscole, minuscole, cifre e simboli ([S-148](../Sources.md#s-148)).
 
 ```bash os=macos,debian,opensuse
-cd {{WPC_DIR}} && WPC_DIR={{WPC_DIR}} ADMIN_ID={{ADMIN_ID}} ADMIN_EMAIL={{ADMIN_EMAIL}} ./scripts/bootstrap-admin.sh
+cd "{{WPC_DIR}}" && WPC_DIR="{{WPC_DIR}}" ADMIN_ID="{{ADMIN_ID}}" ADMIN_EMAIL="{{ADMIN_EMAIL}}" ./scripts/bootstrap-admin.sh
 ```
 
 ```powershell os=windows
-& "{{WPC_DIR}}\scripts\Bootstrap-Admin.ps1" -WpcDir "{{WPC_DIR}}" -AdminId {{ADMIN_ID}} -AdminEmail {{ADMIN_EMAIL}}
+& "{{WPC_DIR}}\scripts\Bootstrap-Admin.ps1" -WpcDir "{{WPC_DIR}}" -AdminId "{{ADMIN_ID}}" -AdminEmail "{{ADMIN_EMAIL}}"
 ```
 
 **Esito atteso:** `proxy_admin '{{ADMIN_ID}}' pronto`. Login su `http://localhost:{{LITELLM_PORT}}/ui` con email e password. In caso di errore dopo la creazione: ripeti con `RESUME=1` o `-Resume`.
@@ -297,7 +298,7 @@ uv tool install 'litellm[proxy]=={{LITELLM_VERSION}}'
 <!-- step: os=all path=uv profile=all -->
 
 ```bash os=macos,debian,opensuse
-cd {{WPC_DIR}} && WPC_DIR={{WPC_DIR}} ./service/start-litellm.sh
+cd "{{WPC_DIR}}" && WPC_DIR="{{WPC_DIR}}" ./service/start-litellm.sh
 ```
 
 ```powershell os=windows
@@ -313,14 +314,14 @@ La unit systemd e il LaunchAgent usano il percorso `~/wpc2026-litellm`. Se `WPC_
 
 ```bash os=debian,opensuse
 mkdir -p ~/.config/systemd/user
-cp {{WPC_DIR}}/service/litellm.service ~/.config/systemd/user/
+cp "{{WPC_DIR}}/service/litellm.service" ~/.config/systemd/user/
 systemctl --user daemon-reload && systemctl --user enable --now litellm.service
 systemctl --user status litellm.service --no-pager
 systemd-analyze --user security litellm.service
 ```
 
 ```bash os=macos
-sed "s/USERNAME/$(whoami)/g" {{WPC_DIR}}/service/com.wpc2026.litellm.plist > ~/Library/LaunchAgents/com.wpc2026.litellm.plist
+sed "s/USERNAME/$(whoami)/g" "{{WPC_DIR}}/service/com.wpc2026.litellm.plist" > ~/Library/LaunchAgents/com.wpc2026.litellm.plist
 launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.wpc2026.litellm.plist
 launchctl print gui/$(id -u)/com.wpc2026.litellm | head -20
 ```
@@ -338,7 +339,7 @@ Get-ScheduledTask -TaskName WPC2026-LiteLLM
 <!-- step: os=all path=all profile=all evidence=no-output -->
 
 ```bash os=macos,debian,opensuse
-export LITELLM_MASTER_KEY="$(grep -E '^LITELLM_MASTER_KEY=' {{WPC_DIR}}/.env | cut -d= -f2-)"
+export LITELLM_MASTER_KEY="$(grep -E '^LITELLM_MASTER_KEY=' "{{WPC_DIR}}/.env" | cut -d= -f2-)"
 ```
 
 ```powershell os=windows
@@ -468,7 +469,7 @@ Invoke-RestMethod -Method Post -Uri http://localhost:{{LITELLM_PORT}}/key/genera
 <!-- step: os=all path=all profile=all -->
 
 ```bash os=all
-uv tool install specify-cli=={{SPECKIT_VERSION}}
+uv tool install "specify-cli=={{SPECKIT_VERSION}}"
 specify version
 specify check
 ```
@@ -479,8 +480,8 @@ specify check
 <!-- step: os=all path=all profile=all -->
 
 ```bash os=all
-specify init {{SPECKIT_PROJECT}} --integration copilot
-cd {{SPECKIT_PROJECT}}
+specify init "{{SPECKIT_PROJECT}}" --integration copilot
+cd "{{SPECKIT_PROJECT}}"
 git status --short
 ```
 
