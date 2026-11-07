@@ -527,7 +527,7 @@ Il formato segue il template ADR di Nygard, con una sezione **Razionale** esplic
 
 **Razionale.** Una sola sorgente evita divergenze tra le copie. Il generatore controlla che ogni parametro usato sia dichiarato e che gli ID siano unici.
 
-**Conseguenze.** Il runbook rimanda a 01 e 02 per le spiegazioni e non le ripete. I passi che producono segreti (S-202, S-203, S-501) hanno `evidence=no-output`.
+**Conseguenze.** Il runbook rimanda a 01 e 02 per le spiegazioni e non le ripete. I passi che producono segreti (S-202, S-203, S-402, S-501) hanno `evidence=no-output`.
 
 **Fonti.** [01](01-Installazione.md), [02](02-Configurazione-Copilot.md), [S-092](Sources.md#s-092).
 

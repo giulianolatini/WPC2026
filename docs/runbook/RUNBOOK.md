@@ -268,21 +268,6 @@ Set-Location "{{WPC_DIR}}"; docker compose -f compose.extended.yaml up -d; docke
 
 **Esito atteso:** `db` è `healthy` e `litellm` è `running`.
 
-### S-304 — Crea il primo proxy_admin
-<!-- step: os=all path=all profile=extended -->
-
-La password è chiesta in modo interattivo: almeno 12 caratteri con maiuscole, minuscole, cifre e simboli ([S-148](../Sources.md#s-148)).
-
-```bash os=macos,debian,opensuse
-cd "{{WPC_DIR}}" && WPC_DIR="{{WPC_DIR}}" ADMIN_ID="{{ADMIN_ID}}" ADMIN_EMAIL="{{ADMIN_EMAIL}}" ./scripts/bootstrap-admin.sh
-```
-
-```powershell os=windows
-& "{{WPC_DIR}}\scripts\Bootstrap-Admin.ps1" -WpcDir "{{WPC_DIR}}" -AdminId "{{ADMIN_ID}}" -AdminEmail "{{ADMIN_EMAIL}}"
-```
-
-**Esito atteso:** `proxy_admin '{{ADMIN_ID}}' pronto`. Login su `http://localhost:{{LITELLM_PORT}}/ui` con email e password. In caso di errore dopo la creazione: ripeti con `RESUME=1` o `-Resume`.
-
 ## F4 — LiteLLM come servizio locale con uv
 
 ### S-401 — Installa LiteLLM con uv
@@ -294,7 +279,18 @@ uv tool install 'litellm[proxy]=={{LITELLM_VERSION}}'
 
 **Esito atteso:** `litellm --version` mostra `{{LITELLM_VERSION}}`. Non usare le versioni `1.82.7`, `1.82.8`, `1.107.0` ([S-104](../Sources.md#s-104)).
 
-### S-402 — Prova l'avvio in primo piano
+### S-402 — Profilo esteso: collega PostgreSQL
+<!-- step: os=all path=uv profile=extended evidence=no-output -->
+
+Con `uv` il profilo esteso usa un PostgreSQL esterno ([01 §6](../01-Installazione.md#6-litellm-come-servizio-locale-con-uv), [S-022](../Sources.md#s-022), [S-023](../Sources.md#s-023)). Il runbook non installa PostgreSQL: usa un database della tua organizzazione o un'installazione locale.
+
+- [ ] Crea il database `litellm` e un utente dedicato, raggiungibili solo da `127.0.0.1` (o dalla rete interna del database).
+- [ ] Scrivi in `.env` la riga `DATABASE_URL=postgresql://litellm:<password>@127.0.0.1:5432/litellm`. Per la password usa solo caratteri `[0-9a-f]` (S-202): entra nell'URL senza codifica.
+- [ ] Controlla che `.env` contenga anche `LITELLM_SALT_KEY` (S-203).
+
+**Esito atteso:** in S-403 il proxy si avvia senza errori di connessione al database. ⚠️ Da provare: percorso uv + profilo esteso.
+
+### S-403 — Prova l'avvio in primo piano
 <!-- step: os=all path=uv profile=all -->
 
 ```bash os=macos,debian,opensuse
@@ -307,7 +303,7 @@ cd "{{WPC_DIR}}" && WPC_DIR="{{WPC_DIR}}" ./service/start-litellm.sh
 
 **Esito atteso:** il proxy ascolta su `127.0.0.1:{{LITELLM_PORT}}`. Ferma con `Ctrl+C`.
 
-### S-403 — Registra il servizio
+### S-404 — Registra il servizio
 <!-- step: os=all path=uv profile=all -->
 
 La unit systemd e il LaunchAgent usano il percorso `~/wpc2026-litellm`. Se `WPC_DIR` è diverso, cambia il percorso nei file copiati prima di attivarli.
@@ -386,6 +382,21 @@ Invoke-RestMethod -Method Post -Uri http://localhost:{{LITELLM_PORT}}/v1/chat/co
 ```
 
 **Esito atteso:** una risposta del modello. `401`: controlla la master key. Errore del provider: controlla la chiave del provider in `.env`.
+
+### S-505 — Crea il primo proxy_admin
+<!-- step: os=all path=all profile=extended -->
+
+Il proxy deve essere attivo (S-502): lo script chiama le API `/user/new` e `/user/update`. La password è chiesta in modo interattivo: almeno 12 caratteri con maiuscole, minuscole, cifre e simboli ([S-148](../Sources.md#s-148)).
+
+```bash os=macos,debian,opensuse
+cd "{{WPC_DIR}}" && WPC_DIR="{{WPC_DIR}}" ADMIN_ID="{{ADMIN_ID}}" ADMIN_EMAIL="{{ADMIN_EMAIL}}" ./scripts/bootstrap-admin.sh
+```
+
+```powershell os=windows
+& "{{WPC_DIR}}\scripts\Bootstrap-Admin.ps1" -WpcDir "{{WPC_DIR}}" -AdminId "{{ADMIN_ID}}" -AdminEmail "{{ADMIN_EMAIL}}"
+```
+
+**Esito atteso:** `proxy_admin '{{ADMIN_ID}}' pronto`. Login su `http://localhost:{{LITELLM_PORT}}/ui` con email e password. In caso di errore dopo la creazione: ripeti con `RESUME=1` o `-Resume`.
 
 ## F6 — Copilot con BYOK nativo
 
