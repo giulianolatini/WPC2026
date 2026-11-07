@@ -30,3 +30,5 @@ Get-Content $envFile | Where-Object { $_ -match '^\s*[A-Za-z_][A-Za-z0-9_]*=' } 
     [Environment]::SetEnvironmentVariable($name.Trim(), $value, 'Process')
 }
 & "$HOME\.local\bin\litellm.exe" --config (Join-Path $WpcDir 'config.yaml') --host 127.0.0.1 --port $Port
+# R-codex-05: propaga il codice di uscita, così Task Scheduler vede il fallimento e applica RestartCount.
+exit $LASTEXITCODE
