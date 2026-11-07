@@ -557,7 +557,7 @@ Il formato segue il template ADR di Nygard, con una sezione <strong>Razionale</s
 <p><strong>Opzioni considerate.</strong> (1) Un runbook per ogni combinazione. (2) Un runbook unico con metadati di filtro per passo e per blocco di codice.</p>
 <p><strong>Decisione.</strong> Usiamo l'opzione 2: <code>docs/runbook/RUNBOOK.md</code>, fasi F1–F9, passi <code>S-nnn</code>. Ogni passo ha la riga <code>&lt;!-- step: os=… path=… profile=… evidence=… --&gt;</code>. I blocchi di codice hanno <code>os=…</code>. I comandi usano parametri <code>{{NOME}}</code> dichiarati in una tabella. L'evidenza registra parametri, esito e output.</p>
 <p><strong>Razionale.</strong> Una sola sorgente evita divergenze tra le copie. Il generatore controlla che ogni parametro usato sia dichiarato e che gli ID siano unici.</p>
-<p><strong>Conseguenze.</strong> Il runbook rimanda a 01 e 02 per le spiegazioni e non le ripete. I passi che producono segreti (S-202, S-203, S-501) hanno <code>evidence=no-output</code>.</p>
+<p><strong>Conseguenze.</strong> Il runbook rimanda a 01 e 02 per le spiegazioni e non le ripete. I passi che producono segreti (S-202, S-203, S-402, S-501) hanno <code>evidence=no-output</code>.</p>
 <p><strong>Fonti.</strong> <a href="01-Installazione.html">01</a>, <a href="02-Configurazione-Copilot.html">02</a>, <a href="Sources.html#s-092">S-092</a>.</p>
 <hr />
 <p><a id="d-027"></a></p>
@@ -585,7 +585,8 @@ Il formato segue il template ADR di Nygard, con una sezione <strong>Razionale</s
 <li>Dati nel HTML: il browser blocca <code>fetch</code> da <code>file://</code>.</li>
 <li>Sessioni multiple in <code>localStorage</code> (chiave <code>wpc2026.runbook</code>); export/import JSON per cambiare browser o macchina.</li>
 <li>Evidenza in Markdown: dati della sessione, parametri (valore e origine), riepilogo, comandi con i parametri risolti, esito, data e ora, output, note.</li>
-<li>Il sito oscura i segreti riconosciuti (<code>sk-…</code>, <code>hf_…</code>, <code>AIza…</code>, <code>Bearer …</code>, <code>*_API_KEY=…</code>) e rifiuta segreti nei parametri.</li>
+<li>Il sito oscura i segreti riconosciuti (<code>sk-…</code>, <code>hf_…</code>, <code>AIza…</code>, <code>Bearer …</code>, <code>*_API_KEY=…</code>, <code>*_PASSWORD=…</code>, campi JSON come <code>"key": "…"</code>, password in <code>postgresql://</code>) e rifiuta segreti nei parametri.</li>
+<li>Le sessioni lette da <code>localStorage</code> o da un JSON importato sono dati non fidati: il sito le ricostruisce campo per campo (valori ammessi, segreti oscurati, nessun output per i passi <code>evidence=no-output</code>) prima di salvarle. Ogni valore dinamico nell'HTML passa dall'escaping (review PR #2).</li>
 <li>highlight.js locale; temi chiaro, scuro e automatico.</li>
 <li><code>tools/update-site.sh</code> e <code>tools/update-site.ps1</code> rigenerano il sito; <code>--check</code> controlla che il sito sia aggiornato.</li>
 </ul>
