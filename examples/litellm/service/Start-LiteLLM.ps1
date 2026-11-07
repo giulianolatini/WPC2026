@@ -6,9 +6,23 @@ param(
 )
 $ErrorActionPreference = 'Stop'
 $envFile = Join-Path $WpcDir '.env'
-# AZ-01: avvisa se altri principal hanno accesso al file
-$others = (Get-Acl $envFile).Access | Where-Object { $_.IdentityReference -notmatch [regex]::Escape($env:USERNAME) -and $_.IdentityReference -notmatch 'SYSTEM|Administrators' }
-if ($others) { Write-Warning ".env è accessibile ad altri utenti. Esegui: icacls `"$envFile`" /inheritance:r /grant:r `"${env:USERNAME}:R`"" }
+# AZ-01 (R-codex-01): termina se un principal diverso da utente corrente, SYSTEM o Administrators
+# ha accesso al file. Confronto per SID esatto, non per sottostringa del nome.
+$allowed = @(
+    [System.Security.Principal.WindowsIdentity]::GetCurrent().User.Value,
+    'S-1-5-18',      # LocalSystem
+    'S-1-5-32-544'   # BUILTIN\Administrators
+)
+$unsafe = foreach ($rule in (Get-Acl -LiteralPath $envFile).Access) {
+    if ($rule.AccessControlType -ne 'Allow') { continue }
+    try { $sid = $rule.IdentityReference.Translate([System.Security.Principal.SecurityIdentifier]).Value }
+    catch { $sid = $rule.IdentityReference.Value }
+    if ($allowed -notcontains $sid) { $rule.IdentityReference.Value }
+}
+if ($unsafe) {
+    Write-Error (".env è accessibile a: {0}. Esegui service\Protect-EnvFile.ps1 e riprova." -f (($unsafe | Select-Object -Unique) -join ', '))
+    exit 1
+}
 Set-Location $WpcDir
 Get-Content $envFile | Where-Object { $_ -match '^\s*[A-Za-z_][A-Za-z0-9_]*=' } | ForEach-Object {
     $name, $value = $_ -split '=', 2

@@ -307,7 +307,7 @@ chmod 600 .env
 ```
 
 ```powershell
-icacls .env /inheritance:r /grant:r "${env:USERNAME}:R"
+.\service\Protect-EnvFile.ps1 -Path .env   # rimuove regole ereditate ed esplicite, lascia solo l'utente corrente
 ```
 
 > Gli script di avvio rifiutano un `.env` leggibile da altri utenti e lo leggono come coppie `CHIAVE=valore`, senza eseguirlo ([`service/load-env.sh`](../examples/litellm/service/load-env.sh)).

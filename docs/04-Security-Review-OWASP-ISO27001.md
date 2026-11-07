@@ -110,7 +110,7 @@ Codici OWASP: `LLMxx` = LLM Top 10 2026; `ASIxx` = Agentic Top 10 2026.
 | ID | File | Rilievo | OWASP | ISO 27001 Annex A | Gravità | Stato |
 |----|------|---------|-------|-------------------|---------|-------|
 | F-01 | `config.yaml` | Le chiavi sono lette da variabili d'ambiente (`os.environ/...`), non scritte nel file | LLM02, LLM04 | A.5.17, A.8.24 | — | **Mitigato** |
-| F-02 | `.env` | Chiavi in chiaro su disco | LLM02 | A.5.17, A.8.3, A.8.12, A.8.24 | Alta | **Mitigato** (AZ-01: `chmod 600`/`icacls`, verifica dei permessi negli script). Residuo in team: secret store (R-07) |
+| F-02 | `.env` | Chiavi in chiaro su disco | LLM02 | A.5.17, A.8.3, A.8.12, A.8.24 | Alta | **Mitigato** (AZ-01: `chmod 600`/`Protect-EnvFile.ps1`, verifica dei permessi negli script). Residuo in team: secret store (R-07) |
 | F-03 | `.gitignore` | `.env` e `*.env` esclusi dal commit | LLM02 | A.5.17, A.8.4, A.8.12 | — | **Mitigato** |
 | F-04 | `compose.*.yaml` | Immagine LiteLLM fissata per tag, non per digest; firma non verificata | LLM04, ASI04 | A.5.21, A.8.9, A.8.19, A.8.32 | Alta | **Mitigato** (AZ-02: `scripts/pin-images.sh`, digest in `.env`) |
 | F-05 | `compose.*.yaml` | Immagine con utente root | ASI05 | A.8.2, A.8.9 | Media | **Mitigato** (AZ-03: `litellm-non_root`, `no-new-privileges`, `cap_drop: ALL`) ⚠️ tag da verificare |
@@ -288,7 +288,7 @@ Approvate dal PO e applicate il 2026-11-07 ([D-025](Decisions.md#d-025)).
 
 | ID | Azione | File modificati | Stato |
 |----|--------|-----------------|-------|
-| AZ-01 | Permessi di `.env` (`chmod 600`, `icacls`); verifica negli script | `.env.example`, `service/load-env.sh`, `Start-LiteLLM.ps1`, [01 §4](01-Installazione.md#4-chiavi-api-e-file-env) | ✅ Applicata |
+| AZ-01 | Permessi di `.env` (`chmod 600`, `Protect-EnvFile.ps1`); verifica negli script (Windows: confronto per SID, uscita con errore) | `.env.example`, `service/load-env.sh`, `Start-LiteLLM.ps1`, `Protect-EnvFile.ps1`, [01 §4](01-Installazione.md#4-chiavi-api-e-file-env) | ✅ Applicata |
 | AZ-02 | Digest e firma cosign per LiteLLM e PostgreSQL | `scripts/pin-images.sh`, `compose.*.yaml`, `.env.example` | ✅ Applicata |
 | AZ-03 | Immagine `litellm-non_root`, `no-new-privileges`, `cap_drop: ALL` | `compose.*.yaml`, [01 §5.1](01-Installazione.md#51-profilo-minimo-senza-database) | ✅ Applicata ⚠️ tag da verificare |
 | AZ-04 | Primo `proxy_admin` prima del blocco del login da ambiente | `scripts/bootstrap-admin.sh`, `config.yaml`, [01 §5.2](01-Installazione.md#52-profilo-esteso-postgresql--admin-ui--virtual-keys) | ✅ Applicata |
