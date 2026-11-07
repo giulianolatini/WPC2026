@@ -41,6 +41,11 @@
     const byName = Object.fromEntries(RB.params.map(p => [p.name, p]));
     return code.replace(PARAM_RE, (m, n) => byName[n] ? paramValue(byName[n], s) : m);
   }
+  // Parametri nel testo dei passi (es. "Esito atteso: … {{LITELLM_PORT}}"): valore evidenziato ed escapato (R2-agy-06).
+  function resolveProse(html, s = cur()) {
+    const byName = Object.fromEntries(RB.params.map(p => [p.name, p]));
+    return html.replace(PARAM_RE, (m, n) => byName[n] ? `<mark class="param">${esc(paramValue(byName[n], s))}</mark>` : m);
+  }
   function usedParams(code) { return [...new Set([...code.matchAll(PARAM_RE)].map(m => m[1]))]; }
 
   /* ------------------------------------------------------------ redazione dei segreti */
@@ -182,6 +187,10 @@
 
   function renderPhases() {
     const s = cur();
+    // Un nuovo rendering (filtri, parametri) mantiene i pannelli aperti e la posizione di lettura.
+    const openIds = new Set([...document.querySelectorAll('.step details.evidence[open]')].map(d => d.closest('.step').id));
+    const closedIds = new Set([...document.querySelectorAll('.step details.evidence:not([open])')].map(d => d.closest('.step').id));
+    const y = window.scrollY;
     $('#intro').innerHTML = `<h2>${esc(RB.title)}</h2>${RB.intro}`;
     let out = '';
     for (const ph of RB.phases) {
@@ -192,7 +201,12 @@
       out += '</section>';
     }
     $('#phases').innerHTML = out || '<p class="card">Nessun passo per i filtri scelti.</p>';
+    document.querySelectorAll('.step details.evidence').forEach(d => {
+      const id = d.closest('.step').id;
+      if (openIds.has(id)) d.open = true; else if (closedIds.has(id)) d.open = false;
+    });
     decorateCode(); bindStepEvents(); renderToc();
+    window.scrollTo(0, y);
   }
 
   function renderStep(st) {
@@ -202,7 +216,7 @@
     if (st.profile !== 'all') badges.push(st.profile === 'minimal' ? 'profilo minimo' : 'profilo esteso');
     let body = '';
     for (const b of st.blocks) {
-      if (b.type === 'prose') body += `<div class="prose">${b.html}</div>`;
+      if (b.type === 'prose') body += `<div class="prose">${resolveProse(b.html)}</div>`;
       else if (visibleBlock(b)) {
         const params = usedParams(b.code);
         body += `<pre class="code" data-code="${esc(b.code)}" data-os="${esc(b.os.join(','))}"><code class="language-${esc(b.lang)}"></code></pre>`
@@ -314,7 +328,7 @@
         WPC.toast('Valore rifiutato: niente segreti, virgolette, $( ), backtick o ; | & < >. Solo $HOME all\'inizio.');
         return;
       }
-      cur().params[name] = v; save(); decorateCode();
+      cur().params[name] = v; save(); renderPhases();   // aggiorna comandi e testo dei passi
     });
     $('#export-md').addEventListener('click', () => download(fileBase() + '.md', exportMarkdown(), 'text/markdown'));
     $('#export-json').addEventListener('click', () => download(fileBase() + '.json', JSON.stringify({ format: 'wpc2026-runbook-session', version: 1, runbook: RB.version + '·' + RB.hash, session: cur() }, null, 2), 'application/json'));

@@ -168,8 +168,9 @@ def parse_runbook(text: str) -> dict:
                         return '<li class="task"><input type="checkbox" data-check="%d"> ' % (n - 1)
                     b["html"] = re.sub(r'<li class="task"><input type="checkbox" disabled> ', repl, h)
                     del b["md"]
-    used = {n for ph in phases for st in ph["steps"] for b in st["blocks"] if b["type"] == "code"
-            for n in re.findall(r"\{\{(\w+)\}\}", b["code"])}
+    # parametri nei comandi e nel testo dei passi (il sito sostituisce entrambi, R2-agy-06)
+    used = {n for ph in phases for st in ph["steps"] for b in st["blocks"]
+            for n in re.findall(r"\{\{(\w+)\}\}", b["code"] if b["type"] == "code" else b["html"])}
     declared = {p["name"] for p in params}
     if used - declared:
         raise SystemExit(f"Parametri usati ma non dichiarati: {sorted(used - declared)}")
