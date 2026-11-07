@@ -44,6 +44,7 @@ Il formato segue il template ADR di Nygard, con una sezione **Razionale** esplic
 | [D-028](#d-028) | 2026-11-07 | Architettura del sito offline e delle evidenze | Accepted |
 | [D-029](#d-029) | 2026-11-07 | Deck finale come artefatto Slides | Accepted |
 | [D-030](#d-030) | 2026-11-07 | PostgreSQL locale per il percorso uv con profilo esteso | Accepted |
+| [D-031](#d-031) | 2026-11-07 | Diagrammi Mermaid disegnati nel sito offline | Proposed |
 
 ---
 
@@ -618,3 +619,22 @@ L'opzione 3 resta possibile: S-402 e S-403 sono «Non applicabile» e S-404 scri
 **Conseguenze.** ⚠️ Da provare su ogni sistema: ID `winget` `PostgreSQL.PostgreSQL.16`, nome del pacchetto e inizializzazione automatica su openSUSE, primo avvio di LiteLLM con il database. Su macOS le connessioni dal socket locale restano `trust` per l'utente che è superutente del database.
 
 **Fonti.** [S-158](Sources.md#s-158), [S-159](Sources.md#s-159), [S-160](Sources.md#s-160), [S-161](Sources.md#s-161), [S-162](Sources.md#s-162), [S-163](Sources.md#s-163), [S-022](Sources.md#s-022).
+
+---
+
+<a id="d-031"></a>
+## D-031 — Diagrammi Mermaid disegnati nel sito offline
+
+- **Data:** 2026-11-07 — **Stato:** Proposed — **Decisore:** richiesta del PO (vedere il grafo, oppure un PNG); scelta tra le due opzioni dell'assistente, da confermare
+
+**Contesto.** I documenti 02 e 04 contengono diagrammi Mermaid. GitHub li disegna; il sito offline mostrava solo la sorgente.
+
+**Opzioni considerate.** (1) Mermaid locale nel sito (`mermaid.min.js`, circa 5,5 MB), disegno nel browser. (2) Immagini PNG o SVG generate in anticipo con Mermaid CLI e salvate nel repository. (3) Solo la sorgente.
+
+**Decisione.** Usiamo l'opzione 1: `mermaid@12.3.0` in `tools/site/vendor/mermaid/`, caricato solo dalle pagine con diagrammi, `securityLevel: 'strict'`. Il diagramma segue tema e font scelti; la sorgente resta visibile in un pannello con il pulsante Copia.
+
+**Razionale.** Una sola sorgente (il Markdown): nessuna immagine da rigenerare quando il diagramma cambia. Mermaid CLI richiede un browser headless sul computer che genera il sito. Il tema scuro funziona anche per i diagrammi.
+
+**Conseguenze.** Il repository cresce di circa 5,5 MB. Un aggiornamento di Mermaid sostituisce il file in `vendor/` e aggiorna `VERSION` (sha256 e integrity npm); `--check` confronta i file di `vendor/`.
+
+**Fonti.** [S-164](Sources.md#s-164).

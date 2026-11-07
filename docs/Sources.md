@@ -174,6 +174,7 @@ Gli altri documenti puntano alla fonte con un link del tipo `Sources.md#s-001`.
 | <a id="s-161"></a>S-161 | [PostgreSQL — Download per SUSE / openSUSE](https://www.postgresql.org/download/linux/suse/) e [openSUSE — SDB:PostgreSQL](https://en.opensuse.org/SDB:PostgreSQL) | PRIMARY | 2026-11-07 (inizializzazione ⚠️ da provare) |
 | <a id="s-162"></a>S-162 | [PostgreSQL — Connections and Authentication (`listen_addresses`) e ALTER SYSTEM](https://www.postgresql.org/docs/current/runtime-config-connection.html) | PRIMARY | 2026-11-07 |
 | <a id="s-163"></a>S-163 | [PostgreSQL — The pg_hba.conf File (`scram-sha-256`)](https://www.postgresql.org/docs/current/auth-pg-hba-conf.html) | PRIMARY | 2026-11-07 |
+| <a id="s-164"></a>S-164 | [Mermaid — documentazione e API `mermaid.run`, `securityLevel`](https://mermaid.js.org/config/usage.html) | PRIMARY | 2026-11-07 (pacchetto npm `mermaid@12.3.0`, MIT) |
 
 ## Metodo (decisioni e scrittura)
 

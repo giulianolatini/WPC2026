@@ -75,4 +75,4 @@ Ogni scelta è documentata in [docs/Decisions.md](docs/Decisions.md). Ogni affer
 
 [GPL-3.0](LICENSE).
 
-Eccezioni: i font in `site/assets/fonts/` hanno la licenza della loro famiglia (file in `site/assets/fonts/LICENSES/`); highlight.js in `site/assets/vendor/highlight/` ha licenza BSD-3-Clause (file `LICENSE` nella stessa cartella).
+Eccezioni: i font in `site/assets/fonts/` hanno la licenza della loro famiglia (file in `site/assets/fonts/LICENSES/`); highlight.js in `site/assets/vendor/highlight/` ha licenza BSD-3-Clause (file `LICENSE` nella stessa cartella); Mermaid in `site/assets/vendor/mermaid/` ha licenza MIT (file `LICENSE` nella stessa cartella).
