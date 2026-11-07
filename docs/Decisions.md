@@ -17,15 +17,24 @@ Il formato segue il template ADR di Nygard, con una sezione **Razionale** esplic
 | [D-001](#d-001) | 2026-11-07 | Struttura del repository e cartella `docs/` | Accepted |
 | [D-002](#d-002) | 2026-11-07 | Registro decisioni e fonti in due file con ancore | Accepted |
 | [D-003](#d-003) | 2026-11-07 | Provider: solo API dirette dei vendor | Accepted |
-| [D-004](#d-004) | 2026-11-07 | Piani Copilot: individuali e di organizzazione | Accepted |
+| [D-004](#d-004) | 2026-11-07 | Piani Copilot: individuali e di organizzazione | Superseded by D-013 |
 | [D-005](#d-005) | 2026-11-07 | LiteLLM: profilo minimo e profilo esteso | Accepted |
-| [D-006](#d-006) | 2026-11-07 | openSUSE: `zypper` al posto di YaST | Accepted |
+| [D-006](#d-006) | 2026-11-07 | openSUSE: `zypper` al posto di YaST | Superseded by D-014 |
 | [D-007](#d-007) | 2026-11-07 | Provider *Custom Endpoint* al posto di `customOAIModels` | Accepted |
 | [D-008](#d-008) | 2026-11-07 | Hugging Face nativo: estensione ufficiale HF | Accepted |
 | [D-009](#d-009) | 2026-11-07 | Installazione di `uv` su Linux con installer ufficiale | Accepted |
 | [D-010](#d-010) | 2026-11-07 | File di esempio in `examples/` | Accepted |
 | [D-011](#d-011) | 2026-11-07 | GitHub Flow con rebase merge su `main` protetto | Accepted |
 | [D-012](#d-012) | 2026-11-07 | Lingua italiana con regole ASD-STE100 adattate | Accepted |
+| [D-013](#d-013) | 2026-11-07 | Policy BYOK: attiva di default, fatturazione in AI Credits | Accepted |
+| [D-014](#d-014) | 2026-11-07 | openSUSE: `zypper`; YaST rimosso da Leap 16 | Accepted |
+| [D-015](#d-015) | 2026-11-07 | "Codex" = `gpt-6.1-sol` via Responses API | Proposed |
+| [D-016](#d-016) | 2026-11-07 | Gemini: `gemini-4-argon` stabile + `gemini-3.1-pro-preview` | Accepted |
+| [D-017](#d-017) | 2026-11-07 | Tesi del talk: confronto con criteri | Accepted |
+| [D-018](#d-018) | 2026-11-07 | LiteLLM: versione fissata `v1.108.2` e hardening | Proposed |
+| [D-019](#d-019) | 2026-11-07 | Claude via LiteLLM con `apiType: messages`, senza discovery | Proposed |
+| [D-020](#d-020) | 2026-11-07 | Tabella breve delle alternative a LiteLLM | Accepted |
+| [D-021](#d-021) | 2026-11-07 | `anthropic-version: 2026-10-21` negli esempi | Proposed |
 
 ---
 
@@ -97,7 +106,7 @@ Il formato segue il template ADR di Nygard, con una sezione **Razionale** esplic
 <a id="d-004"></a>
 ## D-004 — Piani Copilot: individuali e di organizzazione
 
-- **Data:** 2026-11-07 — **Stato:** Accepted — **Decisore:** PO
+- **Data:** 2026-11-07 — **Stato:** Superseded by [D-013](#d-013) — **Decisore:** PO
 
 **Contesto.** Il BYOK ha regole diverse per i piani individuali (Free, Pro, Pro+) e per i piani Business/Enterprise.
 
@@ -135,7 +144,7 @@ Il formato segue il template ADR di Nygard, con una sezione **Razionale** esplic
 <a id="d-006"></a>
 ## D-006 — openSUSE: `zypper` al posto di YaST
 
-- **Data:** 2026-11-07 — **Stato:** Accepted (confermata dal PO il 2026-11-07) — **Decisore:** proposta dell\'assistente, approvata dal PO
+- **Data:** 2026-11-07 — **Stato:** Superseded by [D-014](#d-014) (confermata dal PO il 2026-11-07) — **Decisore:** proposta dell'assistente, approvata dal PO
 
 **Contesto.** La richiesta cita `yast`. YaST è lo strumento di amministrazione (GUI/TUI) di openSUSE. Il package manager a riga di comando è `zypper`; YaST usa la stessa libreria.
 
@@ -154,7 +163,7 @@ Il formato segue il template ADR di Nygard, con una sezione **Razionale** esplic
 <a id="d-007"></a>
 ## D-007 — Provider *Custom Endpoint* al posto di `customOAIModels`
 
-- **Data:** 2026-11-07 — **Stato:** Accepted (confermata dal PO il 2026-11-07) — **Decisore:** proposta dell\'assistente, approvata dal PO
+- **Data:** 2026-11-07 — **Stato:** Accepted (confermata dal PO il 2026-11-07) — **Decisore:** proposta dell'assistente, approvata dal PO
 
 **Contesto.** Molte guide in rete usano l'impostazione `github.copilot.chat.customOAIModels` o il provider *OpenAI Compatible*. La documentazione VS Code attuale li dichiara deprecati e li sostituisce con il provider *Custom Endpoint* (`vendor: customendpoint`), che supporta le API `chat-completions`, `responses` e `messages`.
 
@@ -173,7 +182,7 @@ Il formato segue il template ADR di Nygard, con una sezione **Razionale** esplic
 <a id="d-008"></a>
 ## D-008 — Hugging Face nativo: estensione ufficiale HF
 
-- **Data:** 2026-11-07 — **Stato:** Accepted (confermata dal PO il 2026-11-07) — **Decisore:** proposta dell\'assistente, approvata dal PO
+- **Data:** 2026-11-07 — **Stato:** Accepted (confermata dal PO il 2026-11-07) — **Decisore:** proposta dell'assistente, approvata dal PO
 
 **Contesto.** VS Code non ha un provider built-in Hugging Face. Hugging Face pubblica l'estensione *Hugging Face Provider for GitHub Copilot Chat*, che aggiunge un provider al Language Models editor. Il router HF è anche OpenAI-compatible.
 
@@ -192,7 +201,7 @@ Il formato segue il template ADR di Nygard, con una sezione **Razionale** esplic
 <a id="d-009"></a>
 ## D-009 — Installazione di `uv` su Linux con installer ufficiale
 
-- **Data:** 2026-11-07 — **Stato:** Accepted (confermata dal PO il 2026-11-07) — **Decisore:** proposta dell\'assistente, approvata dal PO
+- **Data:** 2026-11-07 — **Stato:** Accepted (confermata dal PO il 2026-11-07) — **Decisore:** proposta dell'assistente, approvata dal PO
 
 **Contesto.** La richiesta chiede i package manager `apt` e `zypper`. La documentazione di `uv` non cita pacchetti di distribuzione Linux; cita `winget` e `brew`.
 
@@ -211,7 +220,7 @@ Il formato segue il template ADR di Nygard, con una sezione **Razionale** esplic
 <a id="d-010"></a>
 ## D-010 — File di esempio in `examples/`
 
-- **Data:** 2026-11-07 — **Stato:** Accepted (confermata dal PO il 2026-11-07) — **Decisore:** proposta dell\'assistente, approvata dal PO
+- **Data:** 2026-11-07 — **Stato:** Accepted (confermata dal PO il 2026-11-07) — **Decisore:** proposta dell'assistente, approvata dal PO
 
 **Contesto.** I documenti contengono configurazioni lunghe (`config.yaml`, Compose, `chatLanguageModels.json`, unit di servizio). Il pubblico deve poterle scaricare e usare.
 
@@ -258,3 +267,165 @@ Il formato segue il template ADR di Nygard, con una sezione **Razionale** esplic
 **Conseguenze.** I riferimenti allo standard citano solo l'indice delle regole, non il testo ([S-092](Sources.md#s-092)).
 
 **Fonti.** [S-092](Sources.md#s-092).
+
+
+---
+
+<a id="d-013"></a>
+## D-013 — Policy BYOK: attiva di default, fatturazione in AI Credits
+
+- **Data:** 2026-11-07 — **Stato:** Accepted — **Decisore:** PO (review P-02) — **Sostituisce:** [D-004](#d-004)
+
+**Contesto.** D-004 afferma che un amministratore Business/Enterprise *deve abilitare* la policy BYOK. La review P-02 e il changelog GitHub dicono che la policy è *attiva di default*. La FAQ di VS Code dice ancora "must enable": le fonti ufficiali non sono coerenti. Dal 2026-06-01 Copilot usa i GitHub AI Credits al posto delle premium requests.
+
+**Decisione.** Manteniamo lo scopo di D-004 (piani individuali e di organizzazione). Correggiamo i fatti:
+- La policy *Bring Your Own Language Model Key in VS Code* è attiva di default. L'amministratore può disattivarla.
+- Il BYOK locale non consuma crediti Copilot. Il provider fattura le chiamate.
+- L'Enterprise BYOK (public preview) usa la policy *Enable custom models* (nella tabella delle superfici: *Configure custom models*).
+- Piani individuali: Free, Pro, Pro+, Max, Student.
+
+**Razionale.** Il changelog GitHub è la fonte primaria più specifica e più recente sulla policy. Il documento segnala l'incoerenza con ⚠️, così la platea non resta bloccata se un tenant ha la policy disattivata.
+
+**Conseguenze.** [02-Configurazione-Copilot.md §2.5](02-Configurazione-Copilot.md#25-policy-per-copilot-business-ed-enterprise) è aggiornato.
+
+**Fonti.** [S-015](Sources.md#s-015), [S-018](Sources.md#s-018), [S-019](Sources.md#s-019), [S-100](Sources.md#s-100), [S-101](Sources.md#s-101).
+
+---
+
+<a id="d-014"></a>
+## D-014 — openSUSE: `zypper`; YaST rimosso da Leap 16
+
+- **Data:** 2026-11-07 — **Stato:** Accepted — **Decisore:** PO (decisione invariata), contesto corretto dalla review P-06 — **Sostituisce:** [D-006](#d-006)
+
+**Contesto.** D-006 descrive YaST come lo strumento di amministrazione di openSUSE. La review P-06 indica che Leap 16 ha rimosso YaST (installer Agama, gestione con Cockpit, software con Myrlyn). Su Tumbleweed YaST resta, ma non riceve più sviluppo.
+
+**Decisione.** Usiamo `zypper` su Leap 16 e su Tumbleweed. Il documento cita Myrlyn (Leap 16) e YaST Software (Tumbleweed) come alternative grafiche.
+
+**Razionale.** Il razionale di D-006 è più forte: `zypper` è l'unico strumento comune alle due distribuzioni.
+
+**Conseguenze.** I pacchetti Docker sono diversi: su Tumbleweed `docker docker-compose docker-compose-switch`; su Leap 16 `docker docker-compose docker-buildx` (⚠️ fonti in conflitto, da provare).
+
+**Fonti.** [S-064](Sources.md#s-064), [S-067](Sources.md#s-067).
+
+---
+
+<a id="d-015"></a>
+## D-015 — "Codex" = `gpt-6.1-sol` via Responses API
+
+- **Data:** 2026-11-07 — **Stato:** Proposed — **Decisore:** assistente, conferma PO
+
+**Contesto.** Nel catalogo OpenAI tutti i modelli con "codex" nel nome sono *Shut down* o *Deprecated* (`gpt-5.3-codex`). I modelli raccomandati per Codex sono `gpt-6-astra`, `gpt-6.1-sol`, `gpt-6.1-terra`, `gpt-6-luna`. Codex supporta solo la Responses API.
+
+**Opzioni considerate.** (1) `gpt-6.1-sol` via Responses. (2) `gpt-5.3-codex` (deprecato). (3) `gpt-6-astra`.
+
+**Decisione.** Proponiamo l'opzione 1. Nel talk "Codex" indica "il modello OpenAI raccomandato per Codex". In LiteLLM la route usa `openai/responses/gpt-6.1-sol`.
+
+**Razionale.** `gpt-6.1-sol` è valido via API, supporta Responses e Chat Completions, ed è nella lista Codex. Un modello deprecato può sparire prima del talk.
+
+**Conseguenze.** L'harness Codex di VS Code resta fuori scopo (D-003).
+
+**Fonti.** [S-042](Sources.md#s-042), [S-043](Sources.md#s-043), [S-102](Sources.md#s-102).
+
+---
+
+<a id="d-016"></a>
+## D-016 — Gemini: `gemini-4-argon` stabile + `gemini-3.1-pro-preview`
+
+- **Data:** 2026-11-07 — **Stato:** Accepted — **Decisore:** PO
+
+**Contesto.** L'unico modello "Pro" è `gemini-3.1-pro-preview` (preview). Il modello di punta stabile è `gemini-4-argon` (tier a pagamento). `gemini-2.5-pro` è deprecato.
+
+**Opzioni considerate.** (1) Entrambi. (2) Solo Pro preview. (3) Solo `gemini-4-argon`.
+
+**Decisione.** Usiamo l'opzione 1. Alias LiteLLM: `gemini` → `gemini-4-argon` (default stabile); `gemini-pro` → `gemini-3.1-pro-preview`.
+
+**Razionale.** Il default stabile riduce il rischio in demo. L'alias `gemini-pro` mantiene il nome usato nel titolo del talk.
+
+**Conseguenze.** Una chiave Gemini del solo tier gratuito non usa `gemini-4-argon` ⚠️.
+
+**Fonti.** [S-044](Sources.md#s-044), [S-103](Sources.md#s-103).
+
+---
+
+<a id="d-017"></a>
+## D-017 — Tesi del talk: confronto con criteri
+
+- **Data:** 2026-11-07 — **Stato:** Accepted — **Decisore:** PO (review P-08)
+
+**Contesto.** Il contraddittorio P-08 valuta *parziale* la tesi "LiteLLM è preferibile per un team". Argomenti contro: due compromissioni supply chain di LiteLLM nel 2026, CVE critiche, concentrazione delle credenziali, perdita del thinking Anthropic con Chat Completions, bug di integrazione con VS Code. Argomenti a favore: virtual keys, budget, alias, un solo punto di log.
+
+**Opzioni considerate.** (1) Confronto con criteri. (2) Tesi pro gateway con una slide sui rischi. (3) Solo tabella neutra.
+
+**Decisione.** Usiamo l'opzione 1. Nativo per il singolo sviluppatore. Gateway quando serve governance di team, con rischi e misure di hardening esplicite.
+
+**Razionale.** La raccomandazione dipende dal contesto. Una tesi assoluta pro gateway non resiste agli incidenti documentati del 2026.
+
+**Conseguenze.** [02-Configurazione-Copilot.md §4.1](02-Configurazione-Copilot.md#41-quando-usare-un-gateway) contiene criteri di scelta, rischi e hardening.
+
+**Fonti.** [S-104](Sources.md#s-104), [S-105](Sources.md#s-105), [S-106](Sources.md#s-106), [S-107](Sources.md#s-107).
+
+---
+
+<a id="d-018"></a>
+## D-018 — LiteLLM: versione fissata `v1.108.2` e hardening
+
+- **Data:** 2026-11-07 — **Stato:** Proposed — **Decisore:** assistente, conferma PO
+
+**Contesto.** Il tag `v1.90.2` degli esempi è vecchio. Le versioni `1.82.7`, `1.82.8` e `1.107.0` erano compromesse. Il 2026-10-21 anche i tag mobili `latest`, `main-latest`, `main-stable` puntavano a immagini compromesse. La chiave cosign è cambiata il 2026-10-23. Il default di `--host` è `0.0.0.0`.
+
+**Decisione.** Proponiamo:
+- versione `1.108.2` (LTS) fissata per Docker e per `uv`; mai tag mobili; digest e firma cosign per l'uso in team;
+- bind solo su `127.0.0.1`;
+- agli sviluppatori solo virtual keys, mai la master key;
+- `general_settings.disable_env_credential_login: true`.
+
+**Razionale.** Il pin evita che un tag mobile compromesso entri nella demo o nella produzione.
+
+**Conseguenze.** Prima del talk, controlla la release LTS corrente e il suo digest ⚠️.
+
+**Fonti.** [S-023](Sources.md#s-023), [S-104](Sources.md#s-104), [S-105](Sources.md#s-105), [S-108](Sources.md#s-108), [S-109](Sources.md#s-109).
+
+---
+
+<a id="d-019"></a>
+## D-019 — Claude via LiteLLM con `apiType: messages`, senza discovery
+
+- **Data:** 2026-11-07 — **Stato:** Proposed — **Decisore:** assistente, conferma PO
+
+**Contesto.** Con Chat Completions, i modelli Anthropic con thinking e tool richiedono di inviare di nuovo i `thinking_blocks`; i client OpenAI-compatible spesso li perdono (errore 400 o thinking disattivato). La discovery dei modelli del Custom Endpoint dà "Invalid response format" con LiteLLM (issue aperta).
+
+**Decisione.** Proponiamo: modelli Claude via LiteLLM nel gruppo `apiType: messages`; altri modelli in `chat-completions`; nessun `url` a livello di provider (niente discovery), un `url` esplicito per ogni modello.
+
+**Razionale.** Il formato Messages è il formato nativo di Anthropic. Un URL esplicito evita il bug di discovery.
+
+**Conseguenze.** VS Code invia `x-api-key` con Messages. La configurazione aggiunge `Authorization: Bearer ${apiKey}` in `requestHeaders` ⚠️ (da provare).
+
+**Fonti.** [S-001](Sources.md#s-001), [S-028](Sources.md#s-028), [S-110](Sources.md#s-110), [S-111](Sources.md#s-111).
+
+---
+
+<a id="d-020"></a>
+## D-020 — Tabella breve delle alternative a LiteLLM
+
+- **Data:** 2026-11-07 — **Stato:** Accepted — **Decisore:** PO
+
+**Decisione.** Il documento di configurazione contiene una tabella di 5 righe: Enterprise BYOK di GitHub, Portkey, Cloudflare AI Gateway, Azure APIM + Foundry, OpenRouter come gateway. Nessuna procedura.
+
+**Razionale.** La platea deve sapere che LiteLLM non è l'unica scelta. In 30 minuti non c'è tempo per altre demo.
+
+**Fonti.** [S-015](Sources.md#s-015), [S-112](Sources.md#s-112), [S-113](Sources.md#s-113), [S-114](Sources.md#s-114), [S-115](Sources.md#s-115).
+
+---
+
+<a id="d-021"></a>
+## D-021 — `anthropic-version: 2026-10-21` negli esempi
+
+- **Data:** 2026-11-07 — **Stato:** Proposed — **Decisore:** assistente, conferma PO
+
+**Contesto.** L'ultima versione dell'API Anthropic è `2026-10-21` (raccomandata). Rimuove `temperature`, `top_p`, `top_k` (errore 400). `2023-06-01` è nello storico; la pagina non dice se è deprecata.
+
+**Decisione.** Proponiamo `2026-10-21` negli esempi `curl`. Gli esempi non inviano `temperature`, `top_p`, `top_k`.
+
+**Razionale.** La versione raccomandata riduce il rischio di comportamenti legacy.
+
+**Fonti.** [S-116](Sources.md#s-116).

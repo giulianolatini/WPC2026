@@ -12,6 +12,8 @@ Gli altri documenti puntano alla fonte con un link del tipo `Sources.md#s-001`.
 
 **Tag di tipologia**: `[PRIMARY]` documentazione ufficiale del prodotto; `[VENDOR-DOC]` documentazione di vendor di terze parti; `[OPINION]` articolo secondario.
 
+**Verifica**: data di consultazione diretta. `P-NN` indica una fonte trovata dalla review Perplexity ([Review-Perplexity.md](Review-Perplexity.md)) e non riletta dall'assistente.
+
 ---
 
 ## Visual Studio Code e GitHub Copilot
@@ -35,6 +37,20 @@ Gli altri documenti puntano alla fonte con un link del tipo `Sources.md#s-001`.
 | <a id="s-015"></a>S-015 | [GitHub Docs — Bring your own key (BYOK)](https://docs.github.com/en/copilot/concepts/models/bring-your-own-key) | PRIMARY | 2026-11-07 |
 | <a id="s-016"></a>S-016 | [GitHub Docs — Managing policies and features for GitHub Copilot in your organization](https://docs.github.com/en/copilot/how-tos/administer-copilot/manage-for-organization/manage-policies) | PRIMARY | 2026-11-07 |
 | <a id="s-017"></a>S-017 | [GitHub Docs — GitHub flow](https://docs.github.com/en/get-started/using-github/github-flow) | PRIMARY | 2026-11-07 ⚠️ |
+| <a id="s-018"></a>S-018 | [GitHub Changelog — Bring your own language model key in VS Code now available (2026-04-22)](https://github.blog/changelog/2026-04-22-bring-your-own-language-model-key-in-vs-code-now-available/) | PRIMARY | 2026-11-07 |
+| <a id="s-019"></a>S-019 | [GitHub Docs — Enabling custom models for GitHub Copilot in your enterprise](https://docs.github.com/en/copilot/how-tos/administer-copilot/manage-for-enterprise/enable-custom-models) | PRIMARY | P-02 |
+| <a id="s-068"></a>S-068 | [VS Code — Choose an agent harness](https://code.visualstudio.com/docs/agents/run/agent-harnesses) | PRIMARY | 2026-11-07 |
+| <a id="s-069"></a>S-069 | [VS Code — Custom instructions reference](https://code.visualstudio.com/docs/agents/reference/custom-instructions-reference) | PRIMARY | 2026-11-07 |
+| <a id="s-070"></a>S-070 | [VS Code — Release notes 1.122 (Custom Endpoint in Stable, provider built-in)](https://code.visualstudio.com/updates/v1_122) | PRIMARY | P-01 |
+| <a id="s-071"></a>S-071 | [VS Code — AI language models (nuovo percorso agent-customization)](https://code.visualstudio.com/docs/agent-customization/language-models) | PRIMARY | 2026-11-07 |
+| <a id="s-072"></a>S-072 | [VS Code — Custom agent file reference](https://code.visualstudio.com/docs/agents/reference/custom-agent-file-reference) | PRIMARY | P-03 |
+| <a id="s-073"></a>S-073 | [GitHub Docs — GitHub Copilot hooks reference](https://docs.github.com/en/copilot/reference/hooks-reference) | PRIMARY | P-03 |
+| <a id="s-074"></a>S-074 | [microsoft/vscode issue #329089 — percorso di `chatLanguageModels.json` e profili](https://github.com/microsoft/vscode/issues/329089) | PRIMARY | P-01 |
+| <a id="s-075"></a>S-075 | [microsoft/vscode issue #342875 — formato `vendor/id` dei modelli di utilità](https://github.com/microsoft/vscode/issues/342875) | PRIMARY | P-01 |
+| <a id="s-076"></a>S-076 | [microsoft/vscode issue #326797 — Plan/Agent con `customendpoint`](https://github.com/microsoft/vscode/issues/326797) | PRIMARY | P-08 |
+| <a id="s-077"></a>S-077 | [microsoft/vscode issue #332085 — BYOK custom endpoint non selezionabile (WSL/SSH/Dev Container)](https://github.com/microsoft/vscode/issues/332085) | PRIMARY | P-08 |
+| <a id="s-100"></a>S-100 | [GitHub Changelog — Updates to GitHub Copilot billing and plans (2026-06-01)](https://github.blog/changelog/2026-06-01-updates-to-github-copilot-billing-and-plans/) | PRIMARY | P-02 |
+| <a id="s-101"></a>S-101 | [GitHub Docs — Supported surfaces for GitHub Copilot policies](https://docs.github.com/en/copilot/reference/supported-surfaces-for-policies) | PRIMARY | P-02 |
 
 ## LiteLLM
 
@@ -51,6 +67,18 @@ Gli altri documenti puntano alla fonte con un link del tipo `Sources.md#s-001`.
 | <a id="s-028"></a>S-028 | [LiteLLM — `/v1/messages` (Anthropic unified format)](https://docs.litellm.ai/docs/anthropic_unified) | PRIMARY | 2026-11-07 |
 | <a id="s-029"></a>S-029 | [LiteLLM — `/v1/responses` (OpenAI Responses API)](https://docs.litellm.ai/docs/response_api) | PRIMARY | 2026-11-07 |
 | <a id="s-030"></a>S-030 | [LiteLLM — Production checklist](https://docs.litellm.ai/docs/proxy/prod) | PRIMARY | ⚠️ non consultata |
+| <a id="s-104"></a>S-104 | [LiteLLM — Incident: release v1.107.0 (2026-10-21)](https://docs.litellm.ai/blog/security-incident-oct-21-2026) | PRIMARY | 2026-11-07 |
+| <a id="s-105"></a>S-105 | [LiteLLM — Security Update: supply chain incident (marzo 2026, 1.82.7/1.82.8)](https://docs.litellm.ai/blog/security-update-march-2026) | PRIMARY | P-04 |
+| <a id="s-106"></a>S-106 | [NVD — CVE-2026-114612 (LiteLLM, CVSS 9.9)](https://nvd.nist.gov/vuln/detail/CVE-2026-114612) | PRIMARY | P-08 |
+| <a id="s-107"></a>S-107 | [Check Point Research — When LLM Gateways Go Wrong: Findings from LiteLLM](https://research.checkpoint.com/2026/when-llm-gateways-go-wrong-findings-from-litellm/) | OPINION | P-08 |
+| <a id="s-108"></a>S-108 | [LiteLLM — Security Best Practices](https://docs.litellm.ai/docs/proxy/security_best_practices) | PRIMARY | P-08 |
+| <a id="s-109"></a>S-109 | [LiteLLM — Docker Image Security Guide (cosign)](https://docs.litellm.ai/docs/proxy/docker_image_security) | PRIMARY | P-04 |
+| <a id="s-110"></a>S-110 | [LiteLLM — Thinking / Reasoning Content](https://docs.litellm.ai/docs/reasoning_content) | PRIMARY | 2026-11-07 |
+| <a id="s-111"></a>S-111 | [BerriAI/litellm issue #35775 — incompatibilità con la discovery dei modelli di VS Code](https://github.com/BerriAI/litellm/issues/35775) | PRIMARY | P-08 |
+| <a id="s-117"></a>S-117 | [LiteLLM — Health Checks](https://docs.litellm.ai/docs/proxy/health) | PRIMARY | P-04 |
+| <a id="s-118"></a>S-118 | [LiteLLM — CLI Arguments (`--host`, `--port`)](https://docs.litellm.ai/docs/proxy/cli) | PRIMARY | P-04 |
+| <a id="s-119"></a>S-119 | [LiteLLM — Release notes v1.108.2 (LTS)](https://docs.litellm.ai/release_notes/v1.108.2/v1-108-2) | PRIMARY | P-04 |
+| <a id="s-120"></a>S-120 | [LiteLLM — OpenAI Responses API provider (`openai/responses/`)](https://docs.litellm.ai/docs/providers/openai/responses_api) | PRIMARY | P-05 |
 | <a id="s-031"></a>S-031 | [LiteLLM — Virtual keys](https://docs.litellm.ai/docs/proxy/virtual_keys) | PRIMARY | ⚠️ non consultata |
 
 ## Provider LLM
@@ -58,12 +86,16 @@ Gli altri documenti puntano alla fonte con un link del tipo `Sources.md#s-001`.
 | ID | Titolo | Tipo | Verifica |
 |----|--------|------|----------|
 | <a id="s-040"></a>S-040 | [Anthropic — Models overview](https://platform.claude.com/docs/en/about-claude/models/overview) | PRIMARY | 2026-11-07 |
-| <a id="s-041"></a>S-041 | [Anthropic — Messages API reference](https://platform.claude.com/docs/en/api/messages) | PRIMARY | ⚠️ non consultata |
+| <a id="s-041"></a>S-041 | [Anthropic — Messages API reference](https://platform.claude.com/docs/en/api/messages) | PRIMARY | P-05 |
+| <a id="s-116"></a>S-116 | [Anthropic — API versions (`2026-10-21`)](https://platform.claude.com/docs/en/api/versioning) | PRIMARY | 2026-11-07 |
 | <a id="s-042"></a>S-042 | [OpenAI — Codex models (redirect da developers.openai.com/codex/models)](https://learn.chatgpt.com/docs/models) | PRIMARY | 2026-11-07 ⚠️ |
-| <a id="s-043"></a>S-043 | [OpenAI — Responses API reference](https://platform.openai.com/docs/api-reference/responses) | PRIMARY | ⚠️ non consultata |
+| <a id="s-043"></a>S-043 | [OpenAI — Responses API reference](https://developers.openai.com/api/reference/resources/responses) | PRIMARY | P-05 |
+| <a id="s-102"></a>S-102 | [OpenAI — All models (stato dei modelli Codex)](https://developers.openai.com/api/docs/models/all) | PRIMARY | P-05 |
 | <a id="s-044"></a>S-044 | [Google — Gemini API models](https://ai.google.dev/gemini-api/docs/models) | PRIMARY | 2026-11-07 |
+| <a id="s-103"></a>S-103 | [Google — Gemini 4 Argon](https://ai.google.dev/gemini-api/docs/models/gemini-4-argon) | PRIMARY | 2026-11-07 |
 | <a id="s-045"></a>S-045 | [Google — Gemini API OpenAI compatibility](https://ai.google.dev/gemini-api/docs/openai) | PRIMARY | 2026-11-07 |
-| <a id="s-046"></a>S-046 | [OpenRouter — API reference overview](https://openrouter.ai/docs/api-reference/overview) | PRIMARY | ⚠️ non consultata |
+| <a id="s-046"></a>S-046 | [OpenRouter — Quickstart](https://openrouter.ai/docs/quickstart) | PRIMARY | P-05 |
+| <a id="s-121"></a>S-121 | [OpenRouter — App Attribution (`HTTP-Referer`, `X-OpenRouter-Title`)](https://openrouter.ai/docs/app-attribution) | PRIMARY | P-05 |
 | <a id="s-047"></a>S-047 | [Hugging Face — Inference Providers (router OpenAI-compatible)](https://huggingface.co/docs/inference-providers/index) | PRIMARY | 2026-11-07 |
 | <a id="s-048"></a>S-048 | [Hugging Face — Use Inference Providers with GitHub Copilot Chat in VS Code](https://huggingface.co/docs/inference-providers/guides/vscode) | PRIMARY | 2026-11-07 |
 | <a id="s-049"></a>S-049 | [Hugging Face — repository `huggingface-vscode-chat`](https://github.com/huggingface/huggingface-vscode-chat) | PRIMARY | 2026-11-07 |
@@ -74,11 +106,13 @@ Gli altri documenti puntano alla fonte con un link del tipo `Sources.md#s-001`.
 |----|--------|------|----------|
 | <a id="s-060"></a>S-060 | [Astral — Installing uv](https://docs.astral.sh/uv/getting-started/installation/) | PRIMARY | 2026-11-07 |
 | <a id="s-061"></a>S-061 | [Docker — Install Docker Engine on Ubuntu](https://docs.docker.com/engine/install/ubuntu/) | PRIMARY | 2026-11-07 |
-| <a id="s-062"></a>S-062 | [Docker — Install Docker Engine on Debian](https://docs.docker.com/engine/install/debian/) | PRIMARY | ⚠️ non consultata |
+| <a id="s-062"></a>S-062 | [Docker — Install Docker Engine on Debian](https://docs.docker.com/engine/install/debian/) | PRIMARY | P-06 |
 | <a id="s-063"></a>S-063 | [Docker — Linux post-installation steps](https://docs.docker.com/engine/install/linux-postinstall/) | PRIMARY | ⚠️ non consultata |
 | <a id="s-064"></a>S-064 | [openSUSE Wiki — Docker](https://en.opensuse.org/Docker) | PRIMARY | 2026-11-07 |
 | <a id="s-065"></a>S-065 | [Homebrew Formulae — cask `docker-desktop`](https://formulae.brew.sh/cask/docker-desktop) | VENDOR-DOC | 2026-11-07 |
-| <a id="s-066"></a>S-066 | [Docker — Install Docker Desktop on Windows](https://docs.docker.com/desktop/setup/install/windows-install/) | PRIMARY | ⚠️ non consultata |
+| <a id="s-066"></a>S-066 | [Docker — Install Docker Desktop on Windows](https://docs.docker.com/desktop/setup/install/windows-install/) | PRIMARY | P-06 |
+| <a id="s-067"></a>S-067 | [openSUSE News — Leap 16 Enters Beta (YaST → Agama, Cockpit, Myrlyn)](https://news.opensuse.org/2025/04/30/leap-16-enters-beta/) | PRIMARY | P-06 |
+| <a id="s-122"></a>S-122 | [Homebrew Formulae — formula `uv`](https://formulae.brew.sh/formula/uv) | VENDOR-DOC | P-06 |
 
 ## GitHub Spec Kit
 
@@ -86,7 +120,19 @@ Gli altri documenti puntano alla fonte con un link del tipo `Sources.md#s-001`.
 |----|--------|------|----------|
 | <a id="s-080"></a>S-080 | [GitHub — Spec Kit (repository)](https://github.com/github/spec-kit) | PRIMARY | 2026-11-07 |
 | <a id="s-081"></a>S-081 | [GitHub — Spec Kit Installation](https://github.github.io/spec-kit/installation.html) | PRIMARY | 2026-11-07 |
-| <a id="s-082"></a>S-082 | [GitHub — Spec Kit integrations CLI reference](https://github.github.io/spec-kit/integrations/cli.html) | PRIMARY | ⚠️ non consultata |
+| <a id="s-082"></a>S-082 | [GitHub — Spec Kit integrations CLI reference](https://github.github.io/spec-kit/integrations/cli.html) | PRIMARY | P-07 |
+| <a id="s-083"></a>S-083 | [GitHub — Spec Kit: integrazione GitHub Copilot (layout skills/commands)](https://github.github.io/spec-kit/integrations/copilot.html) | PRIMARY | 2026-11-07 |
+| <a id="s-084"></a>S-084 | [GitHub — Spec Kit Core Commands (`specify check`)](https://github.github.com/spec-kit/reference/core.html) | PRIMARY | P-07 |
+| <a id="s-085"></a>S-085 | [GitHub — Spec Kit Releases (v1.3.2)](https://github.com/github/spec-kit/releases) | PRIMARY | P-07 |
+
+## Gateway alternativi
+
+| ID | Titolo | Tipo | Verifica |
+|----|--------|------|----------|
+| <a id="s-112"></a>S-112 | [Portkey — Universal API](https://portkey.ai/docs/product/ai-gateway/universal-api) | VENDOR-DOC | P-08 |
+| <a id="s-113"></a>S-113 | [Cloudflare AI Gateway — REST API](https://developers.cloudflare.com/ai-gateway/usage/rest-api/) | VENDOR-DOC | P-08 |
+| <a id="s-114"></a>S-114 | [Microsoft — GitHub-Copilot-BYOK-with-APIM (APIM + Foundry)](https://github.com/microsoft/GitHub-Copilot-BYOK-with-APIM) | VENDOR-DOC | P-08 |
+| <a id="s-115"></a>S-115 | [OpenRouter — Guardrails (budget, allowlist, ZDR)](https://openrouter.ai/docs/guides/features/guardrails) | VENDOR-DOC | P-08 |
 
 ## Metodo (decisioni e scrittura)
 
