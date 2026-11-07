@@ -1,6 +1,6 @@
 # Profilo esteso: LiteLLM + PostgreSQL (Admin UI, virtual keys, budget, spend log).
 # Avvio: docker compose -f compose.extended.yaml up -d
-# Admin UI: http://localhost:4000/ui  (utente admin, password = LITELLM_MASTER_KEY)
+# Admin UI: http://localhost:4000/ui  (utente proxy_admin creato con scripts/bootstrap-admin.sh)
 # Fonti: docs/Sources.md#s-020, #s-023
 services:
   db:

@@ -321,7 +321,7 @@ chmod 600 .env
 
 > **Sicurezza.** Non fare commit del file `.env`. Il `.gitignore` del repo lo esclude.
 > Il token Hugging Face deve essere *fine-grained* con il permesso *Make calls to Inference Providers* ([S-047](Sources.md#s-047)).
-> `LITELLM_MASTER_KEY` è anche la password `admin` dell'Admin UI ([S-020](Sources.md#s-020)).
+> Di default `LITELLM_MASTER_KEY` è anche la password `admin` dell'Admin UI ([S-020](Sources.md#s-020)). Gli esempi impostano `disable_env_credential_login: true`: la master key non vale più per il login della UI, ma resta valida per l'API ([S-148](Sources.md#s-148), §5.2).
 
 Il file [`examples/litellm/config.yaml`](../examples/litellm/config.yaml) definisce le route verso i cinque provider. Il documento [02-Configurazione-Copilot.md §4](02-Configurazione-Copilot.md#4-github-copilot-con-litellm-come-gateway) lo descrive.
 
