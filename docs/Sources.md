@@ -122,7 +122,7 @@ Gli altri documenti puntano alla fonte con un link del tipo `Sources.md#s-001`.
 | <a id="s-081"></a>S-081 | [GitHub — Spec Kit Installation](https://github.github.io/spec-kit/installation.html) | PRIMARY | 2026-11-07 |
 | <a id="s-082"></a>S-082 | [GitHub — Spec Kit integrations CLI reference](https://github.github.io/spec-kit/integrations/cli.html) | PRIMARY | P-07 |
 | <a id="s-083"></a>S-083 | [GitHub — Spec Kit: integrazione GitHub Copilot (layout skills/commands)](https://github.github.io/spec-kit/integrations/copilot.html) | PRIMARY | 2026-11-07 |
-| <a id="s-084"></a>S-084 | [GitHub — Spec Kit Core Commands (`specify check`)](https://github.github.com/spec-kit/reference/core.html) | PRIMARY | P-07 |
+| <a id="s-084"></a>S-084 | [GitHub — Spec Kit Core Commands (`specify check`)](https://github.github.com/spec-kit/reference/core.html) | PRIMARY | 2026-11-07 (`github.github.com` è il dominio Pages di GitHub; verificato) |
 | <a id="s-085"></a>S-085 | [GitHub — Spec Kit Releases (v1.3.2)](https://github.com/github/spec-kit/releases) | PRIMARY | P-07 |
 
 ## Gateway alternativi
