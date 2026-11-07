@@ -503,6 +503,16 @@ File: [`examples/litellm/service/Register-LiteLLMTask.ps1`](../examples/litellm/
 
 ## 7. Verifica finale
 
+- [ ] Carica nel terminale corrente **solo** la master key. Compose e gli script di avvio leggono `.env` da soli, il terminale no:
+
+```bash
+export LITELLM_MASTER_KEY="$(grep -E '^LITELLM_MASTER_KEY=' ~/wpc2026-litellm/.env | cut -d= -f2-)"
+```
+
+```powershell
+$env:LITELLM_MASTER_KEY = ((Select-String -Path "$HOME\wpc2026-litellm\.env" -Pattern '^LITELLM_MASTER_KEY=').Line -split '=', 2)[1]
+```
+
 - [ ] Verifica la liveness. `/health/liveliness` e `/health/readiness` non richiedono chiave; `/health` la richiede ([S-023](Sources.md#s-023), [S-117](Sources.md#s-117)):
 
 ```bash
