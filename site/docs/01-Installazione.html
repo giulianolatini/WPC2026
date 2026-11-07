@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="../assets/vendor/highlight/github-dark.min.css" id="hl-dark" disabled>
 <link rel="stylesheet" href="../assets/styles.css">
 
-<script>try{var p=JSON.parse(localStorage.getItem('wpc2026.prefs')||'{}');var t=p.theme||'auto';if(t==='auto')t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.dataset.theme=t;}catch(e){}</script>
+<script>try{var p=JSON.parse(localStorage.getItem('wpc2026.prefs')||'{}');var t=p.theme;if(t!=='light'&&t!=='dark')t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.dataset.theme=t;}catch(e){}</script>
 </head>
 <body>
 <div class="topbar">
@@ -358,12 +358,13 @@ docker compose version
 <pre class="code"><code class="language-bash">mkdir -p ~/wpc2026-litellm
 cp -R examples/litellm/. ~/wpc2026-litellm/     # il &quot;.&quot; copia anche i file nascosti (.env.example)
 cd ~/wpc2026-litellm
-cp .env.example .env
+[ -e .env ] || cp .env.example .env    # non sovrascrive un .env esistente
 </code></pre>
 <pre class="code"><code class="language-powershell">New-Item -ItemType Directory -Force &quot;$HOME\wpc2026-litellm&quot; | Out-Null
 Copy-Item -Recurse -Force examples\litellm\* &quot;$HOME\wpc2026-litellm\&quot;
+Copy-Item -Force examples\litellm\.env.example &quot;$HOME\wpc2026-litellm\&quot;   # file con &quot;.&quot; iniziale: copia esplicita
 Set-Location &quot;$HOME\wpc2026-litellm&quot;
-Copy-Item .env.example .env
+if (-not (Test-Path .env)) { Copy-Item .env.example .env }   # non sovrascrive un .env esistente
 </code></pre>
 <ul>
 <li class="task"><input type="checkbox" disabled> Genera la master key e la salt key (<a href="Sources.html#s-020">S-020</a>):</li>
@@ -519,7 +520,7 @@ docker rm -f litellm                             # se hai usato docker run
 <li class="task"><input type="checkbox" disabled> Premi <code>Ctrl+C</code> per arrestare.</li>
 </ul>
 <blockquote>
-<p>Il profilo esteso con <code>uv</code> richiede un PostgreSQL esterno e la variabile <code>DATABASE_URL=postgresql://user:password@host:5432/litellm</code> (<a href="Sources.html#s-022">S-022</a>, <a href="Sources.html#s-023">S-023</a>).</p>
+<p>Il profilo esteso con <code>uv</code> richiede un PostgreSQL esterno e la variabile <code>DATABASE_URL=postgresql://user:password@host:5432/litellm</code> (<a href="Sources.html#s-022">S-022</a>, <a href="Sources.html#s-023">S-023</a>). Il <a href="../index.html">runbook</a> (passi S-402–S-404) installa PostgreSQL su ogni sistema, lo limita a localhost e crea utente, database e <code>DATABASE_URL</code> (<a href="Decisions.html#d-030">D-030</a>).</p>
 </blockquote>
 <h3 id="62-servizio-su-linux-systemd-utente">6.2 Servizio su Linux (systemd, utente)</h3>
 <p>La documentazione LiteLLM non descrive un servizio systemd (<a href="Sources.html#s-023">S-023</a>). Questa unit è una proposta del progetto.</p>

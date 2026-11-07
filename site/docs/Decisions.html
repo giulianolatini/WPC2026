@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="../assets/vendor/highlight/github-dark.min.css" id="hl-dark" disabled>
 <link rel="stylesheet" href="../assets/styles.css">
 
-<script>try{var p=JSON.parse(localStorage.getItem('wpc2026.prefs')||'{}');var t=p.theme||'auto';if(t==='auto')t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.dataset.theme=t;}catch(e){}</script>
+<script>try{var p=JSON.parse(localStorage.getItem('wpc2026.prefs')||'{}');var t=p.theme;if(t!=='light'&&t!=='dark')t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.dataset.theme=t;}catch(e){}</script>
 </head>
 <body>
 <div class="topbar">
@@ -213,6 +213,12 @@ Il formato segue il template ADR di Nygard, con una sezione <strong>Razionale</s
 <td>2026-11-07</td>
 <td>Deck finale come artefatto Slides</td>
 <td>Accepted</td>
+</tr>
+<tr>
+<td><a href="#d-030">D-030</a></td>
+<td>2026-11-07</td>
+<td>PostgreSQL locale per il percorso uv con profilo esteso</td>
+<td>Proposed</td>
 </tr>
 </tbody>
 </table>
@@ -557,7 +563,7 @@ Il formato segue il template ADR di Nygard, con una sezione <strong>Razionale</s
 <p><strong>Opzioni considerate.</strong> (1) Un runbook per ogni combinazione. (2) Un runbook unico con metadati di filtro per passo e per blocco di codice.</p>
 <p><strong>Decisione.</strong> Usiamo l'opzione 2: <code>docs/runbook/RUNBOOK.md</code>, fasi F1–F9, passi <code>S-nnn</code>. Ogni passo ha la riga <code>&lt;!-- step: os=… path=… profile=… evidence=… --&gt;</code>. I blocchi di codice hanno <code>os=…</code>. I comandi usano parametri <code>{{NOME}}</code> dichiarati in una tabella. L'evidenza registra parametri, esito e output.</p>
 <p><strong>Razionale.</strong> Una sola sorgente evita divergenze tra le copie. Il generatore controlla che ogni parametro usato sia dichiarato e che gli ID siano unici.</p>
-<p><strong>Conseguenze.</strong> Il runbook rimanda a 01 e 02 per le spiegazioni e non le ripete. I passi che producono segreti (S-202, S-203, S-402, S-501) hanno <code>evidence=no-output</code>.</p>
+<p><strong>Conseguenze.</strong> Il runbook rimanda a 01 e 02 per le spiegazioni e non le ripete. I passi che producono segreti (S-202, S-203, S-501) hanno <code>evidence=no-output</code>.</p>
 <p><strong>Fonti.</strong> <a href="01-Installazione.html">01</a>, <a href="02-Configurazione-Copilot.html">02</a>, <a href="Sources.html#s-092">S-092</a>.</p>
 <hr />
 <p><a id="d-027"></a></p>
@@ -602,7 +608,25 @@ Il formato segue il template ADR di Nygard, con una sezione <strong>Razionale</s
 <p><strong>Contesto.</strong> Le istruzioni del progetto chiedono un deck che racconti i punti principali e sia una mappa di quanto prodotto.</p>
 <p><strong>Decisione.</strong> Il deck è un artefatto Slides di claude.ai, esportabile in PowerPoint o PDF. Non è un file del repository.</p>
 <p><strong>Conseguenze.</strong> Il README riporta il collegamento al deck quando il PO lo condivide.</p>
-<p><strong>Fonti.</strong> —</p></article>
+<p><strong>Fonti.</strong> —</p>
+<hr />
+<p><a id="d-030"></a></p>
+<h2 id="d-030--postgresql-locale-per-il-percorso-uv-con-profilo-esteso">D-030 — PostgreSQL locale per il percorso uv con profilo esteso</h2>
+<ul>
+<li><strong>Data:</strong> 2026-11-07 — <strong>Stato:</strong> Proposed — <strong>Decisore:</strong> richiesta del PO (procedura di installazione per ogni sistema operativo); scelte di dettaglio dell'assistente, da confermare</li>
+</ul>
+<p><strong>Contesto.</strong> Con <code>uv</code> il profilo esteso richiede un PostgreSQL esterno (<a href="01-Installazione.html#6-litellm-come-servizio-locale-con-uv">01 §6</a>). La review della PR #2 (R2-codex-04) ha trovato il percorso incompleto. Il PO chiede una procedura di installazione per ogni sistema operativo.</p>
+<p><strong>Opzioni considerate.</strong> (1) Versione principale fissa, uguale al profilo Docker (<code>postgres:16</code>), con pacchetti ufficiali: installer EDB via <code>winget</code> (Windows), <code>postgresql@16</code> di Homebrew (macOS), repository PGDG (Debian/Ubuntu), <code>postgresql16-server</code> (openSUSE). (2) Versione dei pacchetti della distribuzione, diversa per ogni sistema. (3) Solo un database dell'organizzazione, senza procedura.</p>
+<p><strong>Decisione.</strong> Usiamo l'opzione 1, con il parametro <code>PG_MAJOR</code> (default <code>16</code>) nei passi S-402–S-404 del runbook:</p>
+<ul>
+<li>S-402 installa il server e lo avvia come servizio.</li>
+<li>S-403 imposta <code>listen_addresses = 'localhost'</code> con <code>ALTER SYSTEM</code> e porta a <code>scram-sha-256</code> ogni riga <code>host</code> di <code>pg_hba.conf</code>.</li>
+<li>S-404 crea l'utente e il database <code>litellm</code> con la password <code>POSTGRES_PASSWORD</code> di <code>.env</code>, passata a <code>psql</code> da standard input, e scrive <code>DATABASE_URL</code> in <code>.env</code> solo se manca.</li>
+</ul>
+<p>L'opzione 3 resta possibile: S-402 e S-403 sono «Non applicabile» e S-404 scrive solo <code>DATABASE_URL</code>.</p>
+<p><strong>Razionale.</strong> La stessa versione principale nei due percorsi riduce le differenze da provare. I pacchetti ufficiali hanno aggiornamenti di sicurezza. L'installer EDB ascolta su tutte le interfacce e Homebrew usa <code>trust</code>: la procedura li limita a localhost e alle password.</p>
+<p><strong>Conseguenze.</strong> ⚠️ Da provare su ogni sistema: ID <code>winget</code> <code>PostgreSQL.PostgreSQL.16</code>, nome del pacchetto e inizializzazione automatica su openSUSE, primo avvio di LiteLLM con il database. Su macOS le connessioni dal socket locale restano <code>trust</code> per l'utente che è superutente del database.</p>
+<p><strong>Fonti.</strong> <a href="Sources.html#s-158">S-158</a>, <a href="Sources.html#s-159">S-159</a>, <a href="Sources.html#s-160">S-160</a>, <a href="Sources.html#s-161">S-161</a>, <a href="Sources.html#s-162">S-162</a>, <a href="Sources.html#s-163">S-163</a>, <a href="Sources.html#s-022">S-022</a>.</p></article>
 <script type="application/json" id="fonts-data">[
   {
     "id": "blexmono",
