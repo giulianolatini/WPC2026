@@ -29,6 +29,7 @@ services:
     command: ["--config", "/app/config.yaml", "--port", "4000"]
     env_file: .env
     environment:
+      # POSTGRES_PASSWORD deve essere esadecimale: non è codificata come URI (R-codex-04, .env.example)
       DATABASE_URL: postgresql://${POSTGRES_USER:-litellm}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-litellm}
       STORE_MODEL_IN_DB: "True"     # permette di gestire i modelli anche dall'Admin UI
     volumes:
