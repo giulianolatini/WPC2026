@@ -216,6 +216,7 @@ Fonte: [S-001](Sources.md#s-001). Senza accesso GitHub i modelli di utilità bui
 
 Fonte: [S-001](Sources.md#s-001).
 
+> **Chiavi nei comandi.** Negli esempi `curl` la chiave passa da stdin (`printf … | curl -H @-`): non compare negli argomenti del processo ([01 §7](01-Installazione.md#7-verifica-finale)).
 > **Chiavi API.** Nei file JSON usa sempre una variabile di input (`"${input:nome}"`), non la chiave in chiaro ([S-001](Sources.md#s-001)).
 > **Header di autenticazione.** Con `apiType: messages` VS Code invia `x-api-key`; con URL Azure OpenAI invia `api-key`; negli altri casi `Authorization: Bearer <apiKey>`. Con `requestHeaders` puoi aggiungere header; il token `${apiKey}` diventa la chiave configurata ([S-071](Sources.md#s-071)).
 > **Agenti.** Solo i modelli con *tool calling* sono visibili per gli agenti ([S-001](Sources.md#s-001)).
@@ -234,8 +235,8 @@ Fonte: [S-001](Sources.md#s-001).
 - [ ] Verifica la chiave fuori da VS Code ([S-040](Sources.md#s-040)):
 
 ```bash
-curl https://api.anthropic.com/v1/messages \
-  -H "x-api-key: $ANTHROPIC_API_KEY" \
+printf 'x-api-key: %s\n' "$ANTHROPIC_API_KEY" \
+  | curl https://api.anthropic.com/v1/messages -H @- \
   -H "anthropic-version: 2026-10-21" \
   -H "content-type: application/json" \
   -d '{"model": "claude-sonnet-5-5", "max_tokens": 64, "messages": [{"role": "user", "content": "Hello"}]}'
@@ -260,8 +261,8 @@ curl https://api.anthropic.com/v1/messages \
 - [ ] Verifica la chiave:
 
 ```bash
-curl https://api.openai.com/v1/responses \
-  -H "Authorization: Bearer $OPENAI_API_KEY" \
+printf 'Authorization: Bearer %s\n' "$OPENAI_API_KEY" \
+  | curl https://api.openai.com/v1/responses -H @- \
   -H "Content-Type: application/json" \
   -d '{"model": "gpt-6.1-sol", "input": "Hello"}'
 ```
@@ -282,8 +283,8 @@ curl https://api.openai.com/v1/responses \
 - [ ] Verifica la chiave con l'endpoint OpenAI-compatible:
 
 ```bash
-curl https://generativelanguage.googleapis.com/v1beta/openai/chat/completions \
-  -H "Authorization: Bearer $GEMINI_API_KEY" \
+printf 'Authorization: Bearer %s\n' "$GEMINI_API_KEY" \
+  | curl https://generativelanguage.googleapis.com/v1beta/openai/chat/completions -H @- \
   -H "Content-Type: application/json" \
   -d '{"model": "gemini-4-argon", "messages": [{"role": "user", "content": "Hello"}]}'
 ```
@@ -477,7 +478,11 @@ general_settings:
 | `huggingface/` | HF Inference Providers | `HF_TOKEN` | [S-027](Sources.md#s-027) |
 
 - [ ] Avvia il proxy (profilo minimo): [01-Installazione.md §5.1](01-Installazione.md#51-profilo-minimo-senza-database) o [§6](01-Installazione.md#6-litellm-come-servizio-locale-con-uv).
-- [ ] Verifica gli alias: `curl -s http://localhost:4000/v1/models -H "Authorization: Bearer $LITELLM_MASTER_KEY"`.
+- [ ] Verifica gli alias (la chiave passa da stdin, non dagli argomenti di `curl`):
+
+```bash
+printf 'Authorization: Bearer %s\n' "$LITELLM_MASTER_KEY" | curl -s http://localhost:4000/v1/models -H @-
+```
 
 ### 4.3 Configurazione di VS Code verso LiteLLM
 
@@ -537,8 +542,8 @@ Con PostgreSQL ([01-Installazione.md §5.2](01-Installazione.md#52-profilo-estes
 - [ ] Genera una virtual key ⚠️ (parametri da verificare in [S-031](Sources.md#s-031)):
 
 ```bash
-curl -s http://localhost:4000/key/generate \
-  -H "Authorization: Bearer $LITELLM_MASTER_KEY" \
+printf 'Authorization: Bearer %s\n' "$LITELLM_MASTER_KEY" \
+  | curl -s http://localhost:4000/key/generate -H @- \
   -H "Content-Type: application/json" \
   -d '{"models": ["claude-sonnet", "gemini-pro"], "max_budget": 5, "metadata": {"user": "demo-wpc"}}'
 ```

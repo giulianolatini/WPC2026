@@ -531,17 +531,20 @@ $env:LITELLM_MASTER_KEY = ((Select-String -Path "$HOME\wpc2026-litellm\.env" -Pa
 curl -s http://localhost:4000/health/liveliness
 ```
 
+> **Chiave fuori dalla riga di comando.** Negli esempi `printf` (comando interno della shell) passa l'header a `curl -H @-` attraverso stdin: la chiave non compare negli argomenti del processo, visibili ad altri utenti con `ps`.
+
 - [ ] Verifica l'elenco dei modelli:
 
 ```bash
-curl -s http://localhost:4000/v1/models -H "Authorization: Bearer $LITELLM_MASTER_KEY"
+printf 'Authorization: Bearer %s\n' "$LITELLM_MASTER_KEY" \
+  | curl -s http://localhost:4000/v1/models -H @-
 ```
 
 - [ ] Invia una richiesta di prova ([S-020](Sources.md#s-020)):
 
 ```bash
-curl http://localhost:4000/v1/chat/completions \
-  -H "Authorization: Bearer $LITELLM_MASTER_KEY" \
+printf 'Authorization: Bearer %s\n' "$LITELLM_MASTER_KEY" \
+  | curl http://localhost:4000/v1/chat/completions -H @- \
   -H "Content-Type: application/json" \
   -d '{"model": "claude-sonnet", "messages": [{"role": "user", "content": "Say hello in five words."}]}'
 ```
