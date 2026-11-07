@@ -35,7 +35,7 @@ Le procedure usano questi parametri. Registra il valore che usi: il valore serve
 | `LITELLM_IMAGE` | `ghcr.io/berriai/litellm:v1.108.2` | Immagine Docker con tag fisso. Non usare tag mobili ([S-104](Sources.md#s-104)) |
 | `LITELLM_MASTER_KEY` | generata | Chiave root del proxy, inizia con `sk-` ([S-020](Sources.md#s-020)) |
 | `LITELLM_SALT_KEY` | generata | Solo profilo esteso. Non rigenerarla ([S-020](Sources.md#s-020)) |
-| `POSTGRES_PASSWORD` | generata | Solo profilo esteso |
+| `POSTGRES_PASSWORD` | generata (`openssl rand -hex 24`) | Solo profilo esteso. Solo caratteri `[0-9a-f]`: entra in `DATABASE_URL` |
 
 ---
 
@@ -382,7 +382,11 @@ File: [`examples/litellm/compose.minimal.yaml`](../examples/litellm/compose.mini
 
 Il profilo esteso aggiunge PostgreSQL. PostgreSQL contiene modelli, chiavi e spend log ([S-020](Sources.md#s-020)).
 
-- [ ] Imposta `POSTGRES_PASSWORD` in `.env`.
+- [ ] Imposta `POSTGRES_PASSWORD` in `.env` con soli caratteri esadecimali. La password entra in `DATABASE_URL` senza codifica URI: caratteri come `#`, `/`, `%`, `@` impediscono la connessione:
+
+```bash
+echo "POSTGRES_PASSWORD=$(openssl rand -hex 24)"
+```
 - [ ] Avvia lo stack:
 
 ```bash
