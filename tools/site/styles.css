@@ -116,4 +116,11 @@ article.doc table { border-collapse: collapse; display: block; overflow-x: auto;
 article.doc th, article.doc td { border: 1px solid var(--border); padding: .35rem .55rem; vertical-align: top; text-align: left; }
 article.doc th { background: var(--bg-2); }
 article.doc .codewrap { margin: .8rem 0; }
+/* Diagrammi Mermaid */
+figure.mermaid-wrap { margin: 1rem 0; padding: .8rem; border: 1px solid var(--border); border-radius: 10px; background: var(--panel); }
+pre.mermaid { margin: 0; background: transparent; border: 0; text-align: center; overflow-x: auto; color: var(--fg-2); font-family: var(--font-code); white-space: pre; }
+pre.mermaid[data-processed] { white-space: normal; }
+pre.mermaid svg { max-width: 100%; height: auto; }
+details.mermaid-src { margin-top: .5rem; font-size: .85rem; }
+details.mermaid-src summary { cursor: pointer; color: var(--fg-2); }
 @media print { .topbar, .side, .copy, details.evidence { display: none !important; } .layout { display: block; } }

@@ -65,6 +65,12 @@ def md_to_html(text: str, from_dir: str) -> str:
     # checklist Markdown
     out = out.replace("<li>[ ] ", '<li class="task"><input type="checkbox" disabled> ').replace(
         "<li>[x] ", '<li class="task"><input type="checkbox" checked disabled> ')
+    # diagrammi Mermaid: il sito li disegna con mermaid.js locale (doc.js); la sorgente resta visibile e copiabile
+    out = re.sub(r'<pre><code class="language-mermaid">(.*?)</code></pre>',
+                 lambda m: ('<figure class="mermaid-wrap"><pre class="mermaid" data-src="%s">%s</pre>'
+                            '<details class="mermaid-src"><summary>Sorgente Mermaid</summary>'
+                            '<pre class="code"><code class="language-plaintext">%s</code></pre></details></figure>')
+                 % (html.escape(html.unescape(m.group(1)), quote=True), m.group(1), m.group(1)), out, flags=re.S)
     # blocchi di codice: classi per highlight.js
     out = re.sub(r'<pre><code class="language-([\w-]+)[^"]*">', r'<pre class="code"><code class="language-\1">', out)
     out = out.replace("<pre><code>", '<pre class="code"><code class="language-plaintext">')
@@ -218,7 +224,8 @@ def build() -> dict:
             continue
         body = ('<nav class="docnav"><a href="../index.html">← Runbook</a><ul>%s</ul></nav><article class="doc">%s</article>'
                 % (nav, md_to_html(src.read_text(encoding="utf-8"), "docs")))
-        files["docs/" + name[:-3] + ".html"] = page(name[:-3], body, 1)
+        extra = '<script src="../assets/vendor/mermaid/mermaid.min.js"></script>' if 'class="mermaid"' in body else ""
+        files["docs/" + name[:-3] + ".html"] = page(name[:-3], body, 1, extra)
     for f in ["styles.css", "common.js", "app.js", "doc.js"]:
         files["assets/" + f] = (TPL / f).read_text(encoding="utf-8")
     return files
