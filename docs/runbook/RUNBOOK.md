@@ -172,16 +172,18 @@ Copia [`settings.secure.jsonc`](../../examples/vscode/settings.secure.jsonc) nel
 ```bash os=macos,debian,opensuse
 mkdir -p "{{WPC_DIR}}"
 cp -R "{{REPO_DIR}}/examples/litellm/." "{{WPC_DIR}}/"
-cd "{{WPC_DIR}}" && cp .env.example .env
+cd "{{WPC_DIR}}" && { [ -e .env ] || cp .env.example .env; }   # non sovrascrive un .env esistente
 ```
 
 ```powershell os=windows
 New-Item -ItemType Directory -Force "{{WPC_DIR}}" | Out-Null
 Copy-Item -Recurse -Force "{{REPO_DIR}}\examples\litellm\*" "{{WPC_DIR}}\"
-Set-Location "{{WPC_DIR}}"; Copy-Item .env.example .env
+# .env.example in modo esplicito: un file che inizia con "." può essere nascosto al carattere jolly
+Copy-Item -Force "{{REPO_DIR}}\examples\litellm\.env.example" "{{WPC_DIR}}\"
+Set-Location "{{WPC_DIR}}"; if (-not (Test-Path .env)) { Copy-Item .env.example .env }   # non sovrascrive un .env esistente
 ```
 
-**Esito atteso:** la cartella contiene `.env`, `config.yaml`, `compose.*.yaml`, `scripts/`, `service/`.
+**Esito atteso:** la cartella contiene `.env`, `config.yaml`, `compose.*.yaml`, `scripts/`, `service/`. Se ripeti il passo, il `.env` esistente resta invariato.
 
 ### S-202 — Genera master key, salt key e password del database
 <!-- step: os=all path=all profile=all evidence=no-output -->

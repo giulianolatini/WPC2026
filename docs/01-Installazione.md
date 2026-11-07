@@ -282,14 +282,15 @@ winget install --id Microsoft.PowerShell -e
 mkdir -p ~/wpc2026-litellm
 cp -R examples/litellm/. ~/wpc2026-litellm/     # il "." copia anche i file nascosti (.env.example)
 cd ~/wpc2026-litellm
-cp .env.example .env
+[ -e .env ] || cp .env.example .env    # non sovrascrive un .env esistente
 ```
 
 ```powershell
 New-Item -ItemType Directory -Force "$HOME\wpc2026-litellm" | Out-Null
 Copy-Item -Recurse -Force examples\litellm\* "$HOME\wpc2026-litellm\"
+Copy-Item -Force examples\litellm\.env.example "$HOME\wpc2026-litellm\"   # file con "." iniziale: copia esplicita
 Set-Location "$HOME\wpc2026-litellm"
-Copy-Item .env.example .env
+if (-not (Test-Path .env)) { Copy-Item .env.example .env }   # non sovrascrive un .env esistente
 ```
 
 - [ ] Genera la master key e la salt key ([S-020](Sources.md#s-020)):
