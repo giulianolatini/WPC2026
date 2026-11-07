@@ -28,13 +28,15 @@ Il formato segue il template ADR di Nygard, con una sezione **Razionale** esplic
 | [D-012](#d-012) | 2026-11-07 | Lingua italiana con regole ASD-STE100 adattate | Accepted |
 | [D-013](#d-013) | 2026-11-07 | Policy BYOK: attiva di default, fatturazione in AI Credits | Accepted |
 | [D-014](#d-014) | 2026-11-07 | openSUSE: `zypper`; YaST rimosso da Leap 16 | Accepted |
-| [D-015](#d-015) | 2026-11-07 | "Codex" = `gpt-6.1-sol` via Responses API | Proposed |
+| [D-015](#d-015) | 2026-11-07 | "Codex" = `gpt-6.1-sol` via Responses API | Accepted |
 | [D-016](#d-016) | 2026-11-07 | Gemini: `gemini-4-argon` stabile + `gemini-3.1-pro-preview` | Accepted |
 | [D-017](#d-017) | 2026-11-07 | Tesi del talk: confronto con criteri | Accepted |
-| [D-018](#d-018) | 2026-11-07 | LiteLLM: versione fissata `v1.108.2` e hardening | Proposed |
-| [D-019](#d-019) | 2026-11-07 | Claude via LiteLLM con `apiType: messages`, senza discovery | Proposed |
+| [D-018](#d-018) | 2026-11-07 | LiteLLM: versione fissata `v1.108.2` e hardening | Accepted |
+| [D-019](#d-019) | 2026-11-07 | Claude via LiteLLM con `apiType: messages`, senza discovery | Accepted |
 | [D-020](#d-020) | 2026-11-07 | Tabella breve delle alternative a LiteLLM | Accepted |
-| [D-021](#d-021) | 2026-11-07 | `anthropic-version: 2026-10-21` negli esempi | Proposed |
+| [D-021](#d-021) | 2026-11-07 | `anthropic-version: 2026-10-21` negli esempi | Accepted |
+| [D-022](#d-022) | 2026-11-07 | Documento di best practice di sicurezza | Accepted |
+| [D-023](#d-023) | 2026-11-07 | Security review con OWASP e ISO/IEC 27001 | Accepted |
 
 ---
 
@@ -312,13 +314,13 @@ Il formato segue il template ADR di Nygard, con una sezione **Razionale** esplic
 <a id="d-015"></a>
 ## D-015 — "Codex" = `gpt-6.1-sol` via Responses API
 
-- **Data:** 2026-11-07 — **Stato:** Proposed — **Decisore:** assistente, conferma PO
+- **Data:** 2026-11-07 — **Stato:** Accepted (confermata dal PO il 2026-11-07) — **Decisore:** proposta dell'assistente, approvata dal PO
 
 **Contesto.** Nel catalogo OpenAI tutti i modelli con "codex" nel nome sono *Shut down* o *Deprecated* (`gpt-5.3-codex`). I modelli raccomandati per Codex sono `gpt-6-astra`, `gpt-6.1-sol`, `gpt-6.1-terra`, `gpt-6-luna`. Codex supporta solo la Responses API.
 
 **Opzioni considerate.** (1) `gpt-6.1-sol` via Responses. (2) `gpt-5.3-codex` (deprecato). (3) `gpt-6-astra`.
 
-**Decisione.** Proponiamo l'opzione 1. Nel talk "Codex" indica "il modello OpenAI raccomandato per Codex". In LiteLLM la route usa `openai/responses/gpt-6.1-sol`.
+**Decisione.** Usiamo l'opzione 1. Nel talk "Codex" indica "il modello OpenAI raccomandato per Codex". In LiteLLM la route usa `openai/responses/gpt-6.1-sol`.
 
 **Razionale.** `gpt-6.1-sol` è valido via API, supporta Responses e Chat Completions, ed è nella lista Codex. Un modello deprecato può sparire prima del talk.
 
@@ -369,11 +371,11 @@ Il formato segue il template ADR di Nygard, con una sezione **Razionale** esplic
 <a id="d-018"></a>
 ## D-018 — LiteLLM: versione fissata `v1.108.2` e hardening
 
-- **Data:** 2026-11-07 — **Stato:** Proposed — **Decisore:** assistente, conferma PO
+- **Data:** 2026-11-07 — **Stato:** Accepted (confermata dal PO il 2026-11-07) — **Decisore:** proposta dell'assistente, approvata dal PO
 
 **Contesto.** Il tag `v1.90.2` degli esempi è vecchio. Le versioni `1.82.7`, `1.82.8` e `1.107.0` erano compromesse. Il 2026-10-21 anche i tag mobili `latest`, `main-latest`, `main-stable` puntavano a immagini compromesse. La chiave cosign è cambiata il 2026-10-23. Il default di `--host` è `0.0.0.0`.
 
-**Decisione.** Proponiamo:
+**Decisione.** Adottiamo:
 - versione `1.108.2` (LTS) fissata per Docker e per `uv`; mai tag mobili; digest e firma cosign per l'uso in team;
 - bind solo su `127.0.0.1`;
 - agli sviluppatori solo virtual keys, mai la master key;
@@ -390,11 +392,11 @@ Il formato segue il template ADR di Nygard, con una sezione **Razionale** esplic
 <a id="d-019"></a>
 ## D-019 — Claude via LiteLLM con `apiType: messages`, senza discovery
 
-- **Data:** 2026-11-07 — **Stato:** Proposed — **Decisore:** assistente, conferma PO
+- **Data:** 2026-11-07 — **Stato:** Accepted (confermata dal PO il 2026-11-07) — **Decisore:** proposta dell'assistente, approvata dal PO
 
 **Contesto.** Con Chat Completions, i modelli Anthropic con thinking e tool richiedono di inviare di nuovo i `thinking_blocks`; i client OpenAI-compatible spesso li perdono (errore 400 o thinking disattivato). La discovery dei modelli del Custom Endpoint dà "Invalid response format" con LiteLLM (issue aperta).
 
-**Decisione.** Proponiamo: modelli Claude via LiteLLM nel gruppo `apiType: messages`; altri modelli in `chat-completions`; nessun `url` a livello di provider (niente discovery), un `url` esplicito per ogni modello.
+**Decisione.** Adottiamo: modelli Claude via LiteLLM nel gruppo `apiType: messages`; altri modelli in `chat-completions`; nessun `url` a livello di provider (niente discovery), un `url` esplicito per ogni modello.
 
 **Razionale.** Il formato Messages è il formato nativo di Anthropic. Un URL esplicito evita il bug di discovery.
 
@@ -420,12 +422,49 @@ Il formato segue il template ADR di Nygard, con una sezione **Razionale** esplic
 <a id="d-021"></a>
 ## D-021 — `anthropic-version: 2026-10-21` negli esempi
 
-- **Data:** 2026-11-07 — **Stato:** Proposed — **Decisore:** assistente, conferma PO
+- **Data:** 2026-11-07 — **Stato:** Accepted (confermata dal PO il 2026-11-07) — **Decisore:** proposta dell'assistente, approvata dal PO
 
 **Contesto.** L'ultima versione dell'API Anthropic è `2026-10-21` (raccomandata). Rimuove `temperature`, `top_p`, `top_k` (errore 400). `2023-06-01` è nello storico; la pagina non dice se è deprecata.
 
-**Decisione.** Proponiamo `2026-10-21` negli esempi `curl`. Gli esempi non inviano `temperature`, `top_p`, `top_k`.
+**Decisione.** Usiamo `2026-10-21` negli esempi `curl`. Gli esempi non inviano `temperature`, `top_p`, `top_k`.
 
 **Razionale.** La versione raccomandata riduce il rischio di comportamenti legacy.
 
 **Fonti.** [S-116](Sources.md#s-116).
+
+
+---
+
+<a id="d-022"></a>
+## D-022 — Documento di best practice di sicurezza
+
+- **Data:** 2026-11-07 — **Stato:** Accepted — **Decisore:** PO
+
+**Contesto.** Il talk mostra configurazioni che gestiscono chiavi API e danno autonomia agli agenti. La platea deve avere un riferimento sui comportamenti corretti.
+
+**Decisione.** Creiamo [03-Security-Best-Practices.md](03-Security-Best-Practices.md) con le best practice di Microsoft (VS Code, GitHub Copilot) e LiteLLM: comportamenti corretti e configurazioni sicure. Aggiungiamo la baseline [`examples/vscode/settings.secure.jsonc`](../examples/vscode/settings.secure.jsonc).
+
+**Razionale.** Le best practice sono distribuite su molte pagine e cambiano spesso. Un documento unico con le fonti riduce il rischio di configurazioni insicure copiate dal talk.
+
+**Conseguenze.** Ogni nuova configurazione di esempio deve rispettare il documento.
+
+**Fonti.** [S-108](Sources.md#s-108), [S-109](Sources.md#s-109), [S-130](Sources.md#s-130), [S-131](Sources.md#s-131), [S-133](Sources.md#s-133), [S-134](Sources.md#s-134).
+
+---
+
+<a id="d-023"></a>
+## D-023 — Security review con OWASP e ISO/IEC 27001
+
+- **Data:** 2026-11-07 — **Stato:** Accepted — **Decisore:** PO
+
+**Contesto.** Le configurazioni di esempio vanno analizzate con framework riconosciuti, utili anche per un audit.
+
+**Opzioni considerate.** OWASP: (1) LLM Top 10 + Agentic Top 10; (2) solo LLM Top 10; (3) LLM Top 10 + Top 10 web. ISO: (1) 2022 Annex A; (2) 2022 Annex A + clausole 4–10.
+
+**Decisione.** OWASP Top 10 for LLM Applications 2025 come asse principale, OWASP Top 10 for Agentic Applications 2026 per gli agenti. ISO/IEC 27001:2022 Annex A e clausole 4–10. Il documento è [04-Security-Review-OWASP-ISO27001.md](04-Security-Review-OWASP-ISO27001.md).
+
+**Razionale.** Il Top 10 LLM copre il singolo scambio con il modello; il Top 10 Agentic copre tool, permessi ed esecuzione. Le clausole 4–10 collegano i rilievi al sistema di gestione.
+
+**Conseguenze.** I rilievi `F-NN` producono azioni `AZ-NN`. Le azioni che cambiano gli esempi richiedono l'approvazione del PO. Il testo della norma ISO non è riprodotto: il documento cita solo numero e titolo dei controlli.
+
+**Fonti.** [S-137](Sources.md#s-137), [S-138](Sources.md#s-138), [S-140](Sources.md#s-140), [S-141](Sources.md#s-141).

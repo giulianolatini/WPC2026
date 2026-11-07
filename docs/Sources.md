@@ -134,6 +134,23 @@ Gli altri documenti puntano alla fonte con un link del tipo `Sources.md#s-001`.
 | <a id="s-114"></a>S-114 | [Microsoft — GitHub-Copilot-BYOK-with-APIM (APIM + Foundry)](https://github.com/microsoft/GitHub-Copilot-BYOK-with-APIM) | VENDOR-DOC | P-08 |
 | <a id="s-115"></a>S-115 | [OpenRouter — Guardrails (budget, allowlist, ZDR)](https://openrouter.ai/docs/guides/features/guardrails) | VENDOR-DOC | P-08 |
 
+## Security
+
+| ID | Titolo | Tipo | Verifica |
+|----|--------|------|----------|
+| <a id="s-130"></a>S-130 | [VS Code — Security considerations for AI in VS Code](https://code.visualstudio.com/docs/copilot/security) | PRIMARY | 2026-11-07 |
+| <a id="s-131"></a>S-131 | [VS Code — Manage AI settings in enterprise environments](https://code.visualstudio.com/docs/enterprise/manage-ai-settings) | PRIMARY | 2026-11-07 |
+| <a id="s-132"></a>S-132 | [VS Code — Enterprise policy reference](https://code.visualstudio.com/docs/enterprise/policies) | PRIMARY | ⚠️ non consultata |
+| <a id="s-133"></a>S-133 | [VS Code — Workspace Trust](https://code.visualstudio.com/docs/editing/workspaces/workspace-trust) | PRIMARY | 2026-11-07 |
+| <a id="s-134"></a>S-134 | [GitHub Docs — Excluding content from GitHub Copilot](https://docs.github.com/en/copilot/how-tos/configure-content-exclusion/exclude-content-from-copilot) | PRIMARY | 2026-11-07 |
+| <a id="s-137"></a>S-137 | [OWASP — Top 10 for LLM Applications 2025](https://genai.owasp.org/llm-top-10/) | PRIMARY | 2026-11-07 |
+| <a id="s-138"></a>S-138 | [OWASP — Top 10 for Agentic Applications for 2026](https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/) | PRIMARY | ⚠️ elenco ricostruito da fonti secondarie, da verificare (P-10) |
+| <a id="s-139"></a>S-139 | [OWASP — MCP Top 10](https://owasp.org/www-project-mcp-top-10/) | PRIMARY | ⚠️ non consultata |
+| <a id="s-140"></a>S-140 | [ISO — ISO/IEC 27001:2022 Information security management systems — Requirements](https://www.iso.org/standard/27001) | PRIMARY | 2026-11-07 (solo scheda; testo della norma non riprodotto) |
+| <a id="s-141"></a>S-141 | [ISO — ISO/IEC 27001:2022/Amd 1:2024 (Climate action changes)](https://www.iso.org/standard/88435.html) | PRIMARY | ⚠️ non consultata |
+| <a id="s-142"></a>S-142 | [VS Code — Extension runtime security](https://code.visualstudio.com/docs/configure/extensions/extension-runtime-security) | PRIMARY | ⚠️ non consultata |
+| <a id="s-144"></a>S-144 | [freedesktop.org — systemd.exec (sandboxing options)](https://www.freedesktop.org/software/systemd/man/latest/systemd.exec.html) | PRIMARY | ⚠️ non consultata |
+
 ## Metodo (decisioni e scrittura)
 
 | ID | Titolo | Tipo | Verifica |
