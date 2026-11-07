@@ -4,8 +4,9 @@
   const PREFS_KEY = 'wpc2026.prefs';
 
   function store(key, value) {
-    try { if (value === undefined) return JSON.parse(localStorage.getItem(key) || 'null'); localStorage.setItem(key, JSON.stringify(value)); }
-    catch (e) { return null; }
+    // Lettura: valore o null. Scrittura: true se salvata, false se il browser rifiuta (spazio pieno, storage bloccato).
+    if (value === undefined) { try { return JSON.parse(localStorage.getItem(key) || 'null'); } catch (e) { return null; } }
+    try { localStorage.setItem(key, JSON.stringify(value)); return true; } catch (e) { return false; }
   }
 
   function fonts() {
