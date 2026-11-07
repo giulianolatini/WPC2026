@@ -9,7 +9,7 @@
 <link rel="stylesheet" href="../assets/vendor/highlight/github.min.css" id="hl-light">
 <link rel="stylesheet" href="../assets/vendor/highlight/github-dark.min.css" id="hl-dark" disabled>
 <link rel="stylesheet" href="../assets/styles.css">
-
+<script src="../assets/vendor/mermaid/mermaid.min.js"></script>
 <script>try{var p=JSON.parse(localStorage.getItem('wpc2026.prefs')||'{}');var t=p.theme;if(t!=='light'&&t!=='dark')t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.dataset.theme=t;}catch(e){}</script>
 </head>
 <body>
@@ -119,7 +119,7 @@ Confronta due percorsi: <strong>configurazione nativa</strong> (BYOK diretto ver
 <hr />
 <h2 id="2-architettura-del-client-ed-elementi-configurabili">2. Architettura del client ed elementi configurabili</h2>
 <h3 id="21-livelli">2.1 Livelli</h3>
-<pre class="code"><code class="language-mermaid">flowchart TB
+<figure class="mermaid-wrap"><pre class="mermaid" data-src="flowchart TB
   U[Sviluppatore] --&gt; UI[&quot;VS Code: Chat view · Inline chat · Agents window&quot;]
   UI --&gt; H{&quot;Harness&lt;br/&gt;Local · Copilot · Claude · Codex&quot;}
   H --&gt; C[&quot;Customizations&lt;br/&gt;instructions · prompt files · agents · skills · hooks · MCP&quot;]
@@ -136,7 +136,41 @@ Confronta due percorsi: <strong>configurazione nativa</strong> (BYOK diretto ver
   L --&gt; P5[HF Inference Providers]
   B --&gt; P1 &amp; P2 &amp; P3 &amp; P4
   E --&gt; P5
-</code></pre>
+">flowchart TB
+  U[Sviluppatore] --&gt; UI[&quot;VS Code: Chat view · Inline chat · Agents window&quot;]
+  UI --&gt; H{&quot;Harness&lt;br/&gt;Local · Copilot · Claude · Codex&quot;}
+  H --&gt; C[&quot;Customizations&lt;br/&gt;instructions · prompt files · agents · skills · hooks · MCP&quot;]
+  H --&gt; M{&quot;Model picker&quot;}
+  M --&gt; G[&quot;Modelli GitHub Copilot&lt;br/&gt;(piano Copilot)&quot;]
+  M --&gt; B[&quot;BYOK built-in&lt;br/&gt;Anthropic · OpenAI · Gemini · Azure · OpenRouter&quot;]
+  M --&gt; E[&quot;BYOK da estensione&lt;br/&gt;es. Hugging Face&quot;]
+  M --&gt; X[&quot;Custom Endpoint&lt;br/&gt;chat-completions · responses · messages&quot;]
+  X --&gt; L[&quot;LiteLLM proxy :4000&quot;]
+  L --&gt; P1[Anthropic API]
+  L --&gt; P2[OpenAI API]
+  L --&gt; P3[Gemini API]
+  L --&gt; P4[OpenRouter]
+  L --&gt; P5[HF Inference Providers]
+  B --&gt; P1 &amp; P2 &amp; P3 &amp; P4
+  E --&gt; P5
+</pre><details class="mermaid-src"><summary>Sorgente Mermaid</summary><pre class="code"><code class="language-plaintext">flowchart TB
+  U[Sviluppatore] --&gt; UI[&quot;VS Code: Chat view · Inline chat · Agents window&quot;]
+  UI --&gt; H{&quot;Harness&lt;br/&gt;Local · Copilot · Claude · Codex&quot;}
+  H --&gt; C[&quot;Customizations&lt;br/&gt;instructions · prompt files · agents · skills · hooks · MCP&quot;]
+  H --&gt; M{&quot;Model picker&quot;}
+  M --&gt; G[&quot;Modelli GitHub Copilot&lt;br/&gt;(piano Copilot)&quot;]
+  M --&gt; B[&quot;BYOK built-in&lt;br/&gt;Anthropic · OpenAI · Gemini · Azure · OpenRouter&quot;]
+  M --&gt; E[&quot;BYOK da estensione&lt;br/&gt;es. Hugging Face&quot;]
+  M --&gt; X[&quot;Custom Endpoint&lt;br/&gt;chat-completions · responses · messages&quot;]
+  X --&gt; L[&quot;LiteLLM proxy :4000&quot;]
+  L --&gt; P1[Anthropic API]
+  L --&gt; P2[OpenAI API]
+  L --&gt; P3[Gemini API]
+  L --&gt; P4[OpenRouter]
+  L --&gt; P5[HF Inference Providers]
+  B --&gt; P1 &amp; P2 &amp; P3 &amp; P4
+  E --&gt; P5
+</code></pre></details></figure>
 <p>Il modello è un elemento <strong>indipendente</strong> dalle customizations. Un'istruzione o una skill funziona con ogni modello che supporta gli strumenti richiesti.</p>
 <h3 id="22-tipi-di-modello-model-picker">2.2 Tipi di modello (model picker)</h3>
 <p>Il <strong>Language Models editor</strong> gestisce i modelli. Aprilo con l'icona a ingranaggio nel model picker, o con il comando <strong>Chat: Manage Language Models</strong> (<a href="Sources.html#s-001">S-001</a>).</p>
@@ -947,7 +981,7 @@ general_settings:
 <li class="task"><input type="checkbox" disabled> Controlla la spesa nell'Admin UI: <code>http://localhost:4000/ui</code>.</li>
 </ul>
 <h3 id="45-sequenza-di-una-richiesta">4.5 Sequenza di una richiesta</h3>
-<pre class="code"><code class="language-mermaid">sequenceDiagram
+<figure class="mermaid-wrap"><pre class="mermaid" data-src="sequenceDiagram
   participant VS as VS Code (Custom Endpoint)
   participant LL as LiteLLM :4000
   participant PR as Provider (Anthropic/OpenAI/Gemini/OpenRouter/HF)
@@ -956,7 +990,25 @@ general_settings:
   LL-&gt;&gt;PR: richiesta nel formato del provider + GEMINI_API_KEY
   PR--&gt;&gt;LL: risposta (stream)
   LL--&gt;&gt;VS: risposta in formato OpenAI (stream)
-</code></pre>
+">sequenceDiagram
+  participant VS as VS Code (Custom Endpoint)
+  participant LL as LiteLLM :4000
+  participant PR as Provider (Anthropic/OpenAI/Gemini/OpenRouter/HF)
+  VS-&gt;&gt;LL: POST /v1/chat/completions {model: &quot;gemini-pro&quot;} + litellmKey
+  LL-&gt;&gt;LL: verifica chiave, risolve alias → gemini/gemini-3.1-pro-preview
+  LL-&gt;&gt;PR: richiesta nel formato del provider + GEMINI_API_KEY
+  PR--&gt;&gt;LL: risposta (stream)
+  LL--&gt;&gt;VS: risposta in formato OpenAI (stream)
+</pre><details class="mermaid-src"><summary>Sorgente Mermaid</summary><pre class="code"><code class="language-plaintext">sequenceDiagram
+  participant VS as VS Code (Custom Endpoint)
+  participant LL as LiteLLM :4000
+  participant PR as Provider (Anthropic/OpenAI/Gemini/OpenRouter/HF)
+  VS-&gt;&gt;LL: POST /v1/chat/completions {model: &quot;gemini-pro&quot;} + litellmKey
+  LL-&gt;&gt;LL: verifica chiave, risolve alias → gemini/gemini-3.1-pro-preview
+  LL-&gt;&gt;PR: richiesta nel formato del provider + GEMINI_API_KEY
+  PR--&gt;&gt;LL: risposta (stream)
+  LL--&gt;&gt;VS: risposta in formato OpenAI (stream)
+</code></pre></details></figure>
 <h3 id="46-alternative-a-litellm">4.6 Alternative a LiteLLM</h3>
 <table>
 <thead>

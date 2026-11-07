@@ -220,6 +220,12 @@ Il formato segue il template ADR di Nygard, con una sezione <strong>Razionale</s
 <td>PostgreSQL locale per il percorso uv con profilo esteso</td>
 <td>Accepted</td>
 </tr>
+<tr>
+<td><a href="#d-031">D-031</a></td>
+<td>2026-11-07</td>
+<td>Diagrammi Mermaid disegnati nel sito offline</td>
+<td>Proposed</td>
+</tr>
 </tbody>
 </table>
 <hr />
@@ -626,7 +632,19 @@ Il formato segue il template ADR di Nygard, con una sezione <strong>Razionale</s
 <p>L'opzione 3 resta possibile: S-402 e S-403 sono «Non applicabile» e S-404 scrive solo <code>DATABASE_URL</code>.</p>
 <p><strong>Razionale.</strong> La stessa versione principale nei due percorsi riduce le differenze da provare. I pacchetti ufficiali hanno aggiornamenti di sicurezza. L'installer EDB ascolta su tutte le interfacce e Homebrew usa <code>trust</code>: la procedura li limita a localhost e alle password.</p>
 <p><strong>Conseguenze.</strong> ⚠️ Da provare su ogni sistema: ID <code>winget</code> <code>PostgreSQL.PostgreSQL.16</code>, nome del pacchetto e inizializzazione automatica su openSUSE, primo avvio di LiteLLM con il database. Su macOS le connessioni dal socket locale restano <code>trust</code> per l'utente che è superutente del database.</p>
-<p><strong>Fonti.</strong> <a href="Sources.html#s-158">S-158</a>, <a href="Sources.html#s-159">S-159</a>, <a href="Sources.html#s-160">S-160</a>, <a href="Sources.html#s-161">S-161</a>, <a href="Sources.html#s-162">S-162</a>, <a href="Sources.html#s-163">S-163</a>, <a href="Sources.html#s-022">S-022</a>.</p></article>
+<p><strong>Fonti.</strong> <a href="Sources.html#s-158">S-158</a>, <a href="Sources.html#s-159">S-159</a>, <a href="Sources.html#s-160">S-160</a>, <a href="Sources.html#s-161">S-161</a>, <a href="Sources.html#s-162">S-162</a>, <a href="Sources.html#s-163">S-163</a>, <a href="Sources.html#s-022">S-022</a>.</p>
+<hr />
+<p><a id="d-031"></a></p>
+<h2 id="d-031--diagrammi-mermaid-disegnati-nel-sito-offline">D-031 — Diagrammi Mermaid disegnati nel sito offline</h2>
+<ul>
+<li><strong>Data:</strong> 2026-11-07 — <strong>Stato:</strong> Proposed — <strong>Decisore:</strong> richiesta del PO (vedere il grafo, oppure un PNG); scelta tra le due opzioni dell'assistente, da confermare</li>
+</ul>
+<p><strong>Contesto.</strong> I documenti 02 e 04 contengono diagrammi Mermaid. GitHub li disegna; il sito offline mostrava solo la sorgente.</p>
+<p><strong>Opzioni considerate.</strong> (1) Mermaid locale nel sito (<code>mermaid.min.js</code>, circa 5,5 MB), disegno nel browser. (2) Immagini PNG o SVG generate in anticipo con Mermaid CLI e salvate nel repository. (3) Solo la sorgente.</p>
+<p><strong>Decisione.</strong> Usiamo l'opzione 1: <code>mermaid@12.3.0</code> in <code>tools/site/vendor/mermaid/</code>, caricato solo dalle pagine con diagrammi, <code>securityLevel: 'strict'</code>. Il diagramma segue tema e font scelti; la sorgente resta visibile in un pannello con il pulsante Copia.</p>
+<p><strong>Razionale.</strong> Una sola sorgente (il Markdown): nessuna immagine da rigenerare quando il diagramma cambia. Mermaid CLI richiede un browser headless sul computer che genera il sito. Il tema scuro funziona anche per i diagrammi.</p>
+<p><strong>Conseguenze.</strong> Il repository cresce di circa 5,5 MB. Un aggiornamento di Mermaid sostituisce il file in <code>vendor/</code> e aggiorna <code>VERSION</code> (sha256 e integrity npm); <code>--check</code> confronta i file di <code>vendor/</code>.</p>
+<p><strong>Fonti.</strong> <a href="Sources.html#s-164">S-164</a>.</p></article>
 <script type="application/json" id="fonts-data">[
   {
     "id": "blexmono",
