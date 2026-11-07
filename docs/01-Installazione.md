@@ -9,7 +9,7 @@ Questo documento descrive l'installazione degli strumenti della demo su Windows,
 | uv | `winget` | `brew` | installer ufficiale ([D-009](Decisions.md#d-009)) | installer ufficiale ([D-009](Decisions.md#d-009)) |
 | LiteLLM proxy | Docker o `uv tool` | Docker o `uv tool` | Docker o `uv tool` | Docker o `uv tool` |
 
-> **Nota su YaST.** Su openSUSE usiamo `zypper`. YaST Software Management installa gli stessi pacchetti in modo grafico ([D-006](Decisions.md#d-006)).
+> **Nota su YaST.** Su openSUSE usiamo `zypper`. Leap 16 non ha più YaST: l'alternativa grafica è Myrlyn. Su Tumbleweed YaST Software è ancora disponibile, ma non riceve più sviluppo ([D-014](Decisions.md#d-014), [S-067](Sources.md#s-067)).
 
 ## Indice
 
@@ -31,7 +31,8 @@ Le procedure usano questi parametri. Registra il valore che usi: il valore serve
 |-----------|---------|-------------|
 | `WPC_DIR` | `~/wpc2026-litellm` (Windows: `$HOME\wpc2026-litellm`) | Cartella di lavoro di LiteLLM |
 | `LITELLM_PORT` | `4000` | Porta del proxy ([S-020](Sources.md#s-020)) |
-| `LITELLM_IMAGE` | `ghcr.io/berriai/litellm:v1.90.2` | Immagine Docker con tag fisso ⚠️ verifica l'ultimo tag stabile ([S-023](Sources.md#s-023)) |
+| `LITELLM_VERSION` | `1.108.2` | Versione LTS fissata ([D-018](Decisions.md#d-018), [S-119](Sources.md#s-119)). ⚠️ Controlla la LTS corrente prima del talk |
+| `LITELLM_IMAGE` | `ghcr.io/berriai/litellm:v1.108.2` | Immagine Docker con tag fisso. Non usare tag mobili ([S-104](Sources.md#s-104)) |
 | `LITELLM_MASTER_KEY` | generata | Chiave root del proxy, inizia con `sk-` ([S-020](Sources.md#s-020)) |
 | `LITELLM_SALT_KEY` | generata | Solo profilo esteso. Non rigenerarla ([S-020](Sources.md#s-020)) |
 | `POSTGRES_PASSWORD` | generata | Solo profilo esteso |
@@ -56,8 +57,12 @@ winget install --id Microsoft.VisualStudioCode -e
 code --version
 ```
 
-> Il pacchetto `winget` installa la *User setup*: non richiede privilegi di amministratore ([S-010](Sources.md#s-010)).
-> Per la *System setup* (tutti gli utenti) usa il programma d'installazione dal sito ([S-010](Sources.md#s-010)). ⚠️ Lo scope `--scope machine` di `winget` per questo pacchetto non è verificato.
+> Senza opzioni `winget` installa la *User setup*: non richiede privilegi di amministratore ([S-010](Sources.md#s-010), [S-012](Sources.md#s-012)).
+> Per la *System setup* (tutti gli utenti, in `Program Files`) apri PowerShell come amministratore e aggiungi `--scope machine` (review P-06):
+>
+> ```powershell
+> winget install --id Microsoft.VisualStudioCode -e --scope machine
+> ```
 
 ### 2.2 macOS (`brew`)
 
@@ -125,7 +130,7 @@ sudo zypper install code
 
 - [ ] Verifica: `code --version`.
 
-> ⚠️ La riga `echo -e` riproduce la struttura del file descritta in [S-009](Sources.md#s-009) (sezione `[code]`, `baseurl`, `gpgcheck=1`, `gpgkey`). Le chiavi `enabled`, `autorefresh` e `type` sono da confrontare con il testo esatto della pagina.
+> Il contenuto del file `vscode.repo` corrisponde al testo di [S-009](Sources.md#s-009) (review P-06).
 
 ### 2.5 Accesso a GitHub Copilot
 
@@ -148,7 +153,8 @@ Scegli il percorso:
 
 **Windows**
 
-- [ ] Installa Docker Desktop ⚠️ ([S-066](Sources.md#s-066)):
+- [ ] Apri PowerShell come amministratore. Il pacchetto `winget` di Docker Desktop ha solo l'installer per tutti gli utenti (`machine`) ([S-066](Sources.md#s-066), review P-06).
+- [ ] Installa Docker Desktop:
 
 ```powershell
 winget install --id Docker.DockerDesktop -e
@@ -199,7 +205,7 @@ sudo apt update
 sudo apt install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 ```
 
-> **Debian:** usa `https://download.docker.com/linux/debian` per la chiave e per `URIs`, e `VERSION_CODENAME` per `Suites` ⚠️ ([S-062](Sources.md#s-062)).
+> **Debian:** usa `https://download.docker.com/linux/debian` per la chiave e per `URIs`, e solo `$VERSION_CODENAME` per `Suites`. Su Debian testing e sulle derivate scrivi a mano il codename della release Debian (es. `trixie`) ([S-062](Sources.md#s-062)).
 
 - [ ] Aggiungi l'utente al gruppo `docker` ⚠️ ([S-063](Sources.md#s-063)):
 
@@ -210,13 +216,15 @@ newgrp docker
 
 **Linux openSUSE (`zypper`)** ([S-064](Sources.md#s-064))
 
-- [ ] Installa Docker e Compose:
+- [ ] Installa Docker e Compose. I pacchetti sono diversi per distribuzione ([S-064](Sources.md#s-064), [D-014](Decisions.md#d-014)):
 
 ```bash
+# Tumbleweed
 sudo zypper install docker docker-compose docker-compose-switch
-```
 
-> Il pacchetto `docker-compose` è disponibile su Tumbleweed ([S-064](Sources.md#s-064)).
+# Leap 16  ⚠️ fonti in conflitto: prova il comando su una VM prima del talk
+sudo zypper install docker docker-compose docker-buildx
+```
 
 - [ ] Abilita e avvia il servizio:
 
@@ -245,6 +253,8 @@ docker compose version
 | Windows | `winget install --id=astral-sh.uv -e` | [S-060](Sources.md#s-060) |
 | macOS | `brew install uv` | [S-060](Sources.md#s-060) |
 | Linux (tutte) | `curl -LsSf https://astral.sh/uv/install.sh \| sh` | [S-060](Sources.md#s-060), [D-009](Decisions.md#d-009) |
+
+> Ubuntu 26.10 ha un pacchetto `uv` (0.11.x), più vecchio della release corrente. Non lo usiamo ([D-009](Decisions.md#d-009), review P-06).
 
 - [ ] Installa `uv` con il comando del tuo sistema.
 - [ ] Apri un nuovo terminale.
@@ -300,6 +310,21 @@ Il file [`examples/litellm/config.yaml`](../examples/litellm/config.yaml) defini
 
 ## 5. LiteLLM con Docker
 
+### 5.0 Sicurezza della supply chain
+
+Nel 2026 LiteLLM ha avuto due compromissioni della release ([S-104](Sources.md#s-104), [S-105](Sources.md#s-105)):
+
+| Data | Versioni compromesse | Canale |
+|------|----------------------|--------|
+| 2026-03-24 | `1.82.7`, `1.82.8` | PyPI |
+| 2026-10-21 | `1.107.0`; tag `latest`, `main-latest`, `main-stable` | PyPI, Docker Hub, GHCR |
+
+Regole del progetto ([D-018](Decisions.md#d-018)):
+
+- [ ] Usa sempre una versione fissata (`v1.108.2`). Non usare `latest`, `main-latest`, `main-stable`.
+- [ ] Per l'uso in team fissa anche il digest e verifica la firma cosign con la chiave del 2026-10-23 ([S-104](Sources.md#s-104), [S-109](Sources.md#s-109)).
+- [ ] Se hai installato `1.82.7`, `1.82.8` o `1.107.0`, considera rubate tutte le credenziali dell'host e ruotale ([S-104](Sources.md#s-104)).
+
 ### 5.1 Profilo minimo (senza database)
 
 Il profilo minimo usa solo `config.yaml` e la master key. Non ha Admin UI per i modelli, virtual keys e budget ([S-020](Sources.md#s-020)).
@@ -312,7 +337,7 @@ docker run -d --name litellm \
   --env-file .env \
   -v "$(pwd)/config.yaml:/app/config.yaml:ro" \
   -p 127.0.0.1:4000:4000 \
-  ghcr.io/berriai/litellm:v1.90.2 \
+  ghcr.io/berriai/litellm:v1.108.2 \
   --config /app/config.yaml
 ```
 
@@ -364,7 +389,7 @@ docker rm -f litellm                             # se hai usato docker run
 - [ ] Installa LiteLLM proxy come tool isolato ([S-021](Sources.md#s-021)):
 
 ```bash
-uv tool install 'litellm[proxy]'
+uv tool install 'litellm[proxy]==1.108.2'
 ```
 
 > Non usare `pip install` su un Python vecchio: `pip` può installare una release vecchia. LiteLLM ≥ 1.84.0 richiede Python ≥ 3.10; `uv` installa un Python compatibile ([S-021](Sources.md#s-021)).
@@ -374,8 +399,10 @@ uv tool install 'litellm[proxy]'
 ```bash
 cd ~/wpc2026-litellm
 set -a; . ./.env; set +a
-litellm --config config.yaml --port 4000
+litellm --config config.yaml --host 127.0.0.1 --port 4000
 ```
+
+> Il default di `--host` è `0.0.0.0`: il proxy è raggiungibile da tutta la rete locale. Usa sempre `--host 127.0.0.1` ([S-118](Sources.md#s-118)).
 
 - [ ] Premi `Ctrl+C` per arrestare.
 
@@ -437,7 +464,7 @@ File: [`examples/litellm/service/Register-LiteLLMTask.ps1`](../examples/litellm/
 
 ## 7. Verifica finale
 
-- [ ] Verifica la liveness ([S-023](Sources.md#s-023)):
+- [ ] Verifica la liveness. `/health/liveliness` e `/health/readiness` non richiedono chiave; `/health` la richiede ([S-023](Sources.md#s-023), [S-117](Sources.md#s-117)):
 
 ```bash
 curl -s http://localhost:4000/health/liveliness
