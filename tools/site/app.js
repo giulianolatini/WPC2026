@@ -59,17 +59,22 @@
   // Ogni sostituzione è idempotente: redact(redact(x)) === redact(x).
   const SECRET_NAME = '(?:[A-Za-z0-9_-]*?(?:password|passwd|secret|token|api[_-]?key|master[_-]?key|salt[_-]?key|private[_-]?key|access[_-]?key)|key)';
   const REDACT = [
+    // prima le intestazioni: "Bearer sk-…" diventa "Bearer [REDATTO]" una volta sola (idempotente, R4-agy-01)
+    [/(Bearer\s+)[A-Za-z0-9._~+\/\-]{8,}=*/gi, '$1[REDATTO]'],
+    [/(x-api-key:\s*)[^\s\[]\S*/gi, '$1[REDATTO]'],
     [/\b(sk-(?:ant-|or-|proj-)?)[A-Za-z0-9_\-]{8,}/g, '$1[REDATTO]'],
     [/\bhf_[A-Za-z0-9]{10,}/g, 'hf_[REDATTO]'],
     [/\bAIza[0-9A-Za-z_\-]{20,}/g, 'AIza[REDATTO]'],
-    [/(Bearer\s+)[A-Za-z0-9._~+\/\-]{8,}=*/gi, '$1[REDATTO]'],
-    [/(x-api-key:\s*)\S+/gi, '$1[REDATTO]'],
+    [/\b(gh[pousr]_|github_pat_)[A-Za-z0-9_]{16,}/g, '$1[REDATTO]'],
     // JSON: "POSTGRES_PASSWORD": "valore", "key": "valore"
     [new RegExp('("' + SECRET_NAME + '"\\s*:\\s*)"(?:[^"\\\\]|\\\\.)*"', 'gi'), '$1"[REDATTO]"'],
-    // CHIAVE=valore, CHIAVE: valore, anche con valore tra virgolette e spazi
-    // anche nomi con trattino: x-litellm-api-key: …, api-key: …, client-secret: … (R2-agy-04)
-    [/\b((?:[A-Za-z][A-Za-z0-9_-]*[_-])?(?:API[_-]?KEY|MASTER[_-]?KEY|SALT[_-]?KEY|ACCESS[_-]?KEY|PRIVATE[_-]?KEY|TOKEN|PASSWORD|PASSWD|SECRET)\s*[=:]\s*)(?:"[^"\n]*"|'[^'\n]*'|[^\s"',}]+)/gi, '$1[REDATTO]'],
-    [/(postgres(?:ql)?:\/\/[^:\s\/]+:)[^@\s]+@/gi, '$1[REDATTO]@']
+    // CHIAVE=valore e Intestazione: valore, con o senza separatore prima del nome (PGPASSWORD, APIKEY,
+    // x-litellm-api-key, client-secret); valore tra virgolette o fino al primo spazio
+    [/\b((?:[A-Za-z][A-Za-z0-9_-]*?)?(?:API[_-]?KEY|MASTER[_-]?KEY|SALT[_-]?KEY|ACCESS[_-]?KEY|PRIVATE[_-]?KEY|TOKEN|PASSWORD|PASSWD|SECRET)\s*[=:]\s*)(?:"[^"\n]*"|'[^'\n]*'|[^\s"']+)/gi, '$1[REDATTO]'],
+    // SQL: CREATE ROLE … PASSWORD '…'
+    [/(\bPASSWORD\s+)'[^'\n]*'/gi, "$1'[REDATTO]'"],
+    // URL con password: postgresql://utente:password@, anche postgresql+asyncpg://
+    [/(postgres(?:ql)?(?:\+[\w-]+)?:\/\/[^:\s\/@]+:)[^@\s]+@/gi, '$1[REDATTO]@']
   ];
   function redact(text) { let t = text || ''; for (const [re, rep] of REDACT) t = t.replace(re, rep); return t; }
 
