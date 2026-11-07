@@ -41,6 +41,11 @@
     const byName = Object.fromEntries(RB.params.map(p => [p.name, p]));
     return code.replace(PARAM_RE, (m, n) => byName[n] ? paramValue(byName[n], s) : m);
   }
+  // Parametri nel testo dei passi (es. "Esito atteso: … {{LITELLM_PORT}}"): valore evidenziato ed escapato (R2-agy-06).
+  function resolveProse(html, s = cur()) {
+    const byName = Object.fromEntries(RB.params.map(p => [p.name, p]));
+    return html.replace(PARAM_RE, (m, n) => byName[n] ? `<mark class="param">${esc(paramValue(byName[n], s))}</mark>` : m);
+  }
   function usedParams(code) { return [...new Set([...code.matchAll(PARAM_RE)].map(m => m[1]))]; }
 
   /* ------------------------------------------------------------ redazione dei segreti */
@@ -56,7 +61,8 @@
     // JSON: "POSTGRES_PASSWORD": "valore", "key": "valore"
     [new RegExp('("' + SECRET_NAME + '"\\s*:\\s*)"(?:[^"\\\\]|\\\\.)*"', 'gi'), '$1"[REDATTO]"'],
     // CHIAVE=valore, CHIAVE: valore, anche con valore tra virgolette e spazi
-    [/\b((?:[A-Za-z][A-Za-z0-9_]*_)?(?:API_?KEY|MASTER_KEY|SALT_KEY|ACCESS_KEY|PRIVATE_KEY|TOKEN|PASSWORD|PASSWD|SECRET)\s*[=:]\s*)(?:"[^"\n]*"|'[^'\n]*'|[^\s"',}]+)/gi, '$1[REDATTO]'],
+    // anche nomi con trattino: x-litellm-api-key: …, api-key: …, client-secret: … (R2-agy-04)
+    [/\b((?:[A-Za-z][A-Za-z0-9_-]*[_-])?(?:API[_-]?KEY|MASTER[_-]?KEY|SALT[_-]?KEY|ACCESS[_-]?KEY|PRIVATE[_-]?KEY|TOKEN|PASSWORD|PASSWD|SECRET)\s*[=:]\s*)(?:"[^"\n]*"|'[^'\n]*'|[^\s"',}]+)/gi, '$1[REDATTO]'],
     [/(postgres(?:ql)?:\/\/[^:\s\/]+:)[^@\s]+@/gi, '$1[REDATTO]@']
   ];
   function redact(text) { let t = text || ''; for (const [re, rep] of REDACT) t = t.replace(re, rep); return t; }
@@ -69,20 +75,43 @@
   const ID_RE = /^s[a-z0-9]{1,20}$/;
   const isoOr = (v, d) => (typeof v === 'string' && !isNaN(Date.parse(v))) ? new Date(v).toISOString() : d;
   const str = (v, max) => (typeof v === 'string' ? v : '').slice(0, max);
+  // Un parametro entra tra virgolette doppie nei comandi bash e PowerShell: lì "$" e "`" espandono ancora.
+  // Unica espansione ammessa: $HOME all'inizio (codex review P2, R2-agy-03). Niente $( ${ $VAR, backtick,
+  // virgolette, parentesi, ; | & < > o a capo.
   function cleanParam(name, v) {
     v = str(v, 300).trim();
     if (!v) return '';
-    if (/["'`\n\r;|&<>]/.test(v) || redact(v) !== v || redact(name + '=' + v) !== name + '=' + v) return null;
+    const rest = v.replace(/^\$HOME(?=$|[\\/])/, '');
+    if (/[$`"'()\n\r;|&<>]/.test(rest) || redact(v) !== v || redact(name + '=' + v) !== name + '=' + v) return null;
     return v;
   }
-  // Comandi importati: restano solo se la redazione non li cambia. Un comando legittimo può contenere
-  // un nome come POSTGRES_PASSWORD (es. in un grep): in quel caso si usano i comandi attuali (S-404, S-501).
+  // Comandi registrati (localStorage o JSON importato). Un comando resta se corrisponde a un blocco del
+  // runbook con parametri validi (anche se contiene nomi come POSTGRES_PASSWORD: S-202, S-404, S-501),
+  // oppure se la redazione non lo cambia (es. runbook di una versione precedente). Altrimenti la lista
+  // torna ai comandi attuali (R2-agy-02).
+  const reEsc = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  function matchesTemplate(st, code) {
+    return st.blocks.some(b => {
+      if (b.type !== 'code') return false;
+      const names = [];
+      const src = b.code.split(/(\{\{\w+\}\})/).map(part => {
+        const m = /^\{\{(\w+)\}\}$/.exec(part);
+        if (!m) return reEsc(part);
+        names.push(m[1]); return '([^\\n]*?)';
+      }).join('');
+      const hit = new RegExp('^' + src + '$').exec(code);
+      return !!hit && names.every((n, i) => cleanParam(n, hit[i + 1]) !== null);
+    });
+  }
   function importCommands(st, cmds, s) {
     if (!Array.isArray(cmds)) return '';
     const list = cmds.slice(0, 20).filter(c => c && typeof c.code === 'string')
       .map(c => ({ lang: /^[\w-]{1,20}$/.test(c.lang) ? c.lang : 'plaintext', code: c.code.slice(0, 20000) }));
-    return list.every(c => redact(c.code) === c.code) ? list : currentCommands(st, s);
+    return list.every(c => matchesTemplate(st, c.code) || redact(c.code) === c.code) ? list : currentCommands(st, s);
   }
+  // JSON con chiavi ordinate: confronta due sessioni senza dipendere dall'ordine delle proprietà.
+  const stable = v => JSON.stringify(v, (k, x) => x && typeof x === 'object' && !Array.isArray(x)
+    ? Object.fromEntries(Object.keys(x).sort().map(key => [key, x[key]])) : x);
   function sanitizeSession(raw) {
     if (!raw || typeof raw !== 'object' || !ID_RE.test(raw.id)) throw new Error('id');
     const now = new Date().toISOString();
@@ -158,6 +187,10 @@
 
   function renderPhases() {
     const s = cur();
+    // Un nuovo rendering (filtri, parametri) mantiene i pannelli aperti e la posizione di lettura.
+    const openIds = new Set([...document.querySelectorAll('.step details.evidence[open]')].map(d => d.closest('.step').id));
+    const closedIds = new Set([...document.querySelectorAll('.step details.evidence:not([open])')].map(d => d.closest('.step').id));
+    const y = window.scrollY;
     $('#intro').innerHTML = `<h2>${esc(RB.title)}</h2>${RB.intro}`;
     let out = '';
     for (const ph of RB.phases) {
@@ -168,7 +201,12 @@
       out += '</section>';
     }
     $('#phases').innerHTML = out || '<p class="card">Nessun passo per i filtri scelti.</p>';
+    document.querySelectorAll('.step details.evidence').forEach(d => {
+      const id = d.closest('.step').id;
+      if (openIds.has(id)) d.open = true; else if (closedIds.has(id)) d.open = false;
+    });
     decorateCode(); bindStepEvents(); renderToc();
+    window.scrollTo(0, y);
   }
 
   function renderStep(st) {
@@ -178,7 +216,7 @@
     if (st.profile !== 'all') badges.push(st.profile === 'minimal' ? 'profilo minimo' : 'profilo esteso');
     let body = '';
     for (const b of st.blocks) {
-      if (b.type === 'prose') body += `<div class="prose">${b.html}</div>`;
+      if (b.type === 'prose') body += `<div class="prose">${resolveProse(b.html)}</div>`;
       else if (visibleBlock(b)) {
         const params = usedParams(b.code);
         body += `<pre class="code" data-code="${esc(b.code)}" data-os="${esc(b.os.join(','))}"><code class="language-${esc(b.lang)}"></code></pre>`
@@ -285,8 +323,12 @@
     $('#params').addEventListener('change', e => {
       const name = e.target.dataset.param; if (!name) return;
       const v = cleanParam(name, e.target.value);
-      if (v === null) { e.target.value = ''; WPC.toast('Valore rifiutato: niente segreti, virgolette o caratteri ; | & < >'); return; }
-      cur().params[name] = v; save(); decorateCode();
+      if (v === null) {
+        e.target.value = cur().params[name] ?? '';   // torna al valore accettato: campo, comandi ed evidenze restano coerenti
+        WPC.toast('Valore rifiutato: niente segreti, virgolette, $( ), backtick o ; | & < >. Solo $HOME all\'inizio.');
+        return;
+      }
+      cur().params[name] = v; save(); renderPhases();   // aggiorna comandi e testo dei passi
     });
     $('#export-md').addEventListener('click', () => download(fileBase() + '.md', exportMarkdown(), 'text/markdown'));
     $('#export-json').addEventListener('click', () => download(fileBase() + '.json', JSON.stringify({ format: 'wpc2026-runbook-session', version: 1, runbook: RB.version + '·' + RB.hash, session: cur() }, null, 2), 'application/json'));
@@ -298,8 +340,9 @@
         if (!d || d.format !== 'wpc2026-runbook-session') throw new Error('formato');
         const s = sanitizeSession(d.session);   // valida PRIMA di salvare (review codex P2)
         if (state.sessions[s.id] && !confirm('La sessione esiste già in questo browser. Sostituirla?')) return;
+        const unchanged = stable(s) === stable(d.session);   // prima di save(): save() cambia updatedAt (R2-agy-01)
         state.sessions[s.id] = s; state.current = s.id; save(); renderAll();
-        WPC.toast(JSON.stringify(s) === JSON.stringify(d.session) ? 'Sessione importata' : 'Sessione importata: valori non validi o segreti rimossi');
+        WPC.toast(unchanged ? 'Sessione importata' : 'Sessione importata: valori non validi o segreti rimossi');
       } catch (err) { alert('File non valido: serve un export JSON di questo runbook.'); }
     });
   }
