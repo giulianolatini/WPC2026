@@ -134,15 +134,20 @@ sudo usermod -G docker -a $USER && newgrp docker
 
 ```powershell os=windows
 winget install --id=astral-sh.uv -e
+uv tool update-shell
 ```
 
 ```bash os=macos
 brew install uv
+uv tool update-shell
 ```
 
 ```bash os=debian,opensuse
 curl -LsSf https://astral.sh/uv/install.sh | sh
+uv tool update-shell
 ```
+
+`uv tool update-shell` aggiunge al `PATH` la cartella dei comandi installati con `uv tool install` (`litellm`, `specify`): con `winget` e `brew` non succede da solo ([S-060](../Sources.md#s-060)).
 
 **Esito atteso:** in un nuovo terminale `uv --version` mostra la versione.
 
@@ -239,7 +244,7 @@ chmod 600 "{{WPC_DIR}}/.env" && ls -l "{{WPC_DIR}}/.env"
 Richiede `cosign`. Lo script verifica l'impronta della chiave, scarica l'immagine e verifica la firma sul digest ([03 §5.1](../03-Security-Best-Practices.md#51-release-e-immagini)).
 
 ```bash os=macos,debian,opensuse
-cd "{{WPC_DIR}}" && LITELLM_TAG="v{{LITELLM_VERSION}}" ./scripts/pin-images.sh
+cd "{{WPC_DIR}}" && LITELLM_TAG="v{{LITELLM_VERSION}}" POSTGRES_TAG="{{PG_MAJOR}}" ./scripts/pin-images.sh
 ```
 
 - [ ] Copia in `.env` le righe `LITELLM_IMAGE=…@sha256:…` e `POSTGRES_IMAGE=…@sha256:…`.
@@ -304,16 +309,16 @@ brew services start "postgresql@{{PG_MAJOR}}"
 ```bash os=debian
 # Repository PGDG: la versione {{PG_MAJOR}} non è nei pacchetti di ogni release (S-160)
 sudo apt install -y postgresql-common
-sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh
+sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y
 sudo apt update && sudo apt install -y "postgresql-{{PG_MAJOR}}"
-sudo -u postgres psql -tAc 'SELECT version()'
+sudo -iu postgres psql -tAc 'SELECT version()'
 ```
 
 ```bash os=opensuse
 # ⚠️ da provare: nome del pacchetto e inizializzazione automatica della cartella dati al primo avvio (S-161)
 sudo zypper install "postgresql{{PG_MAJOR}}-server" "postgresql{{PG_MAJOR}}"
 sudo systemctl enable --now postgresql
-sudo -u postgres psql -tAc 'SELECT version()'
+sudo -iu postgres psql -tAc 'SELECT version()'
 ```
 
 **Esito atteso:** il servizio è attivo e `SELECT version()` mostra `PostgreSQL {{PG_MAJOR}}.x`.
@@ -327,9 +332,11 @@ Il server ascolta solo su `localhost` e le connessioni TCP usano `scram-sha-256`
 # PowerShell come amministratore (Restart-Service). Ogni comando psql chiede la password di "postgres".
 $psql = "C:\Program Files\PostgreSQL\{{PG_MAJOR}}\bin\psql.exe"
 & $psql -U postgres -c "ALTER SYSTEM SET listen_addresses = 'localhost';"
+$hba = & $psql -U postgres -tAc "SHOW hba_file;"
+(Get-Content $hba) -replace '^(host\s.*\s)(trust|ident|md5|password)\s*$', '${1}scram-sha-256' | Set-Content -Encoding utf8 $hba
 Restart-Service "postgresql-x64-{{PG_MAJOR}}"
 & $psql -U postgres -tAc "SHOW listen_addresses;"
-Select-String -Path (& $psql -U postgres -tAc "SHOW hba_file;") -Pattern '^host'
+Select-String -Path $hba -Pattern '^host'
 ```
 
 ```bash os=macos
@@ -342,11 +349,11 @@ brew services restart "postgresql@{{PG_MAJOR}}"
 ```
 
 ```bash os=debian,opensuse
-HBA="$(sudo -u postgres psql -tAc 'SHOW hba_file')"
+HBA="$(sudo -iu postgres psql -tAc 'SHOW hba_file')"
 sudo sed -i -E 's/^(host[[:space:]].*[[:space:]])(trust|ident|md5|password)[[:space:]]*$/\1scram-sha-256/' "$HBA"
-sudo -u postgres psql -c "ALTER SYSTEM SET listen_addresses = 'localhost'"
+sudo -iu postgres psql -c "ALTER SYSTEM SET listen_addresses = 'localhost'"
 sudo systemctl restart postgresql
-sudo -u postgres psql -tAc 'SHOW listen_addresses'; sudo grep -E '^host' "$HBA"
+sudo -iu postgres psql -tAc 'SHOW listen_addresses'; sudo grep -E '^host' "$HBA"
 ```
 
 **Esito atteso:** `listen_addresses` vale `localhost`; ogni riga `host` termina con `scram-sha-256`. ⚠️ macOS: le connessioni dal socket locale (righe `local`) restano `trust` per il tuo utente, che è il superutente del database.
@@ -364,6 +371,7 @@ if ($pw -match '^[0-9a-f]{16,}$') {
     "CREATE ROLE litellm LOGIN PASSWORD '$pw';" | & "$pg\psql.exe" -U postgres -d postgres -v ON_ERROR_STOP=1
     & "$pg\createdb.exe" -U postgres -O litellm litellm
     if (-not (Select-String -Path .env -Pattern '^DATABASE_URL=' -Quiet)) { Add-Content .env "DATABASE_URL=postgresql://litellm:$pw@127.0.0.1:5432/litellm" }
+    if (-not (Select-String -Path .env -Pattern '^STORE_MODEL_IN_DB=' -Quiet)) { Add-Content .env 'STORE_MODEL_IN_DB=True' }
     $env:PGPASSWORD = $pw; & "$pg\psql.exe" -h 127.0.0.1 -U litellm -d litellm -tAc 'SELECT current_user'; Remove-Item Env:PGPASSWORD
 } else { Write-Error 'POSTGRES_PASSWORD in .env manca o non è esadecimale (S-202)' }
 Remove-Variable pw
@@ -377,6 +385,7 @@ if [[ "$pw" =~ ^[0-9a-f]{16,}$ ]]; then
   printf "CREATE ROLE litellm LOGIN PASSWORD '%s';\n" "$pw" | "$PGBIN/psql" -d postgres -v ON_ERROR_STOP=1
   "$PGBIN/createdb" -O litellm litellm
   grep -q '^DATABASE_URL=' .env || printf 'DATABASE_URL=postgresql://litellm:%s@127.0.0.1:5432/litellm\n' "$pw" >> .env
+  grep -q '^STORE_MODEL_IN_DB=' .env || echo 'STORE_MODEL_IN_DB=True' >> .env
   PGPASSWORD="$pw" "$PGBIN/psql" -h 127.0.0.1 -U litellm -d litellm -tAc 'SELECT current_user'
 else
   echo "POSTGRES_PASSWORD in .env manca o non è esadecimale (S-202)" >&2
@@ -388,9 +397,10 @@ unset pw
 cd "{{WPC_DIR}}"
 pw="$(grep -E '^POSTGRES_PASSWORD=' .env | cut -d= -f2-)"
 if [[ "$pw" =~ ^[0-9a-f]{16,}$ ]]; then
-  printf "CREATE ROLE litellm LOGIN PASSWORD '%s';\n" "$pw" | sudo -u postgres psql -d postgres -v ON_ERROR_STOP=1
-  sudo -u postgres createdb -O litellm litellm
+  printf "CREATE ROLE litellm LOGIN PASSWORD '%s';\n" "$pw" | sudo -iu postgres psql -d postgres -v ON_ERROR_STOP=1
+  sudo -iu postgres createdb -O litellm litellm
   grep -q '^DATABASE_URL=' .env || printf 'DATABASE_URL=postgresql://litellm:%s@127.0.0.1:5432/litellm\n' "$pw" >> .env
+  grep -q '^STORE_MODEL_IN_DB=' .env || echo 'STORE_MODEL_IN_DB=True' >> .env
   PGPASSWORD="$pw" psql -h 127.0.0.1 -U litellm -d litellm -tAc 'SELECT current_user'
 else
   echo "POSTGRES_PASSWORD in .env manca o non è esadecimale (S-202)" >&2
@@ -399,6 +409,8 @@ unset pw
 ```
 
 - [ ] Controlla che `.env` contenga anche `LITELLM_SALT_KEY` (S-203).
+
+`STORE_MODEL_IN_DB=True` è lo stesso valore di `compose.extended.yaml`: i modelli si gestiscono anche dall'Admin UI.
 
 **Esito atteso:** l'ultimo comando stampa `litellm`. In S-405 il proxy si avvia senza errori di connessione al database. ⚠️ Da provare: percorso uv + profilo esteso.
 
@@ -440,7 +452,9 @@ launchctl print gui/$(id -u)/com.wpc2026.litellm | head -20
 Get-ScheduledTask -TaskName WPC2026-LiteLLM
 ```
 
-**Esito atteso:** il servizio è attivo. ⚠️ systemd: verifica l'avvio con `ProtectHome=read-only`.
+Profilo esteso: esegui prima S-405. Al primo avvio con `DATABASE_URL` LiteLLM prepara il client Prisma, che scrive nella cartella dello strumento `uv` e nella cache dell'utente. La unit systemd ha `ProtectHome=read-only` e può scrivere solo in `{{WPC_DIR}}`.
+
+**Esito atteso:** il servizio è attivo. ⚠️ systemd: verifica l'avvio con `ProtectHome=read-only`. ⚠️ Profilo esteso: se la unit si ferma con errori di Prisma o di permessi in `~/.local/share/uv` o `~/.cache`, aggiungi quelle cartelle con `systemctl --user edit litellm.service` (`[Service]` → `ReadWritePaths=-%h/.local/share/uv/tools/litellm -%h/.cache/prisma-python`) e annota l'esito nelle evidenze.
 
 ## F5 — Verifica del gateway
 
