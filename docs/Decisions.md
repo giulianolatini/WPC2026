@@ -40,11 +40,12 @@ Il formato segue il template ADR di Nygard, con una sezione **Razionale** esplic
 | [D-024](#d-024) | 2026-11-07 | OWASP LLM Top 10 edizione 2026 | Accepted |
 | [D-025](#d-025) | 2026-11-07 | Applicazione delle azioni AZ-01…AZ-10 | Accepted |
 | [D-026](#d-026) | 2026-11-07 | Runbook unico con filtri per OS, percorso e profilo | Accepted |
-| [D-027](#d-027) | 2026-11-07 | Nerd Fonts in WOFF2 nel repository | Accepted |
+| [D-027](#d-027) | 2026-11-07 | Nerd Fonts in WOFF2 nel repository | Superseded by D-032 |
 | [D-028](#d-028) | 2026-11-07 | Architettura del sito offline e delle evidenze | Accepted |
 | [D-029](#d-029) | 2026-11-07 | Deck finale come artefatto Slides | Accepted |
 | [D-030](#d-030) | 2026-11-07 | PostgreSQL locale per il percorso uv con profilo esteso | Accepted |
 | [D-031](#d-031) | 2026-11-07 | Diagrammi Mermaid disegnati nel sito offline | Accepted |
+| [D-032](#d-032) | 2026-11-07 | Nerd Fonts in WOFF2: sette famiglie e release fissata | Accepted |
 
 ---
 
@@ -538,7 +539,7 @@ Il formato segue il template ADR di Nygard, con una sezione **Razionale** esplic
 <a id="d-027"></a>
 ## D-027 — Nerd Fonts in WOFF2 nel repository
 
-- **Data:** 2026-11-07 — **Stato:** Accepted — **Decisore:** PO ("WOFF2 nel repo")
+- **Data:** 2026-11-07 — **Stato:** Superseded by [D-032](#d-032) — **Decisore:** PO ("WOFF2 nel repo")
 
 **Contesto.** Il sito deve funzionare offline su una postazione che può non avere i font richiesti: BlexMono, FiraCode, GoogleSansCode, Monoid, OpenDyslexic, SauceCodePro, UbuntuSans (Nerd Fonts).
 
@@ -638,3 +639,27 @@ L'opzione 3 resta possibile: S-402 e S-403 sono «Non applicabile» e S-404 scri
 **Conseguenze.** Il repository cresce di circa 5,5 MB. Un aggiornamento di Mermaid sostituisce il file in `vendor/` e aggiorna `VERSION` (sha256 e integrity npm); `--check` confronta i file di `vendor/`.
 
 **Fonti.** [S-164](Sources.md#s-164).
+
+---
+
+<a id="d-032"></a>
+## D-032 — Nerd Fonts in WOFF2: sette famiglie e release fissata
+
+- **Data:** 2026-11-07 — **Stato:** Accepted — **Decisore:** PO (richiesta dopo la review R4-agy-09) — **Sostituisce:** [D-027](#d-027)
+
+**Contesto.** D-027 descrive 5 famiglie (circa 13 MB) e rimanda GoogleSansCode e UbuntuSans a un passo successivo. Il PO ha eseguito `tools/update-site.sh --fonts`: il sito contiene ora tutte le 7 famiglie. La review della PR #2 (R4-agy-04) ha fissato la release e i checksum degli zip. Il registro è *append-only*: una nuova decisione aggiorna D-027.
+
+**Opzioni considerate.** (1) Nuova decisione che sostituisce D-027 con i dati attuali. (2) Lasciare D-027 con i dati di quel momento.
+
+**Decisione.** Usiamo l'opzione 1. Restano valide le scelte di D-027: WOFF2 nel repository, conversione con `tools/fonts.py`, licenza di ogni famiglia in `site/assets/fonts/LICENSES/`, varianti `Mono` per il codice. Cambiano i dati:
+
+- 7 famiglie: BlexMono, FiraCode, GoogleSansCode, Monoid, OpenDyslexic, SauceCodePro, UbuntuSans.
+- 17 file WOFF2 (circa 19 MB): varianti `Mono` 400/700 di ogni famiglia (OpenDyslexic solo 400), varianti per il testo di OpenDyslexic e UbuntuSans.
+- Release Nerd Fonts fissata a `v3.5.1`, con lo sha256 di ogni zip in `tools/fonts.json`. `tools/update-site.sh --fonts` (o `-Fonts`) verifica l'hash prima di estrarre.
+- Conversione riproducibile: due esecuzioni producono gli stessi byte (`recalcTimestamp=False`).
+
+**Razionale.** Il registro deve descrivere il repository com'è. Le altre parti di D-027 non cambiano.
+
+**Conseguenze.** Un aggiornamento dei font cambia la versione in `tools/fonts.json`, aggiorna gli sha256 e rigenera i WOFF2 con `--fonts`.
+
+**Fonti.** [S-152](Sources.md#s-152), [S-153](Sources.md#s-153), [S-156](Sources.md#s-156).
