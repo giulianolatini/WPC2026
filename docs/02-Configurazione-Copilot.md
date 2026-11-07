@@ -485,7 +485,7 @@ general_settings:
 - [ ] Inserisci in `chatLanguageModels.json` il contenuto di [`examples/vscode/chatLanguageModels.litellm.json`](../examples/vscode/chatLanguageModels.litellm.json).
 - [ ] Alla prima richiesta, inserisci nel prompt `litellmKey` la master key (profilo minimo) o una virtual key (profilo esteso).
 
-**Gruppo in formato OpenAI** (`apiType: chat-completions`) per Codex, Gemini, OpenRouter, Hugging Face:
+**Gruppo in formato OpenAI** (`apiType: chat-completions`) per Codex, Gemini, OpenRouter, Hugging Face. Estratto: il file completo contiene anche `openrouter-gpt-oss` e `hf-gpt-oss`:
 
 ```json
 {
@@ -501,7 +501,7 @@ general_settings:
 }
 ```
 
-**Gruppo in formato Anthropic** (`apiType: messages`) per Claude. Il formato Messages evita la perdita dei `thinking_blocks` con tool ([D-019](Decisions.md#d-019), [S-110](Sources.md#s-110)):
+**Gruppo in formato Anthropic** (`apiType: messages`) per Claude. Estratto: il file completo contiene anche `claude-opus`. Il formato Messages evita la perdita dei `thinking_blocks` con tool ([D-019](Decisions.md#d-019), [S-110](Sources.md#s-110)):
 
 ```json
 {

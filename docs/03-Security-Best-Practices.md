@@ -87,8 +87,11 @@ L'analisi delle configurazioni di esempio rispetto a OWASP e ISO/IEC 27001 è in
     "**/.env": false,
     "**/.env.*": false,
     "**/*.pem": false,
+    "**/*.key": false,
     "**/.github/workflows/**": false,
-    "**/.vscode/*.json": false
+    "**/.github/hooks/**": false,
+    "**/.vscode/*.json": false,
+    "**/.mcp.json": false
   },
   "chat.tools.global.autoApprove": false
 }
