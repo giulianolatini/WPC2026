@@ -56,7 +56,8 @@
     // JSON: "POSTGRES_PASSWORD": "valore", "key": "valore"
     [new RegExp('("' + SECRET_NAME + '"\\s*:\\s*)"(?:[^"\\\\]|\\\\.)*"', 'gi'), '$1"[REDATTO]"'],
     // CHIAVE=valore, CHIAVE: valore, anche con valore tra virgolette e spazi
-    [/\b((?:[A-Za-z][A-Za-z0-9_]*_)?(?:API_?KEY|MASTER_KEY|SALT_KEY|ACCESS_KEY|PRIVATE_KEY|TOKEN|PASSWORD|PASSWD|SECRET)\s*[=:]\s*)(?:"[^"\n]*"|'[^'\n]*'|[^\s"',}]+)/gi, '$1[REDATTO]'],
+    // anche nomi con trattino: x-litellm-api-key: …, api-key: …, client-secret: … (R2-agy-04)
+    [/\b((?:[A-Za-z][A-Za-z0-9_-]*[_-])?(?:API[_-]?KEY|MASTER[_-]?KEY|SALT[_-]?KEY|ACCESS[_-]?KEY|PRIVATE[_-]?KEY|TOKEN|PASSWORD|PASSWD|SECRET)\s*[=:]\s*)(?:"[^"\n]*"|'[^'\n]*'|[^\s"',}]+)/gi, '$1[REDATTO]'],
     [/(postgres(?:ql)?:\/\/[^:\s\/]+:)[^@\s]+@/gi, '$1[REDATTO]@']
   ];
   function redact(text) { let t = text || ''; for (const [re, rep] of REDACT) t = t.replace(re, rep); return t; }
