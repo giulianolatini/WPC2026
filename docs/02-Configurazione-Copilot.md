@@ -431,7 +431,7 @@ LiteLLM proxy espone un solo endpoint locale. Traduce le richieste nei formati d
 
 ### 4.2 Configurazione del gateway (`config.yaml`)
 
-File completo: [`examples/litellm/config.yaml`](../examples/litellm/config.yaml). Estratto:
+File completo: [`examples/litellm/config.yaml`](../examples/litellm/config.yaml). Estratto senza le impostazioni di hardening (`extra_body.provider`, `turn_off_message_logging`, `max_request_size_mb`, `allowed_file_extensions`), descritte in [04 §9](04-Security-Review-OWASP-ISO27001.md#9-azioni):
 
 ```yaml
 model_list:

@@ -15,11 +15,11 @@ curl -fsSL "$KEY_URL" -o "$tmp/cosign.pub"
 got=$( (sha256sum "$tmp/cosign.pub" 2>/dev/null || shasum -a 256 "$tmp/cosign.pub") | awk '{print $1}')
 [ "$got" = "$KEY_SHA256" ] || { echo "Impronta di cosign.pub NON valida: $got" >&2; exit 1; }
 
-cosign verify --key "$tmp/cosign.pub" "$REPO:$LITELLM_TAG" > /dev/null
 docker pull -q "$REPO:$LITELLM_TAG" > /dev/null
 docker pull -q "postgres:$POSTGRES_TAG" > /dev/null
 lit=$(docker inspect --format='{{index .RepoDigests 0}}' "$REPO:$LITELLM_TAG")
 pg=$(docker inspect --format='{{index .RepoDigests 0}}' "postgres:$POSTGRES_TAG")
+# Firma verificata sul digest immutabile, non sul tag mobile (R-agy-15).
 cosign verify --key "$tmp/cosign.pub" "$lit" > /dev/null
 echo "# Firma verificata il $(date -u +%Y-%m-%dT%H:%M:%SZ). Copia in .env:"
 echo "LITELLM_IMAGE=$lit"
