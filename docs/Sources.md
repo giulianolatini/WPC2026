@@ -168,6 +168,12 @@ Gli altri documenti puntano alla fonte con un link del tipo `Sources.md#s-001`.
 | <a id="s-155"></a>S-155 | [Python-Markdown — documentazione ed estensioni](https://python-markdown.github.io/) | PRIMARY | 2026-11-07 |
 | <a id="s-156"></a>S-156 | [fontTools — conversione in WOFF2 (`flavor="woff2"`)](https://fonttools.readthedocs.io/en/latest/ttLib/woff2.html) | PRIMARY | 2026-11-07 |
 | <a id="s-157"></a>S-157 | [MDN — Window.localStorage](https://developer.mozilla.org/docs/Web/API/Window/localStorage) | VENDOR-DOC | 2026-11-07 |
+| <a id="s-158"></a>S-158 | [PostgreSQL — Download per Windows (installer EDB)](https://www.postgresql.org/download/windows/) | PRIMARY | 2026-11-07 (ID winget `PostgreSQL.PostgreSQL.<NN>` ⚠️ da verificare con `winget search`) |
+| <a id="s-159"></a>S-159 | [PostgreSQL — Download per macOS (Homebrew `postgresql@NN`)](https://www.postgresql.org/download/macosx/) | PRIMARY | 2026-11-07 |
+| <a id="s-160"></a>S-160 | [PostgreSQL — Download per Ubuntu e Debian (repository PGDG, script `apt.postgresql.org.sh`)](https://www.postgresql.org/download/linux/ubuntu/) | PRIMARY | 2026-11-07 |
+| <a id="s-161"></a>S-161 | [PostgreSQL — Download per SUSE / openSUSE](https://www.postgresql.org/download/linux/suse/) e [openSUSE — SDB:PostgreSQL](https://en.opensuse.org/SDB:PostgreSQL) | PRIMARY | 2026-11-07 (inizializzazione ⚠️ da provare) |
+| <a id="s-162"></a>S-162 | [PostgreSQL — Connections and Authentication (`listen_addresses`) e ALTER SYSTEM](https://www.postgresql.org/docs/current/runtime-config-connection.html) | PRIMARY | 2026-11-07 |
+| <a id="s-163"></a>S-163 | [PostgreSQL — The pg_hba.conf File (`scram-sha-256`)](https://www.postgresql.org/docs/current/auth-pg-hba-conf.html) | PRIMARY | 2026-11-07 |
 
 ## Metodo (decisioni e scrittura)
 
