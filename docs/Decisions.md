@@ -43,6 +43,7 @@ Il formato segue il template ADR di Nygard, con una sezione **Razionale** esplic
 | [D-027](#d-027) | 2026-11-07 | Nerd Fonts in WOFF2 nel repository | Accepted |
 | [D-028](#d-028) | 2026-11-07 | Architettura del sito offline e delle evidenze | Proposed |
 | [D-029](#d-029) | 2026-11-07 | Deck finale come artefatto Slides | Accepted |
+| [D-030](#d-030) | 2026-11-07 | PostgreSQL locale per il percorso uv con profilo esteso | Proposed |
 
 ---
 
@@ -527,7 +528,7 @@ Il formato segue il template ADR di Nygard, con una sezione **Razionale** esplic
 
 **Razionale.** Una sola sorgente evita divergenze tra le copie. Il generatore controlla che ogni parametro usato sia dichiarato e che gli ID siano unici.
 
-**Conseguenze.** Il runbook rimanda a 01 e 02 per le spiegazioni e non le ripete. I passi che producono segreti (S-202, S-203, S-402, S-501) hanno `evidence=no-output`.
+**Conseguenze.** Il runbook rimanda a 01 e 02 per le spiegazioni e non le ripete. I passi che producono segreti (S-202, S-203, S-501) hanno `evidence=no-output`.
 
 **Fonti.** [01](01-Installazione.md), [02](02-Configurazione-Copilot.md), [S-092](Sources.md#s-092).
 
@@ -592,3 +593,28 @@ Il formato segue il template ADR di Nygard, con una sezione **Razionale** esplic
 **Conseguenze.** Il README riporta il collegamento al deck quando il PO lo condivide.
 
 **Fonti.** —
+
+---
+
+<a id="d-030"></a>
+## D-030 — PostgreSQL locale per il percorso uv con profilo esteso
+
+- **Data:** 2026-11-07 — **Stato:** Proposed — **Decisore:** richiesta del PO (procedura di installazione per ogni sistema operativo); scelte di dettaglio dell'assistente, da confermare
+
+**Contesto.** Con `uv` il profilo esteso richiede un PostgreSQL esterno ([01 §6](01-Installazione.md#6-litellm-come-servizio-locale-con-uv)). La review della PR #2 (R2-codex-04) ha trovato il percorso incompleto. Il PO chiede una procedura di installazione per ogni sistema operativo.
+
+**Opzioni considerate.** (1) Versione principale fissa, uguale al profilo Docker (`postgres:16`), con pacchetti ufficiali: installer EDB via `winget` (Windows), `postgresql@16` di Homebrew (macOS), repository PGDG (Debian/Ubuntu), `postgresql16-server` (openSUSE). (2) Versione dei pacchetti della distribuzione, diversa per ogni sistema. (3) Solo un database dell'organizzazione, senza procedura.
+
+**Decisione.** Usiamo l'opzione 1, con il parametro `PG_MAJOR` (default `16`) nei passi S-402–S-404 del runbook:
+
+- S-402 installa il server e lo avvia come servizio.
+- S-403 imposta `listen_addresses = 'localhost'` con `ALTER SYSTEM` e porta a `scram-sha-256` ogni riga `host` di `pg_hba.conf`.
+- S-404 crea l'utente e il database `litellm` con la password `POSTGRES_PASSWORD` di `.env`, passata a `psql` da standard input, e scrive `DATABASE_URL` in `.env` solo se manca.
+
+L'opzione 3 resta possibile: S-402 e S-403 sono «Non applicabile» e S-404 scrive solo `DATABASE_URL`.
+
+**Razionale.** La stessa versione principale nei due percorsi riduce le differenze da provare. I pacchetti ufficiali hanno aggiornamenti di sicurezza. L'installer EDB ascolta su tutte le interfacce e Homebrew usa `trust`: la procedura li limita a localhost e alle password.
+
+**Conseguenze.** ⚠️ Da provare su ogni sistema: ID `winget` `PostgreSQL.PostgreSQL.16`, nome del pacchetto e inizializzazione automatica su openSUSE, primo avvio di LiteLLM con il database. Su macOS le connessioni dal socket locale restano `trust` per l'utente che è superutente del database.
+
+**Fonti.** [S-158](Sources.md#s-158), [S-159](Sources.md#s-159), [S-160](Sources.md#s-160), [S-161](Sources.md#s-161), [S-162](Sources.md#s-162), [S-163](Sources.md#s-163), [S-022](Sources.md#s-022).

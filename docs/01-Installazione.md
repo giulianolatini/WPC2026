@@ -462,7 +462,7 @@ cd ~/wpc2026-litellm
 
 - [ ] Premi `Ctrl+C` per arrestare.
 
-> Il profilo esteso con `uv` richiede un PostgreSQL esterno e la variabile `DATABASE_URL=postgresql://user:password@host:5432/litellm` ([S-022](Sources.md#s-022), [S-023](Sources.md#s-023)).
+> Il profilo esteso con `uv` richiede un PostgreSQL esterno e la variabile `DATABASE_URL=postgresql://user:password@host:5432/litellm` ([S-022](Sources.md#s-022), [S-023](Sources.md#s-023)). Il [runbook](runbook/RUNBOOK.md) (passi S-402–S-404) installa PostgreSQL su ogni sistema, lo limita a localhost e crea utente, database e `DATABASE_URL` ([D-030](Decisions.md#d-030)).
 
 ### 6.2 Servizio su Linux (systemd, utente)
 

@@ -32,6 +32,7 @@ Il sito offline in `site/` si genera da questo file con `tools/update-site.sh` (
 | ADMIN_EMAIL | tu@example.com | tu@example.com | Email del `proxy_admin` (profilo esteso) |
 | SPECKIT_VERSION | 1.3.2 | 1.3.2 | Versione di Spec Kit ([S-085](../Sources.md#s-085)) |
 | SPECKIT_PROJECT | wpc-speckit-demo | wpc-speckit-demo | Cartella del progetto di prova Spec Kit |
+| PG_MAJOR | 16 | 16 | Versione principale di PostgreSQL per uv + profilo esteso, come `postgres:16` del profilo Docker ([D-030](../Decisions.md#d-030)) |
 
 ## F1 — Prerequisiti
 
@@ -281,18 +282,126 @@ uv tool install "litellm[proxy]=={{LITELLM_VERSION}}"
 
 **Esito atteso:** `litellm --version` mostra `{{LITELLM_VERSION}}`. Non usare le versioni `1.82.7`, `1.82.8`, `1.107.0` ([S-104](../Sources.md#s-104)).
 
-### S-402 — Profilo esteso: collega PostgreSQL
-<!-- step: os=all path=uv profile=extended evidence=no-output -->
+### S-402 — Profilo esteso: installa PostgreSQL
+<!-- step: os=all path=uv profile=extended -->
 
-Con `uv` il profilo esteso usa un PostgreSQL esterno ([01 §6](../01-Installazione.md#6-litellm-come-servizio-locale-con-uv), [S-022](../Sources.md#s-022), [S-023](../Sources.md#s-023)). Il runbook non installa PostgreSQL: usa un database della tua organizzazione o un'installazione locale.
+Con `uv` il profilo esteso usa un PostgreSQL esterno al proxy ([01 §6](../01-Installazione.md#6-litellm-come-servizio-locale-con-uv), [S-022](../Sources.md#s-022)). Questo passo lo installa sulla stessa macchina, con la versione `{{PG_MAJOR}}` del profilo Docker ([D-030](../Decisions.md#d-030)). Se usi un database della tua organizzazione, segna il passo come **Non applicabile** e vai a S-404.
 
-- [ ] Crea il database `litellm` e un utente dedicato, raggiungibili solo da `127.0.0.1` (o dalla rete interna del database).
-- [ ] Scrivi in `.env` la riga `DATABASE_URL=postgresql://litellm:<password>@127.0.0.1:5432/litellm`. Per la password usa solo caratteri `[0-9a-f]` (S-202): entra nell'URL senza codifica.
+```powershell os=windows
+# PowerShell come amministratore. Installer EDB in modo interattivo: imposta la password del superutente "postgres" (S-158)
+winget search PostgreSQL.PostgreSQL
+winget install --id "PostgreSQL.PostgreSQL.{{PG_MAJOR}}" -e --interactive
+Get-Service "postgresql-x64-{{PG_MAJOR}}"
+```
+
+```bash os=macos
+brew install "postgresql@{{PG_MAJOR}}"
+brew services start "postgresql@{{PG_MAJOR}}"
+"$(brew --prefix "postgresql@{{PG_MAJOR}}")/bin/psql" -d postgres -tAc 'SELECT version()'
+```
+
+```bash os=debian
+# Repository PGDG: la versione {{PG_MAJOR}} non è nei pacchetti di ogni release (S-160)
+sudo apt install -y postgresql-common
+sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh
+sudo apt update && sudo apt install -y "postgresql-{{PG_MAJOR}}"
+sudo -u postgres psql -tAc 'SELECT version()'
+```
+
+```bash os=opensuse
+# ⚠️ da provare: nome del pacchetto e inizializzazione automatica della cartella dati al primo avvio (S-161)
+sudo zypper install "postgresql{{PG_MAJOR}}-server" "postgresql{{PG_MAJOR}}"
+sudo systemctl enable --now postgresql
+sudo -u postgres psql -tAc 'SELECT version()'
+```
+
+**Esito atteso:** il servizio è attivo e `SELECT version()` mostra `PostgreSQL {{PG_MAJOR}}.x`.
+
+### S-403 — Profilo esteso: limita PostgreSQL a localhost e alle password
+<!-- step: os=all path=uv profile=extended -->
+
+Il server ascolta solo su `localhost` e le connessioni TCP usano `scram-sha-256` ([S-162](../Sources.md#s-162), [S-163](../Sources.md#s-163)). L'installer EDB per Windows ascolta su tutte le interfacce; Homebrew accetta le connessioni locali senza password (`trust`).
+
+```powershell os=windows
+# PowerShell come amministratore (Restart-Service). Ogni comando psql chiede la password di "postgres".
+$psql = "C:\Program Files\PostgreSQL\{{PG_MAJOR}}\bin\psql.exe"
+& $psql -U postgres -c "ALTER SYSTEM SET listen_addresses = 'localhost';"
+Restart-Service "postgresql-x64-{{PG_MAJOR}}"
+& $psql -U postgres -tAc "SHOW listen_addresses;"
+Select-String -Path (& $psql -U postgres -tAc "SHOW hba_file;") -Pattern '^host'
+```
+
+```bash os=macos
+PGBIN="$(brew --prefix "postgresql@{{PG_MAJOR}}")/bin"
+HBA="$("$PGBIN/psql" -d postgres -tAc 'SHOW hba_file')"
+sed -i '' -E 's/^(host[[:space:]].*[[:space:]])(trust|ident|md5|password)[[:space:]]*$/\1scram-sha-256/' "$HBA"
+"$PGBIN/psql" -d postgres -c "ALTER SYSTEM SET listen_addresses = 'localhost'"
+brew services restart "postgresql@{{PG_MAJOR}}"
+"$PGBIN/psql" -d postgres -tAc 'SHOW listen_addresses'; grep -E '^host' "$HBA"
+```
+
+```bash os=debian,opensuse
+HBA="$(sudo -u postgres psql -tAc 'SHOW hba_file')"
+sudo sed -i -E 's/^(host[[:space:]].*[[:space:]])(trust|ident|md5|password)[[:space:]]*$/\1scram-sha-256/' "$HBA"
+sudo -u postgres psql -c "ALTER SYSTEM SET listen_addresses = 'localhost'"
+sudo systemctl restart postgresql
+sudo -u postgres psql -tAc 'SHOW listen_addresses'; sudo grep -E '^host' "$HBA"
+```
+
+**Esito atteso:** `listen_addresses` vale `localhost`; ogni riga `host` termina con `scram-sha-256`. ⚠️ macOS: le connessioni dal socket locale (righe `local`) restano `trust` per il tuo utente, che è il superutente del database.
+
+### S-404 — Profilo esteso: crea utente e database e scrivi DATABASE_URL
+<!-- step: os=all path=uv profile=extended -->
+
+L'utente `litellm` usa `POSTGRES_PASSWORD` di `.env` (S-202: solo caratteri `[0-9a-f]`, quindi entra nell'URL senza codifica). La password passa a `psql` da standard input: non compare nella lista dei processi né nell'output. Con un database della tua organizzazione, chiedi utente e database all'amministratore e scrivi solo la riga `DATABASE_URL`.
+
+```powershell os=windows
+Set-Location "{{WPC_DIR}}"
+$pg = "C:\Program Files\PostgreSQL\{{PG_MAJOR}}\bin"
+$pw = ((Select-String -Path .env -Pattern '^POSTGRES_PASSWORD=').Line -split '=', 2)[1]
+if ($pw -match '^[0-9a-f]{16,}$') {
+    "CREATE ROLE litellm LOGIN PASSWORD '$pw';" | & "$pg\psql.exe" -U postgres -d postgres -v ON_ERROR_STOP=1
+    & "$pg\createdb.exe" -U postgres -O litellm litellm
+    if (-not (Select-String -Path .env -Pattern '^DATABASE_URL=' -Quiet)) { Add-Content .env "DATABASE_URL=postgresql://litellm:$pw@127.0.0.1:5432/litellm" }
+    $env:PGPASSWORD = $pw; & "$pg\psql.exe" -h 127.0.0.1 -U litellm -d litellm -tAc 'SELECT current_user'; Remove-Item Env:PGPASSWORD
+} else { Write-Error 'POSTGRES_PASSWORD in .env manca o non è esadecimale (S-202)' }
+Remove-Variable pw
+```
+
+```bash os=macos
+cd "{{WPC_DIR}}"
+PGBIN="$(brew --prefix "postgresql@{{PG_MAJOR}}")/bin"
+pw="$(grep -E '^POSTGRES_PASSWORD=' .env | cut -d= -f2-)"
+if [[ "$pw" =~ ^[0-9a-f]{16,}$ ]]; then
+  printf "CREATE ROLE litellm LOGIN PASSWORD '%s';\n" "$pw" | "$PGBIN/psql" -d postgres -v ON_ERROR_STOP=1
+  "$PGBIN/createdb" -O litellm litellm
+  grep -q '^DATABASE_URL=' .env || printf 'DATABASE_URL=postgresql://litellm:%s@127.0.0.1:5432/litellm\n' "$pw" >> .env
+  PGPASSWORD="$pw" "$PGBIN/psql" -h 127.0.0.1 -U litellm -d litellm -tAc 'SELECT current_user'
+else
+  echo "POSTGRES_PASSWORD in .env manca o non è esadecimale (S-202)" >&2
+fi
+unset pw
+```
+
+```bash os=debian,opensuse
+cd "{{WPC_DIR}}"
+pw="$(grep -E '^POSTGRES_PASSWORD=' .env | cut -d= -f2-)"
+if [[ "$pw" =~ ^[0-9a-f]{16,}$ ]]; then
+  printf "CREATE ROLE litellm LOGIN PASSWORD '%s';\n" "$pw" | sudo -u postgres psql -d postgres -v ON_ERROR_STOP=1
+  sudo -u postgres createdb -O litellm litellm
+  grep -q '^DATABASE_URL=' .env || printf 'DATABASE_URL=postgresql://litellm:%s@127.0.0.1:5432/litellm\n' "$pw" >> .env
+  PGPASSWORD="$pw" psql -h 127.0.0.1 -U litellm -d litellm -tAc 'SELECT current_user'
+else
+  echo "POSTGRES_PASSWORD in .env manca o non è esadecimale (S-202)" >&2
+fi
+unset pw
+```
+
 - [ ] Controlla che `.env` contenga anche `LITELLM_SALT_KEY` (S-203).
 
-**Esito atteso:** in S-403 il proxy si avvia senza errori di connessione al database. ⚠️ Da provare: percorso uv + profilo esteso.
+**Esito atteso:** l'ultimo comando stampa `litellm`. In S-405 il proxy si avvia senza errori di connessione al database. ⚠️ Da provare: percorso uv + profilo esteso.
 
-### S-403 — Prova l'avvio in primo piano
+### S-405 — Prova l'avvio in primo piano
 <!-- step: os=all path=uv profile=all -->
 
 ```bash os=macos,debian,opensuse
@@ -305,7 +414,7 @@ cd "{{WPC_DIR}}" && WPC_DIR="{{WPC_DIR}}" ./service/start-litellm.sh
 
 **Esito atteso:** il proxy ascolta su `127.0.0.1:{{LITELLM_PORT}}`. Ferma con `Ctrl+C`.
 
-### S-404 — Registra il servizio
+### S-406 — Registra il servizio
 <!-- step: os=all path=uv profile=all -->
 
 La unit systemd e il LaunchAgent usano il percorso `~/wpc2026-litellm`. Se `WPC_DIR` è diverso, cambia il percorso nei file copiati prima di attivarli.
