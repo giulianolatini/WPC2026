@@ -73,7 +73,7 @@ L'analisi delle configurazioni di esempio rispetto a OWASP e ISO/IEC 27001 è in
 
 **Comportamento corretto** ([S-130](Sources.md#s-130))
 
-- [ ] Usa il livello **Manual permissions** per la demo e per repository sensibili. *Allow all* e *Autopilot* eliminano le conferme.
+- [ ] Usa il livello **Manual permissions** per la demo e per repository sensibili. *Allow all* e *Autopilot* eliminano le conferme. Nell'harness Copilot *Autopilot* è una modalità dell'agente; nell'harness Local è un livello di permesso (P-09).
 - [ ] Concedi i permessi a livello di **sessione**: scadono con la sessione. I permessi di workspace o utente restano.
 - [ ] Controlla ogni modifica nel diff editor prima del commit. Le modifiche fatte con comandi di terminale non sono nel working set dell'editor: controllale a parte.
 - [ ] Non usare `chat.tools.global.autoApprove`: elimina tutte le approvazioni.
@@ -101,8 +101,12 @@ L'analisi delle configurazioni di esempio rispetto a OWASP e ISO/IEC 27001 è in
 
 ### 3.3 Sandbox dell'agente
 
-- [ ] Mantieni la sandbox attiva (attiva di default sui sistemi supportati) ([S-130](Sources.md#s-130)).
-- [ ] Limita la rete in uscita: `chat.agent.sandbox.network.allowNetwork` è `true` di default ([S-130](Sources.md#s-130)).
+- [ ] **Attiva la sandbox**: `chat.agent.sandbox.enabled` vale `off` di default su tutte le piattaforme. Imposta `"on"` ([S-145](Sources.md#s-145)).
+- [ ] Controlla i requisiti: macOS 15+; Linux glibc o WSL2 con bubblewrap ≥ 0.5.0, slirp4netns, util-linux ≥ 2.35; Windows 11 (sperimentale). Non supportati: WSL1, Alpine e altre distribuzioni musl ([S-145](Sources.md#s-145)).
+- [ ] Limita la rete in uscita: `chat.agent.sandbox.network.allowNetwork` è `true` di default. Con `false` la rete è bloccata, anche per il browser integrato. Con `true` limita le destinazioni con `chat.agent.sandbox.network.allowedDomains` e `deniedDomains` (i negati prevalgono) ([S-145](Sources.md#s-145)).
+- [ ] Verifica la policy effettiva con `/sandbox policy` in chat: la documentazione non dice se `allowedDomains` è una allowlist esclusiva ([S-145](Sources.md#s-145)).
+- [ ] Su Windows, proxy e restrizioni per hostname richiedono `chat.agent.sandbox.network.allowLocalNetwork: true` ([S-145](Sources.md#s-145)).
+- [ ] I server MCP avviati in locale girano nella sandbox (`chat.agent.sandbox.mcpServers`, default `true`) ([S-145](Sources.md#s-145)).
 - [ ] Ricorda i limiti: la sandbox non è una VM né un confine di account. Credenziali iniettate, rete libera e fallback senza sandbox la indeboliscono. Un dev container aggiunge un confine ([S-130](Sources.md#s-130)).
 
 ### 3.4 MCP server
@@ -126,7 +130,8 @@ L'analisi delle configurazioni di esempio rispetto a OWASP e ISO/IEC 27001 è in
 
 - [ ] Tieni chiavi e credenziali fuori dai file del workspace e dall'output del terminale: il contesto inviato al modello può includerli ([S-130](Sources.md#s-130)).
 - [ ] Nei modelli BYOK usa `"${input:...}"` per `apiKey`: la chiave resta nel secret storage di VS Code ([S-001](Sources.md#s-001)).
-- [ ] (Business/Enterprise) Configura la **content exclusion** per file sensibili, ad esempio `"*": ["**/.env"]`. Limiti: l'agente può non rilevare accessi indiretti; non sostituisce i permessi del sistema operativo; le modifiche richiedono fino a 30 minuti o un reload della finestra ([S-134](Sources.md#s-134)).
+- [ ] (Business/Enterprise) Configura la **content exclusion** per file sensibili, ad esempio `"*": ["**/.env"]`. Vale anche per gli agenti in VS Code. Limiti: accessi indiretti, symlink, filesystem remoti e server MCP di terzi non sono garantiti; non sostituisce i permessi del sistema operativo; le modifiche richiedono fino a 30 minuti o un reload della finestra ([S-134](Sources.md#s-134), P-09).
+- [ ] ⚠️ **Content exclusion e BYOK:** nessuna fonte dice che l'esclusione vale per i modelli BYOK. La policy arriva da GitHub con l'account: senza login, nell'harness Local, è probabile che non sia applicata (P-09). Per i file sensibili usa anche `chat.tools.edits.autoApprove` e i permessi del sistema operativo.
 - [ ] Con BYOK i dati vanno al provider scelto. Verifica le condizioni del provider (conservazione, zero data retention) prima di inviare codice riservato ([S-015](Sources.md#s-015)).
 
 ---
@@ -150,7 +155,7 @@ Le policy si distribuiscono con Group Policy, Microsoft Intune o profili di conf
 | BYOK | *Bring Your Own Language Model Key in VS Code* (GitHub.com) | Disattiva il BYOK locale | [S-018](Sources.md#s-018) |
 | Osservabilità | `CopilotOtel*` | Export OpenTelemetry | [S-131](Sources.md#s-131) |
 
-> ⚠️ Le sessioni dell'harness Copilot non applicano completamente `ChatAgentMode`, `ChatMCP` e `ChatToolsEligibleForAutoApproval` ([S-130](Sources.md#s-130)). Le policy `ChatAgentSandbox*` sono deprecate e valgono solo per l'harness Local ([S-131](Sources.md#s-131)). Verifica le note dell'harness prima di affidarti a queste policy.
+> ⚠️ Le sessioni dell'harness Copilot non applicano completamente tre policy ([S-130](Sources.md#s-130), [S-131](Sources.md#s-131)): `ChatAgentMode` non toglie le opzioni dell'Agent Host dal selettore *Session Target*; `ChatMCP` non vale per i server MCP che il runtime Copilot scopre da solo; `ChatToolsEligibleForAutoApproval` toglie *Allow all*, ma *Assisted permissions* e le approvazioni salvate nella sessione possono ancora approvare il tool. I setting gestiti dall'enterprise in Copilot (`permissions.*`, `sandbox`, `allowedMcpServers`) hanno precedenza sulle policy del dispositivo (P-09). Le policy `ChatAgentSandbox*` sono deprecate e valgono solo per l'harness Local ([S-131](Sources.md#s-131)). Verifica le note dell'harness prima di affidarti a queste policy.
 
 ---
 
@@ -161,13 +166,13 @@ Fonti: [S-108](Sources.md#s-108) (Security Best Practices), [S-109](Sources.md#s
 ### 5.1 Release e immagini
 
 - [ ] Fissa una versione esatta o un digest. Mai `latest`, `main-latest`, `main-stable` ([S-108](Sources.md#s-108), [D-018](Decisions.md#d-018)).
-- [ ] Verifica la firma dell'immagine con la chiave cosign del commit `e82a3c6` ([S-109](Sources.md#s-109)):
+- [ ] Verifica la firma dell'immagine con la chiave cosign del commit `e82a3c6`. Impronta SHA-256 di `cosign.pub`: `e3fe3e08c44b16407fe0b37c43b4f8b603b3a0f4ee74c29e647bc022d762c2c0` ([S-104](Sources.md#s-104), [S-109](Sources.md#s-109)). Lo script [`scripts/pin-images.sh`](../examples/litellm/scripts/pin-images.sh) automatizza i passi:
 
 ```bash
 cosign verify \
   --key https://raw.githubusercontent.com/BerriAI/litellm/e82a3c646908ba0a6ee0beddc4310d7a6cac4065/cosign.pub \
-  ghcr.io/berriai/litellm:v1.108.2
-docker inspect --format='{{index .RepoDigests 0}}' ghcr.io/berriai/litellm:v1.108.2
+  ghcr.io/berriai/litellm-non_root:v1.108.2
+docker inspect --format='{{index .RepoDigests 0}}' ghcr.io/berriai/litellm-non_root:v1.108.2
 ```
 
 - [ ] Preferisci l'immagine `ghcr.io/berriai/litellm-non_root` ([S-109](Sources.md#s-109)).
@@ -177,7 +182,13 @@ docker inspect --format='{{index .RepoDigests 0}}' ghcr.io/berriai/litellm:v1.10
 
 - [ ] Ruoli RBAC minimi; pochi `proxy_admin` ([S-108](Sources.md#s-108)).
 - [ ] Agli utenti e ai workload solo **virtual keys** con scope; mai la master key ([S-108](Sources.md#s-108)).
-- [ ] `general_settings.disable_env_credential_login: true`. **Prima** crea un utente `proxy_admin` o collega l'SSO, altrimenti perdi l'accesso all'Admin UI ([S-108](Sources.md#s-108)).
+- [ ] `general_settings.disable_env_credential_login: true`. **Prima** crea un utente `proxy_admin` con password o collega l'SSO, altrimenti perdi l'accesso all'Admin UI ([S-108](Sources.md#s-108), [S-148](Sources.md#s-148)):
+  1. Con la master key: `POST /user/new` con `user_role: proxy_admin` e `auto_create_key: false`.
+  2. `POST /user/update` con la password (almeno 12 caratteri, maiuscole, minuscole, cifre, simboli).
+  3. Verifica il login con email e password.
+  4. Attiva l'opzione e riavvia.
+
+  Lo script [`scripts/bootstrap-admin.sh`](../examples/litellm/scripts/bootstrap-admin.sh) esegue i passi 1–2. Con SSO e `disable_password_login_when_sso_enabled` anche il `proxy_admin` di emergenza (`/fallback/login`) è bloccato ([S-148](Sources.md#s-148)).
 - [ ] SSO per l'Admin UI; JWT per il traffico API; SCIM per il ciclo di vita degli utenti ([S-108](Sources.md#s-108)).
 - [ ] Limiti di login falliti: imposta `general_settings.trusted_proxy_ranges` (CIDR dell'ingress, o `[]` con client diretti) ([S-108](Sources.md#s-108)).
 
@@ -221,7 +232,7 @@ docker inspect --format='{{index .RepoDigests 0}}' ghcr.io/berriai/litellm:v1.10
 
 File: [`examples/vscode/settings.secure.jsonc`](../examples/vscode/settings.secure.jsonc). Copialo in `.vscode/settings.json` o nelle impostazioni utente.
 
-> ⚠️ La baseline limita la rete della sandbox. Se un agente deve scaricare pacchetti, concedi i domini necessari in modo esplicito invece di riattivare la rete completa.
+> La baseline **attiva** la sandbox (default `off`) e blocca la rete dell'agente. Se un agente deve scaricare pacchetti, imposta `allowNetwork: true` con `allowedDomains` espliciti invece della rete completa ([S-145](Sources.md#s-145)).
 
 ---
 
@@ -231,7 +242,7 @@ File: [`examples/vscode/settings.secure.jsonc`](../examples/vscode/settings.secu
 |---|-----------|------|
 | 1 | Restricted Mode per repo sconosciuti | VS Code |
 | 2 | Manual permissions, nessuna auto-approvazione globale | Copilot |
-| 3 | Sandbox attiva, rete limitata | Copilot |
+| 3 | Sandbox attivata (`chat.agent.sandbox.enabled: "on"`), rete limitata | Copilot |
 | 4 | MCP solo da fonti verificate, con approvazione | Copilot |
 | 5 | Chiavi solo in `${input:...}` o secret store | VS Code, LiteLLM |
 | 6 | LiteLLM con versione e digest fissati, firma verificata | LiteLLM |

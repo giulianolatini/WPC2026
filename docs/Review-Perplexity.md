@@ -192,8 +192,8 @@ Risposte ricevute il 2026-11-07. L'assistente ha riletto direttamente le fonti p
 | P-07 | 3 confermate, 1 parziale, 1 confutata (`specify check` esiste) | Layout skills di default e `--commands`: confermato ([S-083](Sources.md#s-083)) | Release `v1.3.2`; tabella layout; `--ai` rimossa; `specify check` | — |
 | P-08 | Tesi PARZIALE | Perdita `thinking_blocks` con Chat Completions: confermato ([S-110](Sources.md#s-110)) | §4.1 riscritta (criteri, rischi, hardening); §4.6 alternative | [D-017](Decisions.md#d-017), [D-019](Decisions.md#d-019), [D-020](Decisions.md#d-020) |
 
-| P-09 | — | — | — | — |
-| P-10 | — | — | — | — |
+| P-09 | 5 confermate, 1 confutata (sandbox attiva di default), 1 parziale | Sandbox `off` di default: confermato ([S-145](Sources.md#s-145)); procedura `proxy_admin`: confermata ([S-148](Sources.md#s-148)) | 03 §3.3 riscritta; baseline con `chat.agent.sandbox.enabled: "on"`; limiti dell'harness Copilot; content exclusion e BYOK ⚠️; script `bootstrap-admin.sh` | [D-025](Decisions.md#d-025) |
+| P-10 | Titoli ASI confermati; esiste LLM Top 10 2026; mappature Annex A parziali (controlli da aggiungere) | Data 2026-08-03 ([S-146](Sources.md#s-146)) ed elenco 2026 ([S-147](Sources.md#s-147)): confermati | 04 riscritto: ID 2026 con corrispondenza 2025, 16 controlli Annex A aggiunti, 3 rischi nuovi, Amd 1:2024, ISO/IEC 42001 | [D-024](Decisions.md#d-024) |
 
 **Punti ancora aperti (⚠️), da provare prima del talk**
 
@@ -203,3 +203,8 @@ Risposte ricevute il 2026-11-07. L'assistente ha riletto direttamente le fonti p
 - [ ] Pacchetti Docker su openSUSE Leap 16.
 - [ ] LTS e digest correnti di LiteLLM.
 - [ ] Accesso a `gemini-4-argon` con la chiave Gemini del demo.
+- [ ] Tag `ghcr.io/berriai/litellm-non_root:v1.108.2` e firma cosign (`scripts/pin-images.sh`).
+- [ ] Campi `provider.data_collection` e `allow_fallbacks` di OpenRouter tramite `extra_body` in LiteLLM.
+- [ ] Opzione `turn_off_message_logging` di LiteLLM.
+- [ ] Unit systemd con `ProtectHome=read-only`: avvio di `~/.local/bin/litellm`.
+- [ ] Semantica di `chat.agent.sandbox.network.allowedDomains` (`/sandbox policy`).
