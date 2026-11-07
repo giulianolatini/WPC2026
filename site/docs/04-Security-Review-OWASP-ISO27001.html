@@ -9,7 +9,7 @@
 <link rel="stylesheet" href="../assets/vendor/highlight/github.min.css" id="hl-light">
 <link rel="stylesheet" href="../assets/vendor/highlight/github-dark.min.css" id="hl-dark" disabled>
 <link rel="stylesheet" href="../assets/styles.css">
-
+<script src="../assets/vendor/mermaid/mermaid.min.js"></script>
 <script>try{var p=JSON.parse(localStorage.getItem('wpc2026.prefs')||'{}');var t=p.theme;if(t!=='light'&&t!=='dark')t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.dataset.theme=t;}catch(e){}</script>
 </head>
 <body>
@@ -147,7 +147,7 @@
 </tbody>
 </table>
 <p><strong>Confini di fiducia e flussi</strong></p>
-<pre class="code"><code class="language-mermaid">flowchart LR
+<figure class="mermaid-wrap"><pre class="mermaid" data-src="flowchart LR
   subgraph TB1[&quot;Postazione sviluppatore&quot;]
     VS[&quot;VS Code + Copilot&lt;br/&gt;(agente, tool, MCP)&quot;]
     SS[(&quot;Secret storage&lt;br/&gt;VS Code&quot;)]
@@ -172,7 +172,57 @@
   LL --&gt; DB
   LL -- &quot;chiavi provider + contesto (LLM02)&quot; --&gt; AN &amp; OA &amp; GE &amp; OR &amp; HF
   VS -- &quot;BYOK nativo&quot; --&gt; AN &amp; OA &amp; GE &amp; OR &amp; HF
-</code></pre>
+">flowchart LR
+  subgraph TB1[&quot;Postazione sviluppatore&quot;]
+    VS[&quot;VS Code + Copilot&lt;br/&gt;(agente, tool, MCP)&quot;]
+    SS[(&quot;Secret storage&lt;br/&gt;VS Code&quot;)]
+    subgraph TB2[&quot;Processo / container LiteLLM :4000 (loopback)&quot;]
+      LL[&quot;LiteLLM proxy&quot;]
+      ENV[(&quot;.env&quot;)]
+    end
+    DB[(&quot;PostgreSQL&lt;br/&gt;profilo esteso&quot;)]
+  end
+  REPO[&quot;Repository / web / MCP&lt;br/&gt;(contenuto non fidato)&quot;]
+  subgraph TB3[&quot;Provider esterni&quot;]
+    AN[Anthropic]
+    OA[OpenAI]
+    GE[Google Gemini]
+    OR[OpenRouter → provider terzi]
+    HF[HF Router → provider terzi]
+  end
+  REPO -- &quot;prompt injection (LLM01, ASI01)&quot; --&gt; VS
+  SS -. apiKey .-&gt; VS
+  VS -- &quot;virtual/master key&quot; --&gt; LL
+  ENV -. chiavi provider .-&gt; LL
+  LL --&gt; DB
+  LL -- &quot;chiavi provider + contesto (LLM02)&quot; --&gt; AN &amp; OA &amp; GE &amp; OR &amp; HF
+  VS -- &quot;BYOK nativo&quot; --&gt; AN &amp; OA &amp; GE &amp; OR &amp; HF
+</pre><details class="mermaid-src"><summary>Sorgente Mermaid</summary><pre class="code"><code class="language-plaintext">flowchart LR
+  subgraph TB1[&quot;Postazione sviluppatore&quot;]
+    VS[&quot;VS Code + Copilot&lt;br/&gt;(agente, tool, MCP)&quot;]
+    SS[(&quot;Secret storage&lt;br/&gt;VS Code&quot;)]
+    subgraph TB2[&quot;Processo / container LiteLLM :4000 (loopback)&quot;]
+      LL[&quot;LiteLLM proxy&quot;]
+      ENV[(&quot;.env&quot;)]
+    end
+    DB[(&quot;PostgreSQL&lt;br/&gt;profilo esteso&quot;)]
+  end
+  REPO[&quot;Repository / web / MCP&lt;br/&gt;(contenuto non fidato)&quot;]
+  subgraph TB3[&quot;Provider esterni&quot;]
+    AN[Anthropic]
+    OA[OpenAI]
+    GE[Google Gemini]
+    OR[OpenRouter → provider terzi]
+    HF[HF Router → provider terzi]
+  end
+  REPO -- &quot;prompt injection (LLM01, ASI01)&quot; --&gt; VS
+  SS -. apiKey .-&gt; VS
+  VS -- &quot;virtual/master key&quot; --&gt; LL
+  ENV -. chiavi provider .-&gt; LL
+  LL --&gt; DB
+  LL -- &quot;chiavi provider + contesto (LLM02)&quot; --&gt; AN &amp; OA &amp; GE &amp; OR &amp; HF
+  VS -- &quot;BYOK nativo&quot; --&gt; AN &amp; OA &amp; GE &amp; OR &amp; HF
+</code></pre></details></figure>
 <ul>
 <li><strong>TB1:</strong> la postazione. L'agente esegue tool e comandi con i privilegi dell'utente.</li>
 <li><strong>TB2:</strong> il gateway. Contiene tutte le chiavi dei provider: un solo punto di compromissione (<a href="Sources.html#s-104">S-104</a>).</li>
