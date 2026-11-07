@@ -1,6 +1,8 @@
 // Baseline di sicurezza per VS Code + GitHub Copilot (WPC2026).
 // Fonti: docs/03-Security-Best-Practices.md, docs/Sources.md#s-130, #s-133.
-// Copia il contenuto in .vscode/settings.json (workspace) o nelle impostazioni utente.
+// Copia il contenuto nelle IMPOSTAZIONI UTENTE (Preferences: Open User Settings (JSON)).
+// Le impostazioni security.workspace.trust.* hanno scope applicazione: in .vscode/settings.json
+// VS Code le ignora (R-codex-10). Un workspace non deve poter decidere la propria fiducia.
 {
   // --- Workspace Trust (S-133)
   "security.workspace.trust.enabled": true,
