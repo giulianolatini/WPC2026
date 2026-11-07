@@ -567,7 +567,7 @@ Il formato segue il template ADR di Nygard, con una sezione **Razionale** esplic
 - Dati nel HTML: il browser blocca `fetch` da `file://`.
 - Sessioni multiple in `localStorage` (chiave `wpc2026.runbook`); export/import JSON per cambiare browser o macchina.
 - Evidenza in Markdown: dati della sessione, parametri (valore e origine), riepilogo, comandi con i parametri risolti, esito, data e ora, output, note.
-- Il sito oscura i segreti riconosciuti (`sk-…`, `hf_…`, `AIza…`, `Bearer …`, `*_API_KEY=…`) e rifiuta segreti nei parametri.
+- Il sito oscura i segreti riconosciuti (`sk-…`, `hf_…`, `AIza…`, `Bearer …`, `*_API_KEY=…`, `*_PASSWORD=…`, campi JSON come `"key": "…"`, password in `postgresql://`) e rifiuta segreti nei parametri.
 - Le sessioni lette da `localStorage` o da un JSON importato sono dati non fidati: il sito le ricostruisce campo per campo (valori ammessi, segreti oscurati, nessun output per i passi `evidence=no-output`) prima di salvarle. Ogni valore dinamico nell'HTML passa dall'escaping (review PR #2).
 - highlight.js locale; temi chiaro, scuro e automatico.
 - `tools/update-site.sh` e `tools/update-site.ps1` rigenerano il sito; `--check` controlla che il sito sia aggiornato.

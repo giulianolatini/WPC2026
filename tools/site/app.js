@@ -44,13 +44,19 @@
   function usedParams(code) { return [...new Set([...code.matchAll(PARAM_RE)].map(m => m[1]))]; }
 
   /* ------------------------------------------------------------ redazione dei segreti */
+  // Pattern dei segreti noti (R2-codex-03: anche campi JSON tra virgolette e valori tra virgolette con spazi).
+  // Ogni sostituzione è idempotente: redact(redact(x)) === redact(x).
+  const SECRET_NAME = '(?:[A-Za-z0-9_-]*?(?:password|passwd|secret|token|api[_-]?key|master[_-]?key|salt[_-]?key|private[_-]?key|access[_-]?key)|key)';
   const REDACT = [
     [/\b(sk-(?:ant-|or-|proj-)?)[A-Za-z0-9_\-]{8,}/g, '$1[REDATTO]'],
     [/\bhf_[A-Za-z0-9]{10,}/g, 'hf_[REDATTO]'],
     [/\bAIza[0-9A-Za-z_\-]{20,}/g, 'AIza[REDATTO]'],
     [/(Bearer\s+)[A-Za-z0-9._~+\/\-]{8,}=*/gi, '$1[REDATTO]'],
     [/(x-api-key:\s*)\S+/gi, '$1[REDATTO]'],
-    [/\b((?:[A-Z][A-Z0-9_]*_)?(?:API_KEY|MASTER_KEY|SALT_KEY|TOKEN|PASSWORD|SECRET)\s*[=:]\s*)["']?[^\s"']+["']?/g, '$1[REDATTO]'],
+    // JSON: "POSTGRES_PASSWORD": "valore", "key": "valore"
+    [new RegExp('("' + SECRET_NAME + '"\\s*:\\s*)"(?:[^"\\\\]|\\\\.)*"', 'gi'), '$1"[REDATTO]"'],
+    // CHIAVE=valore, CHIAVE: valore, anche con valore tra virgolette e spazi
+    [/\b((?:[A-Za-z][A-Za-z0-9_]*_)?(?:API_?KEY|MASTER_KEY|SALT_KEY|ACCESS_KEY|PRIVATE_KEY|TOKEN|PASSWORD|PASSWD|SECRET)\s*[=:]\s*)(?:"[^"\n]*"|'[^'\n]*'|[^\s"',}]+)/gi, '$1[REDATTO]'],
     [/(postgres(?:ql)?:\/\/[^:\s\/]+:)[^@\s]+@/gi, '$1[REDATTO]@']
   ];
   function redact(text) { let t = text || ''; for (const [re, rep] of REDACT) t = t.replace(re, rep); return t; }
