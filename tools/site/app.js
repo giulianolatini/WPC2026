@@ -79,13 +79,29 @@
     if (/[$`"'()\n\r;|&<>]/.test(rest) || redact(v) !== v || redact(name + '=' + v) !== name + '=' + v) return null;
     return v;
   }
-  // Comandi importati: restano solo se la redazione non li cambia. Un comando legittimo può contenere
-  // un nome come POSTGRES_PASSWORD (es. in un grep): in quel caso si usano i comandi attuali (S-404, S-501).
+  // Comandi registrati (localStorage o JSON importato). Un comando resta se corrisponde a un blocco del
+  // runbook con parametri validi (anche se contiene nomi come POSTGRES_PASSWORD: S-202, S-404, S-501),
+  // oppure se la redazione non lo cambia (es. runbook di una versione precedente). Altrimenti la lista
+  // torna ai comandi attuali (R2-agy-02).
+  const reEsc = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  function matchesTemplate(st, code) {
+    return st.blocks.some(b => {
+      if (b.type !== 'code') return false;
+      const names = [];
+      const src = b.code.split(/(\{\{\w+\}\})/).map(part => {
+        const m = /^\{\{(\w+)\}\}$/.exec(part);
+        if (!m) return reEsc(part);
+        names.push(m[1]); return '([^\\n]*?)';
+      }).join('');
+      const hit = new RegExp('^' + src + '$').exec(code);
+      return !!hit && names.every((n, i) => cleanParam(n, hit[i + 1]) !== null);
+    });
+  }
   function importCommands(st, cmds, s) {
     if (!Array.isArray(cmds)) return '';
     const list = cmds.slice(0, 20).filter(c => c && typeof c.code === 'string')
       .map(c => ({ lang: /^[\w-]{1,20}$/.test(c.lang) ? c.lang : 'plaintext', code: c.code.slice(0, 20000) }));
-    return list.every(c => redact(c.code) === c.code) ? list : currentCommands(st, s);
+    return list.every(c => matchesTemplate(st, c.code) || redact(c.code) === c.code) ? list : currentCommands(st, s);
   }
   // JSON con chiavi ordinate: confronta due sessioni senza dipendere dall'ordine delle proprietà.
   const stable = v => JSON.stringify(v, (k, x) => x && typeof x === 'object' && !Array.isArray(x)
