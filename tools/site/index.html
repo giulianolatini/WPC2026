@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="it" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="generator" content="tools/build_site.py — non modificare a mano: modifica docs/runbook/RUNBOOK.md">
+<title>{{TITLE}}</title>
+<link rel="stylesheet" href="assets/fonts.css">
+<link rel="stylesheet" href="assets/vendor/highlight/github.min.css" id="hl-light">
+<link rel="stylesheet" href="assets/vendor/highlight/github-dark.min.css" id="hl-dark" disabled>
+<link rel="stylesheet" href="assets/styles.css">
+<script>/* applica il tema prima del rendering */try{var p=JSON.parse(localStorage.getItem('wpc2026.prefs')||'{}');var t=p.theme||'auto';if(t==='auto')t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body>
+<div class="topbar">
+  <h1>Runbook WPC2026 <span class="ver">v{{VERSION}}</span></h1>
+  <a href="docs/01-Installazione.html">Documenti</a>
+  <label>Tema <select id="pref-theme"><option value="auto">automatico</option><option value="light">chiaro</option><option value="dark">scuro</option></select></label>
+  <label>Testo <select id="pref-body"></select></label>
+  <label>Codice <select id="pref-code"></select></label>
+</div>
+
+<div class="layout">
+  <aside class="side">
+    <section class="card">
+      <h2>Sessione</h2>
+      <div class="row" style="margin-bottom:.6rem">
+        <select id="session-select" style="flex:1" aria-label="Sessione"></select>
+        <button id="session-new" title="Nuova sessione">Nuova</button>
+      </div>
+      <div class="field"><span>Nome della sessione</span><input type="text" id="s-name"></div>
+      <div class="field"><span>Operatore</span><input type="text" id="s-operator" placeholder="Nome e cognome"></div>
+      <div class="grid2">
+        <div class="field"><span>Sistema operativo</span><select id="s-os"></select></div>
+        <div class="field"><span>Percorso LiteLLM</span><select id="s-path"><option value="docker">Docker</option><option value="uv">uv (servizio)</option></select></div>
+      </div>
+      <div class="field"><span>Profilo LiteLLM</span><select id="s-profile"><option value="minimal">minimo</option><option value="extended">esteso (PostgreSQL)</option></select></div>
+      <div class="progress"><div id="progress-bar"></div></div>
+      <p class="hint" id="progress-text"></p>
+      <p class="hint hidden" id="version-warning">⚠️ La sessione è stata avviata con un'altra versione del runbook.</p>
+      <div class="row" style="margin-top:.6rem">
+        <button class="primary" id="export-md">Esporta evidenze (MD)</button>
+        <button id="export-json">Esporta sessione (JSON)</button>
+        <button id="import-json">Importa JSON</button>
+        <button class="danger" id="session-delete">Elimina</button>
+        <input type="file" id="import-file" accept="application/json,.json" class="hidden">
+      </div>
+      <p class="hint">Le sessioni restano in questo browser (localStorage). Usa l'export JSON per spostarle su un'altra macchina.</p>
+    </section>
+    <section class="card">
+      <h2>Parametri</h2>
+      <div id="params"></div>
+      <p class="hint">I valori sostituiscono <code>&#123;&#123;NOME&#125;&#125;</code> nei comandi e finiscono nelle evidenze. Non inserire segreti.</p>
+    </section>
+    <section class="card">
+      <h2>Fasi</h2>
+      <ul class="toc" id="toc"></ul>
+    </section>
+  </aside>
+
+  <main>
+    <section class="card intro" id="intro"></section>
+    <div id="phases"></div>
+  </main>
+</div>
+<div class="toast" id="toast"></div>
+
+<script type="application/json" id="runbook-data">{{RUNBOOK_JSON}}</script>
+<script type="application/json" id="fonts-data">{{FONTS_JSON}}</script>
+<script src="assets/vendor/highlight/highlight.min.js"></script>
+<script src="assets/vendor/highlight/languages/bash.min.js"></script>
+<script src="assets/vendor/highlight/languages/powershell.min.js"></script>
+<script src="assets/vendor/highlight/languages/yaml.min.js"></script>
+<script src="assets/vendor/highlight/languages/json.min.js"></script>
+<script src="assets/vendor/highlight/languages/ini.min.js"></script>
+<script src="assets/vendor/highlight/languages/dockerfile.min.js"></script>
+<script src="assets/vendor/highlight/languages/plaintext.min.js"></script>
+<script src="assets/common.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>
