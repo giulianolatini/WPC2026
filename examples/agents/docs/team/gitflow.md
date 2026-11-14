@@ -54,8 +54,12 @@ Le istruzioni di un agente non sono un controllo di sicurezza: GitHub deve rifiu
 L'Organizzatore esegue `git` e `gh` con un'identità **diversa** da quella del PO:
 
 - una GitHub App o un account di servizio, con i soli permessi *Contents: write* e *Pull requests: write*;
-- senza il permesso *Administration* e fuori dalla lista di bypass dei ruleset;
+- senza il permesso *Administration*, senza il permesso *Workflows* e fuori dalla lista di bypass dei ruleset;
 - il PO resta l'unico *code owner*: approva le PR verso `main` e ne esegue il merge.
+
+Senza il permesso *Workflows* GitHub rifiuta un push dell'agente che modifica un file in `.github/workflows/`: l'agente non può cambiare `ci.yml` per rendere verdi i controlli.
+
+⚠️ Rischio che resta: `develop` non richiede approvazioni, quindi una PR dell'agente può cambiare i test. Il Reviewer antagonista segnala con severità `alta` ogni test cancellato o reso sempre verde e ogni modifica in `.github/`. Per un controllo più forte richiedi l'approvazione del PO anche su `develop` ([D-043](https://github.com/giulianolatini/WPC2026/blob/main/docs/Decisions.md#d-043)).
 
 Con il token del PO l'agente avrebbe i diritti del PO, compreso `gh pr merge --admin`. Con un'identità separata GitHub rifiuta il merge se manca l'approvazione o un controllo di stato.
 

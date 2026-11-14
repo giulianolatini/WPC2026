@@ -242,7 +242,8 @@ Le istruzioni di un agente non sono un controllo: GitHub deve rifiutare le opera
 | Script | `scripts/Set-Rulesets.ps1` | Crea o aggiorna i ruleset con la REST API | [S-174](Sources.md#s-174) |
 
 - `gh pr merge --admin` usa i privilegi di amministratore per unire una PR che non rispetta i requisiti ([S-175](Sources.md#s-175)). Per questo l'agente non usa il token del PO.
-- **Identità separata.** L'Organizzatore usa una GitHub App o un account di servizio con i soli permessi *Contents: write* e *Pull requests: write*, senza *Administration* e fuori dalla lista di bypass ([S-177](Sources.md#s-177)). Il PO è l'unico code owner.
+- **Identità separata.** L'Organizzatore usa una GitHub App o un account di servizio con i soli permessi *Contents: write* e *Pull requests: write*, senza *Administration*, senza *Workflows* e fuori dalla lista di bypass ([S-177](Sources.md#s-177)). Il PO è l'unico code owner.
+- **Controlli di stato e workflow.** `ci.yml` gira dal ramo della PR: chi può modificare il workflow può rendere verdi i controlli. Senza il permesso *Workflows* l'agente non può modificare `.github/workflows/`. Resta il rischio di test modificati in una PR verso `develop`, che non richiede approvazioni: il Reviewer antagonista lo controlla ([D-043](Decisions.md#d-043)).
 - Il caso svolto [`examples/speckit-ruleset/`](../examples/speckit-ruleset/README.md) contiene la specifica, il piano e i test che verificano il rifiuto di `--admin`.
 - ⚠️ Niente di questo è stato provato su GitHub. Con il piano Free i ruleset funzionano solo nei repository pubblici; per i repository privati servono i piani Pro, Team o Enterprise Cloud ([S-171](Sources.md#s-171)). Il bypass di un team richiede un'organizzazione.
 
@@ -259,11 +260,11 @@ Nessuna pratica garantisce che un processo non termini mai: l'evento `AppDomain.
 
 ## 10. Sicurezza
 
-- **Privilegio minimo.** Ogni figura ha solo gli strumenti necessari: i Reviewer e l'Avversario leggono soltanto; solo l'Organizzatore usa `git` e `gh` per le PR ([03 §3](03-Security-Best-Practices.md#3-github-copilot-in-vs-code)).
+- **Privilegio minimo.** Ogni figura ha solo gli strumenti necessari: i Reviewer e l'Avversario leggono soltanto; il Pianificatore usa il terminale solo per Spec Kit e per il ramo della pianificazione; solo l'Organizzatore usa `gh` per le PR ([03 §3](03-Security-Best-Practices.md#3-github-copilot-in-vs-code)).
 - **Segreti.** Le istruzioni di ogni figura vietano di leggere `.env`, chiavi e token. Mantieni attiva la sandbox dell'agente ([03 §7](03-Security-Best-Practices.md#7-baseline-di-configurazione)).
 - **Codice verso i provider.** Con il BYOK il codice del progetto va ai provider dei modelli. Tre figure usano OpenRouter (Tester e i due Reviewer): configura i *guardrail* dell'account (provider permessi, nessuna conservazione dei dati) prima di usare il team su codice riservato ([S-115](Sources.md#s-115), [S-151](Sources.md#s-151)). `allow_fallbacks` vale solo nella singola richiesta (P-12).
 - **Merge.** L'Organizzatore unisce solo in `develop`. I ruleset e l'identità separata impediscono il merge in `main` senza l'approvazione del PO (§9.1).
-- **Prompt injection.** Un file del repository o una pagina web possono contenere istruzioni per l'agente. Lascia lo strumento `web` solo al Pianificatore ([04](04-Security-Review-OWASP-ISO27001.md)).
+- **Prompt injection.** Un file del repository o una pagina web possono contenere istruzioni per l'agente. Nessuna figura ha lo strumento `web`: il Pianificatore ha `execute` per gli script di Spec Kit, e un agente con `web` ed `execute` insieme può eseguire istruzioni lette da una pagina ([D-043](Decisions.md#d-043), [04](04-Security-Review-OWASP-ISO27001.md)).
 
 ## 11. Punti da provare
 

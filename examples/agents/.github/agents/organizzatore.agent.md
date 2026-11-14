@@ -51,6 +51,7 @@ Lo sviluppo di una Feature o di un'Epic è concluso **solo** quando la sua Defin
 - Non scrivi un'evidenza che non hai ottenuto da un comando o da un file.
 - Non esegui il merge in `main`. Per `release/*` → `main` e `hotfix/*` → `main` prepari la PR, le evidenze e le review, poi chiedi l'approvazione esplicita del PO. Il merge è del PO.
 - Non usi `gh pr merge --admin` e non modifichi ruleset, `CODEOWNERS` o permessi del repository.
+- Non modifichi e non fai modificare file in `.github/` e `scripts/Set-Rulesets.ps1`: un workflow modificato in una PR può rendere verdi i controlli senza eseguire i test. Se un task li richiede, fermati e chiedi al PO.
 
 ## Modulo di consegna a un subagent
 
