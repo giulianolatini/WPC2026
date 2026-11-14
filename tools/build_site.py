@@ -24,7 +24,7 @@ OS_ALL = ["windows", "macos", "debian", "opensuse"]
 PARAM_TYPES = ("path", "port", "major", "version", "name", "email")
 OS_LABEL = {"windows": "Windows", "macos": "macOS", "debian": "Debian/Ubuntu", "opensuse": "openSUSE"}
 DOC_PAGES = ["01-Installazione.md", "02-Configurazione-Copilot.md", "03-Security-Best-Practices.md",
-             "04-Security-Review-OWASP-ISO27001.md", "Decisions.md", "Sources.md", "Review-Perplexity.md"]
+             "04-Security-Review-OWASP-ISO27001.md", "05-Team-Agenti.md", "Decisions.md", "Sources.md", "Review-Perplexity.md"]
 
 
 # ---------------------------------------------------------------- Markdown
