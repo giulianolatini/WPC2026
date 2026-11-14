@@ -33,7 +33,7 @@ Nessuna pratica garantisce che un processo non termini mai. Il team applica ques
 - il Pianificatore scrive un criterio di accettazione per ogni input non valido e per ogni errore previsto;
 - il Tester scrive un test per ognuno di questi criteri;
 - chi implementa valida gli input, cattura le eccezioni previste nel punto in cui le può gestire e registra un gestore globale che scrive l'errore nel log e termina con un codice di uscita diverso da zero;
-- il Reviewer antagonista assegna severità `alta` a ogni eccezione non gestita in una PR verso `main` (voce DoD-E4).
+- il Reviewer antagonista controlla le evidenze della voce DoD-E4 e assegna severità `alta` a ogni eccezione non gestita in una PR verso `main`; il suo esito entra nella voce DoD-E6.
 
 ## Protezione dei rami su GitHub
 

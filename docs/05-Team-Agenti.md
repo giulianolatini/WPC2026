@@ -256,7 +256,7 @@ Nessuna pratica garantisce che un processo non termini mai: l'evento `AppDomain.
 1. il Pianificatore scrive un criterio di accettazione per ogni input non valido e ogni errore previsto;
 2. il Tester scrive un test per ognuno di questi criteri (voce DoD-F4) e i test d'integrazione della Release (voce DoD-E3);
 3. chi implementa valida gli input e cattura solo le eccezioni da cui il codice può riprendersi ([S-178](Sources.md#s-178)); un gestore globale registra l'errore prima della terminazione ([S-179](Sources.md#s-179));
-4. il Reviewer antagonista assegna severità `alta` a ogni eccezione non gestita in una PR verso `main` (voce DoD-E4).
+4. il Reviewer antagonista controlla le evidenze della voce DoD-E4 e assegna severità `alta` a ogni eccezione non gestita in una PR verso `main`; il suo esito entra nella voce DoD-E6.
 
 ## 10. Sicurezza
 

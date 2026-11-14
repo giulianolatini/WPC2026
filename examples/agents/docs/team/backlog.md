@@ -68,9 +68,9 @@ Il file `epic.md` contiene questa tabella.
 | DoD-E1 | Tutte le Feature dell'Epic hanno la Definition of Done completa | Elenco delle Feature con stato | Organizzatore, Reviewer |
 | DoD-E2 | Ogni risultato misurabile dell'Epic è verificato | Per ogni risultato: test o comando ed esito | Organizzatore, Reviewer, PO |
 | DoD-E3 | I test d'integrazione del Tester sono verdi sul ramo `release/*` | Comando, numero di test superati e falliti | Organizzatore, Reviewer |
-| DoD-E4 | Regola di qualità di `main`: nessun rilievo aperto su eccezioni non gestite; il prodotto ha un gestore globale degli errori | Esito del Reviewer antagonista sulla PR verso `main` | Reviewer antagonista |
+| DoD-E4 | Regola di qualità di `main`: ogni errore previsto ha un test verde; il prodotto ha un gestore globale degli errori | Nomi dei test di errore e d'integrazione; file e riga del gestore globale | Organizzatore, Reviewer antagonista |
 | DoD-E5 | Manuale utente, manuale per sviluppatori e log di sviluppo sono aggiornati | Percorsi dei file | Reviewer ottimista |
-| DoD-E6 | Il PO ha approvato la PR `release/*` → `main` | Review di approvazione del PO sulla PR | PO |
+| DoD-E6 | I due Reviewer hanno esito `APPROVA` sull'ultimo commit e il PO ha approvato la PR `release/*` → `main` | Esito, data e hash delle due review in un commento della PR; review di approvazione del PO | Organizzatore, PO |
 | DoD-E7 | La Release è unita in `main` e ha il tag `v<versione>` | Hash del merge e nome del tag | PO, Organizzatore |
 | DoD-E8 | La PR di riallineamento verso `develop` è unita | Numero della PR | Organizzatore |
 

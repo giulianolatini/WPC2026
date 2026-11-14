@@ -36,9 +36,9 @@ Le voci vengono da `docs/team/backlog.md`. Il Pianificatore può aggiungere voci
 | DoD-E1 | Tutte le Feature hanno la Definition of Done completa | ☐ | |
 | DoD-E2 | Ogni risultato misurabile è verificato | ☐ | |
 | DoD-E3 | Test d'integrazione verdi sul ramo `release/*` | ☐ | |
-| DoD-E4 | Regola di qualità di `main` rispettata | ☐ | |
+| DoD-E4 | Regola di qualità di `main`: test degli errori verdi, gestore globale presente | ☐ | |
 | DoD-E5 | Manuali e log di sviluppo aggiornati | ☐ | |
-| DoD-E6 | PR `release/*` → `main` approvata dal PO | ☐ | |
+| DoD-E6 | I due Reviewer approvano; PR `release/*` → `main` approvata dal PO | ☐ | |
 | DoD-E7 | Release unita in `main` con il tag `v<versione>` | ☐ | |
 | DoD-E8 | PR di riallineamento verso `develop` unita | ☐ | |
 
