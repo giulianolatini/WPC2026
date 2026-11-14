@@ -52,7 +52,9 @@ Describe 'Ruleset main/develop con contoso-copilot-agent' -Tag 'Live', 'AdminByp
 
         function Get-PrState {
             param([Parameter(Mandatory)][string] $Number)
-            (& gh pr view $Number --repo $script:Repo --json state --jq '.state').Trim()
+            $raw = & gh pr view $Number --repo $script:Repo --json state --jq '.state'
+            if ($LASTEXITCODE -ne 0) { throw "Impossibile leggere lo stato della PR $Number." }
+            "$raw".Trim()
         }
 
         # Tutti e tre i check obbligatori devono esistere ed essere verdi: un elenco vuoto non basta.

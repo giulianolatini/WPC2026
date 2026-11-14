@@ -59,7 +59,7 @@ L'Organizzatore esegue `git` e `gh` con un'identità **diversa** da quella del P
 
 Senza il permesso *Workflows* GitHub rifiuta un push dell'agente che modifica un file in `.github/workflows/`: l'agente non può cambiare `ci.yml` per rendere verdi i controlli.
 
-⚠️ Rischio che resta: `develop` non richiede approvazioni, quindi una PR dell'agente può cambiare i test. Il Reviewer antagonista segnala con severità `alta` ogni test cancellato o reso sempre verde e ogni modifica in `.github/`. Per un controllo più forte richiedi l'approvazione del PO anche su `develop` ([D-043](https://github.com/giulianolatini/WPC2026/blob/main/docs/Decisions.md#d-043)).
+⚠️ Rischio che resta: `develop` non richiede approvazioni, quindi una PR dell'agente può cambiare i test. Il Reviewer antagonista segnala con severità `alta` ogni test cancellato o reso sempre verde e ogni modifica in `.github/`. Per un controllo più forte richiedi l'approvazione di un *code owner* anche su `develop`: per tutte le PR, o solo per i file in `.github/` e `scripts/`. In quel caso il merge in `develop` non è più automatico.
 
 Con il token del PO l'agente avrebbe i diritti del PO, compreso `gh pr merge --admin`. Con un'identità separata GitHub rifiuta il merge se manca l'approvazione o un controllo di stato.
 
