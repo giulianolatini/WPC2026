@@ -119,6 +119,11 @@ Gli altri documenti puntano alla fonte con un link del tipo `Sources.md#s-001`.
 | <a id="s-066"></a>S-066 | [Docker — Install Docker Desktop on Windows](https://docs.docker.com/desktop/setup/install/windows-install/) | PRIMARY | P-06 |
 | <a id="s-067"></a>S-067 | [openSUSE News — Leap 16 Enters Beta (YaST → Agama, Cockpit, Myrlyn)](https://news.opensuse.org/2025/04/30/leap-16-enters-beta/) | PRIMARY | P-06 |
 | <a id="s-122"></a>S-122 | [Homebrew Formulae — formula `uv`](https://formulae.brew.sh/formula/uv) | VENDOR-DOC | P-06 |
+| <a id="s-190"></a>S-190 | [Microsoft Learn — Install PowerShell 7 on macOS](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-macos) | PRIMARY | 2026-11-14 |
+| <a id="s-191"></a>S-191 | [Microsoft Learn — Alternate ways to install PowerShell (Homebrew, .NET global tool)](https://learn.microsoft.com/powershell/scripting/install/alternate-install-methods) | PRIMARY | 2026-11-14 |
+| <a id="s-192"></a>S-192 | [Microsoft Learn — Install PowerShell 7 on Ubuntu](https://learn.microsoft.com/en-us/powershell/scripting/install/install-ubuntu) | PRIMARY | 2026-11-14 |
+| <a id="s-193"></a>S-193 | [Microsoft Learn — Install PowerShell 7 on Debian](https://learn.microsoft.com/en-us/powershell/scripting/install/install-debian) | PRIMARY | 2026-11-14 |
+| <a id="s-194"></a>S-194 | [Microsoft Learn — Community support for PowerShell on Linux (SLES e openSUSE)](https://learn.microsoft.com/powershell/scripting/install/community-support) | PRIMARY | 2026-11-14 |
 
 ## GitHub Spec Kit
 

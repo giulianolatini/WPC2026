@@ -60,6 +60,7 @@ Il formato segue il template ADR di Nygard, con una sezione **Razionale** esplic
 | [D-043](#d-043) | 2026-11-14 | Agente Cercatore, strumenti del Pianificatore e approvazione del PO su `develop` | Accepted |
 | [D-044](#d-044) | 2026-11-14 | Versione di Spec Kit: controllo a ogni pianificazione e aggiornamento con ADR | Accepted |
 | [D-045](#d-045) | 2026-11-14 | Configurazione per il piano GitHub Free e limiti rispetto a Pro e Team | Accepted |
+| [D-046](#d-046) | 2026-11-14 | PowerShell 7 su macOS con Homebrew e su Linux con il gestore dei pacchetti | Accepted |
 
 ---
 
@@ -973,3 +974,22 @@ L'opzione 3 resta possibile: S-402 e S-403 sono «Non applicabile» e S-404 scri
 **Conseguenze.** Con un account personale non c'è un sostituto di emergenza: solo il PO può cambiare un ruleset. ⚠️ Da provare: l'opzione `-WithoutEmergencyTeam` e il bypass di un team in un'organizzazione Free.
 
 **Fonti.** [S-171](Sources.md#s-171), [S-172](Sources.md#s-172), [S-189](Sources.md#s-189).
+
+---
+
+<a id="d-046"></a>
+## D-046 — PowerShell 7 su macOS con Homebrew e su Linux con il gestore dei pacchetti
+
+- **Data:** 2026-11-14 — **Stato:** Accepted — **Decisore:** PO ("aggiungi in documentazione l'installazione di pwsh per MacOS via brew e su Linux con il packet manager")
+
+**Contesto.** La documentazione installava PowerShell 7 solo su Windows. Il team di agenti lo richiede su ogni sistema (script, Pester, `Set-Rulesets.ps1`).
+
+**Opzioni considerate.** macOS: (1) Homebrew; (2) pacchetto PKG firmato, metodo preferito da Microsoft. Debian e Ubuntu: `apt` dal repository Microsoft. openSUSE: nessun pacchetto ufficiale; (a) *global tool* di .NET; (b) Snap; (c) archivio binario.
+
+**Decisione.** macOS: `brew install powershell`, con l'avviso che la formula è della comunità Homebrew e che Microsoft preferisce il PKG. Debian e Ubuntu: `apt` da `packages.microsoft.com`. openSUSE: `dotnet tool install --global PowerShell`.
+
+**Razionale.** Homebrew è già il gestore dei pacchetti che il runbook usa su macOS per VS Code, Docker e `uv`. Il repository Microsoft è il metodo preferito per Debian e Ubuntu. Su openSUSE il team ha già .NET SDK: il *global tool* non aggiunge un altro gestore.
+
+**Conseguenze.** La formula Homebrew compila dal sorgente e non è supportata da Microsoft. ⚠️ Il comando per openSUSE va provato. Su Ubuntu il repository Microsoft può entrare in conflitto con i pacchetti .NET della distribuzione.
+
+**Fonti.** [S-190](Sources.md#s-190), [S-191](Sources.md#s-191), [S-192](Sources.md#s-192), [S-193](Sources.md#s-193), [S-194](Sources.md#s-194).
