@@ -970,9 +970,9 @@ Il formato segue il template ADR di Nygard, con una sezione <strong>Razionale</s
 </ul>
 <p><strong>Contesto.</strong> Il runbook (<a href="#d-026">D-026</a>) ha le fasi F1–F9; F9 è la chiusura (revoca delle chiavi, esportazione delle evidenze). L'installazione e la prova del team di agenti non hanno passi.</p>
 <p><strong>Opzioni considerate.</strong> (1) Nuova fase dopo la chiusura. (2) Nuova fase F9 «Team di agenti» prima della chiusura, che diventa F10. (3) Un secondo runbook.</p>
-<p><strong>Decisione.</strong> Opzione 2. La fase F9 ha i passi S-911…S-920. La chiusura è la fase F10 con i passi S-1001 e S-1002. Gli identificativi S-901 e S-902 non si riusano. Nuovi parametri: <code>TEAM_PROJECT</code>, <code>GH_OWNER</code>, <code>GH_REPO</code>, <code>PO_USER</code>. Il default di <code>SPECKIT_VERSION</code> diventa <code>1.4.0</code>.</p>
+<p><strong>Decisione.</strong> Opzione 2. La fase F9 ha i passi S-911…S-921. La chiusura è la fase F10 con i passi S-1001 e S-1002. Gli identificativi S-901 e S-902 non si riusano. Nuovi parametri: <code>TEAM_PROJECT</code>, <code>GH_OWNER</code>, <code>GH_REPO</code>, <code>PO_USER</code>. Il default di <code>SPECKIT_VERSION</code> diventa <code>1.4.0</code>.</p>
 <p><strong>Razionale.</strong> La revoca delle chiavi deve restare l'ultima azione. Un identificativo riusato collegherebbe le evidenze di una sessione salvata a un passo diverso.</p>
-<p><strong>Conseguenze.</strong> Una sessione salvata prima di questa modifica perde lo stato dei due passi di chiusura. ⚠️ I passi S-916, S-917 e S-920 usano ruleset e script non provati su GitHub. ⚠️ La versione di Spec Kit non è confermata dalla rilettura diretta (<a href="Review-Perplexity.html#registro-degli-esiti">Review-Perplexity.md</a>).</p>
+<p><strong>Conseguenze.</strong> Una sessione salvata prima di questa modifica perde lo stato dei due passi di chiusura. ⚠️ I passi S-917, S-918 e S-921 usano ruleset e script non provati su GitHub. ⚠️ La versione di Spec Kit non è confermata dalla rilettura diretta (<a href="Review-Perplexity.html#registro-degli-esiti">Review-Perplexity.md</a>).</p>
 <p><strong>Fonti.</strong> <a href="Sources.html#s-080">S-080</a>, <a href="Sources.html#s-171">S-171</a>, <a href="Sources.html#s-174">S-174</a>, <a href="Sources.html#s-175">S-175</a>.</p></article>
 <script type="application/json" id="fonts-data">[
   {
