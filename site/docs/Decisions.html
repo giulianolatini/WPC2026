@@ -19,7 +19,7 @@
   <label>Testo <select id="pref-body"></select></label>
   <label>Codice <select id="pref-code"></select></label>
 </div>
-<nav class="docnav"><a href="../index.html">← Runbook</a><ul><li><a href="01-Installazione.html">01-Installazione</a></li><li><a href="02-Configurazione-Copilot.html">02-Configurazione-Copilot</a></li><li><a href="03-Security-Best-Practices.html">03-Security-Best-Practices</a></li><li><a href="04-Security-Review-OWASP-ISO27001.html">04-Security-Review-OWASP-ISO27001</a></li><li><a href="Decisions.html">Decisions</a></li><li><a href="Sources.html">Sources</a></li><li><a href="Review-Perplexity.html">Review-Perplexity</a></li></ul></nav><article class="doc"><h1 id="decisions--registro-delle-decisioni">Decisions — Registro delle decisioni</h1>
+<nav class="docnav"><a href="../index.html">← Runbook</a><ul><li><a href="01-Installazione.html">01-Installazione</a></li><li><a href="02-Configurazione-Copilot.html">02-Configurazione-Copilot</a></li><li><a href="03-Security-Best-Practices.html">03-Security-Best-Practices</a></li><li><a href="04-Security-Review-OWASP-ISO27001.html">04-Security-Review-OWASP-ISO27001</a></li><li><a href="05-Team-Agenti.html">05-Team-Agenti</a></li><li><a href="Decisions.html">Decisions</a></li><li><a href="Sources.html">Sources</a></li><li><a href="Review-Perplexity.html">Review-Perplexity</a></li></ul></nav><article class="doc"><h1 id="decisions--registro-delle-decisioni">Decisions — Registro delle decisioni</h1>
 <p>Questo file è il registro cronologico delle decisioni del progetto WPC2026.
 Il formato segue il template ADR di Nygard, con una sezione <strong>Razionale</strong> esplicita (<a href="Sources.html#s-090">S-090</a>, <a href="Sources.html#s-091">S-091</a>).</p>
 <p><strong>Regole del registro</strong></p>
@@ -230,6 +230,30 @@ Il formato segue il template ADR di Nygard, con una sezione <strong>Razionale</s
 <td><a href="#d-032">D-032</a></td>
 <td>2026-11-07</td>
 <td>Nerd Fonts in WOFF2: sette famiglie e release fissata</td>
+<td>Accepted</td>
+</tr>
+<tr>
+<td><a href="#d-033">D-033</a></td>
+<td>2026-11-14</td>
+<td>Team di agenti: custom agents di VS Code, template in <code>examples/agents/</code></td>
+<td>Accepted</td>
+</tr>
+<tr>
+<td><a href="#d-034">D-034</a></td>
+<td>2026-11-14</td>
+<td>Team di agenti: modelli per figura (misto per ruolo)</td>
+<td>Accepted</td>
+</tr>
+<tr>
+<td><a href="#d-035">D-035</a></td>
+<td>2026-11-14</td>
+<td>Team di agenti: flusso di lavoro, GitFlow, TDD e backlog</td>
+<td>Accepted</td>
+</tr>
+<tr>
+<td><a href="#d-036">D-036</a></td>
+<td>2026-11-14</td>
+<td>Regole di scrittura originali ispirate ad ASD-STE100</td>
 <td>Accepted</td>
 </tr>
 </tbody>
@@ -668,7 +692,108 @@ Il formato segue il template ADR di Nygard, con una sezione <strong>Razionale</s
 </ul>
 <p><strong>Razionale.</strong> Il registro deve descrivere il repository com'è. Le altre parti di D-027 non cambiano.</p>
 <p><strong>Conseguenze.</strong> Un aggiornamento dei font cambia la versione in <code>tools/fonts.json</code>, aggiorna gli sha256 e rigenera i WOFF2 con <code>--fonts</code>.</p>
-<p><strong>Fonti.</strong> <a href="Sources.html#s-152">S-152</a>, <a href="Sources.html#s-153">S-153</a>, <a href="Sources.html#s-156">S-156</a>.</p></article>
+<p><strong>Fonti.</strong> <a href="Sources.html#s-152">S-152</a>, <a href="Sources.html#s-153">S-153</a>, <a href="Sources.html#s-156">S-156</a>.</p>
+<hr />
+<p><a id="d-033"></a></p>
+<h2 id="d-033--team-di-agenti-custom-agents-di-vs-code-template-in-examplesagents">D-033 — Team di agenti: custom agents di VS Code, template in <code>examples/agents/</code></h2>
+<ul>
+<li><strong>Data:</strong> 2026-11-14 — <strong>Stato:</strong> Accepted — <strong>Decisore:</strong> PO (brainstorming del 2026-11-14)</li>
+</ul>
+<p><strong>Contesto.</strong> Il PO chiede un secondo passo: un team di sviluppo orchestrato (9 figure) che usa i modelli BYOK configurati in <a href="02-Configurazione-Copilot.html">02</a> per uno sviluppo <em>spec-driven</em>. La richiesta nomina «ClaudeCode, Codex e OpenRouter tramite chiamate API di GitHub Copilot». Il progetto software usa GitFlow; questo repository usa GitHub Flow.</p>
+<p><strong>Opzioni considerate.</strong> Forma: (1) <em>custom agents</em> di VS Code con subagent; (2) harness Claude e Codex; (3) Copilot CLI; (4) orchestratore esterno. Harness: (a) Copilot con Local di riserva; (b) solo Copilot; (c) solo Local. Posizione: (i) template in questo repository; (ii) nuovo repository.</p>
+<p><strong>Decisione.</strong> Opzioni 1, a, i. Ogni figura è un file <code>.agent.md</code> in <code>examples/agents/.github/agents/</code>, scritto per l'harness Copilot (<code>target: github-copilot</code>). Il documento <a href="05-Team-Agenti.html">05</a> descrive le differenze per l'harness Local.</p>
+<p><strong>Razionale.</strong> I <em>custom agents</em> fissano modello, strumenti e istruzioni per figura e restano dentro Copilot Chat, che il talk descrive. L'harness Local termina a febbraio 2027. Un template lascia questo repository in GitHub Flow.</p>
+<p><strong>Conseguenze.</strong> Nell'harness Copilot il BYOK è sperimentale: punto ⚠️ da provare. Senza il campo <code>agents</code> (solo Local) la limitazione dei subagent sta nelle istruzioni e in <code>user-invocable: false</code>.</p>
+<p><strong>Fonti.</strong> <a href="Sources.html#s-007">S-007</a>, <a href="Sources.html#s-068">S-068</a>, <a href="Sources.html#s-072">S-072</a>, <a href="Sources.html#s-165">S-165</a>.</p>
+<hr />
+<p><a id="d-034"></a></p>
+<h2 id="d-034--team-di-agenti-modelli-per-figura-misto-per-ruolo">D-034 — Team di agenti: modelli per figura (misto per ruolo)</h2>
+<ul>
+<li><strong>Data:</strong> 2026-11-14 — <strong>Stato:</strong> Accepted — <strong>Decisore:</strong> PO (brainstorming del 2026-11-14)</li>
+</ul>
+<p><strong>Contesto.</strong> Il PO chiede modelli costosi per analisi e pianificazione e modelli economici per l'implementazione: Pianificatore alto con effort <code>high</code> o superiore; Organizzatore intermedio; Avversario medio con ragionamento limitato; figure operative e Reviewer medio/bassi; due modelli diversi per i Reviewer.</p>
+<p><strong>Opzioni considerate.</strong> (1) Misto per ruolo tra Anthropic, OpenAI e OpenRouter. (2) OpenRouter solo con <code>openai/gpt-oss-120b</code> senza conservazione dei dati. (3) Massimo risparmio: tutte le figure operative su modelli aperti via OpenRouter.</p>
+<p><strong>Decisione.</strong> Opzione 1:</p>
+<table>
+<thead>
+<tr>
+<th>Figura</th>
+<th>Modello</th>
+<th>Effort</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Pianificatore</td>
+<td><code>claude-fable-5-2</code></td>
+<td><code>high</code></td>
+</tr>
+<tr>
+<td>Organizzatore</td>
+<td><code>claude-sonnet-5-5</code></td>
+<td>default</td>
+</tr>
+<tr>
+<td>Avversario</td>
+<td><code>gpt-6.1-sol</code></td>
+<td><code>low</code></td>
+</tr>
+<tr>
+<td>Sviluppatore, Operativo</td>
+<td><code>gpt-5.4-mini</code></td>
+<td>default</td>
+</tr>
+<tr>
+<td>Tester, Scrittore</td>
+<td><code>claude-haiku-5-5</code></td>
+<td>default</td>
+</tr>
+<tr>
+<td>Reviewer ottimista</td>
+<td><code>deepseek/deepseek-v4.1-flash</code> (OpenRouter)</td>
+<td>default</td>
+</tr>
+<tr>
+<td>Reviewer antagonista</td>
+<td><code>qwen/qwen3-coder</code> (OpenRouter)</td>
+<td>default</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Razionale.</strong> Il costo segue il ragionamento richiesto. Due provider diversi per Pianificatore e Avversario, e due modelli diversi per i Reviewer, danno punti di vista indipendenti. OpenAI non ha modelli «Codex» correnti: le figure di codice usano i modelli generali indicati per il coding.</p>
+<p><strong>Conseguenze.</strong> ⚠️ Da verificare con P-12: ID e prezzi dei modelli OpenAI e OpenRouter. I diff delle PR vanno a provider scelti da OpenRouter: servono i <em>guardrail</em> per codice riservato (<a href="05-Team-Agenti.html#9-sicurezza">05 §9</a>). Un cambio di modello modifica solo il campo <code>model</code> del file della figura.</p>
+<p><strong>Fonti.</strong> <a href="Sources.html#s-040">S-040</a>, <a href="Sources.html#s-102">S-102</a>, <a href="Sources.html#s-166">S-166</a>, <a href="Sources.html#s-072">S-072</a>.</p>
+<hr />
+<p><a id="d-035"></a></p>
+<h2 id="d-035--team-di-agenti-flusso-di-lavoro-gitflow-tdd-e-backlog">D-035 — Team di agenti: flusso di lavoro, GitFlow, TDD e backlog</h2>
+<ul>
+<li><strong>Data:</strong> 2026-11-14 — <strong>Stato:</strong> Accepted — <strong>Decisore:</strong> PO (brainstorming del 2026-11-14)</li>
+</ul>
+<p><strong>Contesto.</strong> La richiesta lascia aperti cinque punti: dove vive il backlog; come avviene il brainstorming 1to1 (un subagent non può fare domande all'utente); chi unisce le Feature in <code>develop</code>; hotfix e riallineamento in GitFlow; chi modifica i test nel ciclo TDD.</p>
+<p><strong>Decisione.</strong></p>
+<ul>
+<li><strong>Backlog:</strong> specifiche e piano con GitHub Spec Kit; Epic, Feature e Task in file Markdown in <code>docs/backlog/</code>.</li>
+<li><strong>Brainstorming:</strong> il PO apre direttamente l'agente Pianificatore, che chiama l'Avversario come subagent.</li>
+<li><strong>Merge in <code>develop</code>:</strong> l'Organizzatore, quando i due Reviewer approvano e i test sono verdi. Il merge in <code>main</code> resta del PO, con approvazione esplicita.</li>
+<li><strong>GitFlow completo:</strong> rami <code>hotfix/*</code> da <code>main</code> e <em>back-merge</em> di Release e hotfix in <code>develop</code>.</li>
+<li><strong>TDD:</strong> il Tester scrive prima i test (<em>red</em>); chi implementa li fa passare (<em>green</em>) e fa il <em>refactor</em>; solo il Tester modifica i test.</li>
+</ul>
+<p><strong>Opzioni scartate.</strong> Backlog in GitHub Issues o senza Spec Kit; Organizzatore come tramite nel brainstorming; merge in <code>develop</code> sempre del PO; GitFlow senza hotfix; test modificabili da chi implementa.</p>
+<p><strong>Razionale.</strong> I file Markdown sono versionati con il codice e leggibili da ogni figura. Il brainstorming diretto è l'unico vero 1to1 possibile. Il merge automatico in <code>develop</code> riduce le attese del PO, che controlla il passaggio a <code>main</code>. La separazione tra chi scrive i test e chi scrive il codice protegge il significato dei test.</p>
+<p><strong>Conseguenze.</strong> L'Organizzatore ha gli strumenti <code>execute</code> (git, gh) e <code>agent</code>. Il ruleset di GitHub deve imporre l'approvazione del PO su <code>main</code>. ⚠️ Da verificare con P-13: nomi dei rami di Spec Kit rispetto a <code>feature/*</code>.</p>
+<p><strong>Fonti.</strong> <a href="Sources.html#s-165">S-165</a>, <a href="Sources.html#s-167">S-167</a>, <a href="Sources.html#s-168">S-168</a>, <a href="Sources.html#s-169">S-169</a>, <a href="Sources.html#s-080">S-080</a>.</p>
+<hr />
+<p><a id="d-036"></a></p>
+<h2 id="d-036--regole-di-scrittura-originali-ispirate-ad-asd-ste100">D-036 — Regole di scrittura originali ispirate ad ASD-STE100</h2>
+<ul>
+<li><strong>Data:</strong> 2026-11-14 — <strong>Stato:</strong> Accepted — <strong>Decisore:</strong> PO (brainstorming del 2026-11-14)</li>
+</ul>
+<p><strong>Contesto.</strong> Il Pianificatore deve dare allo Scrittore regole e un dizionario basati su ASD-STE100. Il PO può consultare lo standard ma non condividerlo; il repository è pubblico.</p>
+<p><strong>Opzioni considerate.</strong> (1) Regole originali in italiano e dizionario dei termini del progetto, nel repository, con riferimenti solo all'indice dello standard. (2) File locale escluso da git, più vicino allo standard. (3) Solo dizionario di progetto.</p>
+<p><strong>Decisione.</strong> Opzione 1: <code>examples/agents/docs/team/writing-rules.md</code> contiene 16 regole originali e un dizionario iniziale. Le istruzioni del Pianificatore vietano di copiare testo dello standard.</p>
+<p><strong>Razionale.</strong> Lo Scrittore ha bisogno delle regole nel repository per applicarle. Un testo originale rispetta il vincolo di riservatezza.</p>
+<p><strong>Conseguenze.</strong> Il Pianificatore estende il dizionario a ogni progetto. Le regole non sostituiscono lo standard e non lo riproducono.</p>
+<p><strong>Fonti.</strong> <a href="Sources.html#s-092">S-092</a>.</p></article>
 <script type="application/json" id="fonts-data">[
   {
     "id": "blexmono",
