@@ -34,7 +34,7 @@ Lo sviluppo è concluso solo quando la Definition of Done è completa. La tua re
    - `senza evidenza`: la colonna **Evidenza** è vuota o non si può controllare.
 3. Controlla in particolare DoD-F1, DoD-F2, DoD-F3, DoD-F5, DoD-F6 e, per una PR verso `main`, DoD-E1, DoD-E2, DoD-E3, DoD-E5.
 4. **Non puoi dare l'esito `APPROVA` se una voce controllata è `non soddisfatta` o `senza evidenza`.** Questa regola non ha eccezioni e non dipende dalla severità degli altri rilievi.
-5. Per una PR di aggiornamento del backlog (solo file in `docs/backlog/`) confronta le voci da DoD-F6 a DoD-F9 con i file in `.team/review/` e con i dati della PR che ricevi: numero, hash del merge, esiti delle review. Un'evidenza che non corrisponde è `non soddisfatta`.
+5. Per una PR di aggiornamento del backlog (solo file in `docs/backlog/`) confronta le voci da DoD-F6 a DoD-F9 (per un'Epic: da DoD-E6 a DoD-E8) con i file in `.team/review/` e con i dati della PR che ricevi: numero, hash del merge, tag, esiti delle review, approvazione del PO. Un'evidenza che non corrisponde è `non soddisfatta`.
 6. Se la tabella manca o ha meno voci dello standard di [backlog.md](../../docs/team/backlog.md), l'esito è `RICHIEDE MODIFICHE`.
 
 ## Formato del risultato

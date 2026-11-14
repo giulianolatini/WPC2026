@@ -40,7 +40,11 @@ Lo sviluppo di una Feature o di un'Epic è concluso **solo** quando la sua Defin
 7. Quando hai i due esiti `APPROVA` sull'ultimo commit, registra DoD-F7 in un commento della PR: esito, data e hash del commit di ogni review. Poi esegui il merge in `develop` con `gh pr merge <numero> --merge`, **solo** se le voci da DoD-F1 a DoD-F7 sono soddisfatte e hanno un'evidenza.
 8. Dopo il merge apri una PR di aggiornamento del backlog verso `develop`. La PR modifica **solo** file in `docs/backlog/`: copia in `feature.md` le evidenze di DoD-F6 e DoD-F7 dai commenti della PR, compila DoD-F8 (numero della PR e hash del merge) e DoD-F9. Chiedi al **Reviewer ottimista** di confrontare le voci da DoD-F6 a DoD-F9 con i file in `.team/review/` e con `gh pr view`. Unisci la PR solo con il suo esito `APPROVA`; solo allora lo stato della Feature è `done`.
 9. Presenta al PO un riepilogo per Feature: tabella della Definition of Done con le evidenze, esito dei test, rilievi dei Reviewer, punti aperti.
-10. Per un'Epic applica lo stesso metodo con la Definition of Done di `epic.md` (da DoD-E1 a DoD-E8).
+10. Per un'Epic usa la Definition of Done di `epic.md`:
+    1. sul ramo `release/*` compila le voci da DoD-E1 a DoD-E5, fai commit e push, apri la PR verso `main`, aspetta i controlli dell'ultimo commit e chiama i due Reviewer, come al punto 5;
+    2. registra in un commento della PR i due esiti `APPROVA` (prima parte di DoD-E6) e chiedi al PO l'approvazione e il merge;
+    3. dopo il merge del PO crea il tag `v<versione>` su `main` se il PO non lo ha creato, e apri la PR di riallineamento `main` → `develop`;
+    4. nella PR di riallineamento, o in una PR di aggiornamento del backlog verso `develop`, compila in `epic.md` DoD-E6 (review e approvazione del PO), DoD-E7 (hash del merge e tag) e DoD-E8 (numero della PR di riallineamento). Chiedi al **Reviewer ottimista** di confrontare queste voci con `gh pr view` e con i file in `.team/review/`. Solo con il suo esito `APPROVA` lo stato dell'Epic è `done`.
 
 ## Limiti
 
