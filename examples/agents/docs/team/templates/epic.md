@@ -7,7 +7,7 @@ versione: <versione della Release che contiene l'Epic>
 
 # E01 — <titolo dell'Epic>
 
-> **Obiettivo di completamento.** Lo sviluppo di questa Epic è concluso solo quando la Definition of Done qui sotto è completa: ogni voce è soddisfatta e ha un'evidenza. Fino a quel momento lo stato non è `done`.
+> **Obiettivo di completamento.** Lo sviluppo di questa Epic è concluso solo quando la Definition of Done qui sotto è completa: ogni voce è soddisfatta e ha un'evidenza. Due soglie: la PR `release/*` si unisce in `main` solo con le voci da DoD-E1 a DoD-E6 soddisfatte; lo stato diventa `done` solo con tutte le voci, da DoD-E1 a DoD-E8.
 
 ## Obiettivo
 

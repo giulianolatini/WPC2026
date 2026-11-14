@@ -46,7 +46,7 @@ Lo sviluppo di una Feature o di un'Epic è concluso solo quando la sua Definitio
 1. Il Pianificatore scrive la Definition of Done in ogni `feature.md` ed `epic.md`.
 2. L'Organizzatore compila le evidenze prima di chiedere le review.
 3. Ogni Reviewer controlla le voci e non approva se una voce non è soddisfatta o non ha un'evidenza.
-4. L'Organizzatore unisce la PR e cambia lo stato in `done` solo con la Definition of Done completa.
+4. L'Organizzatore unisce la PR in `develop` solo con le voci da DoD-F1 a DoD-F7 soddisfatte. Dopo il merge registra DoD-F8 e DoD-F9 e solo allora cambia lo stato in `done`.
 
 ## Ciclo TDD di un task di codice
 

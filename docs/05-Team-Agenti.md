@@ -186,7 +186,7 @@ La procedura con comandi, parametri ed evidenze è la fase F9 del [runbook](runb
 - [ ] Seleziona l'agente **Organizzatore** e chiedi di sviluppare la Feature (es. `E01-F01`).
 - [ ] Per ogni task l'Organizzatore chiama, in ordine: Tester (*red*), Sviluppatore o Operativo (*green* e *refactor*), Scrittore.
 - [ ] L'Organizzatore apre la PR verso `develop`, compila le evidenze della Definition of Done e chiama i due Reviewer.
-- [ ] Se i due Reviewer approvano e la Definition of Done è completa, l'Organizzatore unisce la PR e ti presenta il riepilogo con le evidenze.
+- [ ] Se i due Reviewer approvano e le voci da DoD-F1 a DoD-F7 sono soddisfatte, l'Organizzatore unisce la PR, registra DoD-F8 e DoD-F9 e ti presenta il riepilogo con le evidenze.
 
 ### 7.3 Release
 
@@ -217,9 +217,9 @@ I criteri di accettazione da soli non bastano: descrivono il comportamento, non 
 |---|---|---|
 | `epic.md`, `feature.md` | Pianificatore | Scrive in testa l'obiettivo di completamento e la tabella con tutte le voci standard |
 | Prima delle review | Organizzatore | Compila la colonna **Evidenza** con comandi ed esiti reali |
-| Review | Reviewer ottimista e antagonista | Assegnano a ogni voce `soddisfatta`, `non soddisfatta` o `senza evidenza`; non approvano con una voce aperta |
-| Merge | Organizzatore (in `develop`), PO (in `main`) | Unisce solo con la Definition of Done completa |
-| Stato `done` | Organizzatore | Lo assegna solo dopo aver compilato tutte le evidenze |
+| Review | Reviewer ottimista e antagonista | Controllano le voci che esistono prima delle review (da DoD-F1 a DoD-F6; da DoD-E1 a DoD-E5): `soddisfatta`, `non soddisfatta` o `senza evidenza`; non approvano con una voce aperta |
+| Merge | Organizzatore (in `develop`), PO (in `main`) | Unisce solo con le voci richieste per il merge: da DoD-F1 a DoD-F7 per `develop`, da DoD-E1 a DoD-E6 per `main` |
+| Stato `done` | Organizzatore | Lo assegna solo con tutte le voci soddisfatte, comprese quelle che esistono dopo il merge (DoD-F8, DoD-F9; DoD-E7, DoD-E8) |
 
 Le voci standard (da DoD-F1 a DoD-F9 per una Feature, da DoD-E1 a DoD-E8 per un'Epic) sono in [backlog.md](../examples/agents/docs/team/backlog.md). I modelli dei file sono in [templates/](../examples/agents/docs/team/templates/feature.md). Solo il PO può togliere una voce.
 
