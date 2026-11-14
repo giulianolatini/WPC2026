@@ -30,16 +30,19 @@ Describe 'Ruleset main/develop con contoso-copilot-agent' -Tag 'Live', 'AdminByp
         $script:AuthErrorPattern = 'HTTP 401|Bad credentials|Resource not accessible by integration'
 
         function Invoke-Gh {
-            param([Parameter(Mandatory)][string[]] $Arguments, [string] $Case)
+            param([Parameter(Mandatory)][string[]] $Arguments, [string] $Case, [string] $PrNumber)
             # Un exit code ≠ 0 è un esito atteso: non deve interrompere il test.
             $ErrorActionPreference = 'Continue'
             $output   = & gh @Arguments 2>&1 | Out-String
             $exitCode = $LASTEXITCODE
+            # Stato della PR dopo il comando: fa parte dell'evidenza (contratto, sezione Output).
+            $prState  = if ($PrNumber) { Get-PrState -Number $PrNumber } else { $null }
             $script:Evidence.Add([pscustomobject]@{
                 case     = $Case
                 command  = "gh $($Arguments -join ' ')"
                 exitCode = $exitCode
                 output   = $output.Trim()
+                prState  = $prState
             })
             [pscustomobject]@{ ExitCode = $exitCode; Output = $output }
         }
@@ -47,6 +50,16 @@ Describe 'Ruleset main/develop con contoso-copilot-agent' -Tag 'Live', 'AdminByp
         function Get-PrState {
             param([Parameter(Mandatory)][string] $Number)
             (& gh pr view $Number --repo $script:Repo --json state --jq '.state').Trim()
+        }
+
+        # Tutti e tre i check obbligatori devono esistere ed essere verdi: un elenco vuoto non basta.
+        function Test-RequiredChecksGreen {
+            param($Facts)
+            foreach ($name in 'build', 'test-dotnet', 'test-powershell') {
+                $check = @($Facts.statusCheckRollup | Where-Object { $_.name -eq $name })
+                if ($check.Count -eq 0 -or $check[0].conclusion -ne 'SUCCESS') { return $false }
+            }
+            $true
         }
 
         # Stato della PR di test: serve per attribuire il rifiuto alla regola giusta.
@@ -89,8 +102,8 @@ Describe 'Ruleset main/develop con contoso-copilot-agent' -Tag 'Live', 'AdminByp
             $f.baseRefName    | Should -Be 'main'
             $f.mergeable      | Should -Not -Be 'CONFLICTING'
             $f.reviewDecision | Should -Not -Be 'APPROVED'
-            @($f.statusCheckRollup | Where-Object { $_.conclusion -ne 'SUCCESS' }).Count |
-                Should -Be 0 -Because 'con i check verdi l''unico requisito mancante è l''approvazione del code owner'
+            Test-RequiredChecksGreen -Facts $f |
+                Should -BeTrue -Because 'con i tre check verdi l''unico requisito mancante è l''approvazione del code owner'
         }
 
         It 'PR_DEVELOP_RED: aperta, verso develop, senza conflitti, test-dotnet fallito' {
@@ -98,7 +111,9 @@ Describe 'Ruleset main/develop con contoso-copilot-agent' -Tag 'Live', 'AdminByp
             $f.state       | Should -Be 'OPEN'
             $f.baseRefName | Should -Be 'develop'
             $f.mergeable   | Should -Not -Be 'CONFLICTING'
-            ($f.statusCheckRollup | Where-Object { $_.name -eq 'test-dotnet' }).conclusion | Should -Be 'FAILURE'
+            $failed = @($f.statusCheckRollup | Where-Object { $_.name -eq 'test-dotnet' })
+            $failed.Count         | Should -BeGreaterThan 0 -Because 'il check test-dotnet deve essere stato eseguito'
+            $failed[0].conclusion | Should -Be 'FAILURE'
         }
 
         It 'PR_DEVELOP_GREEN: aperta, verso develop, senza conflitti, check verdi' {
@@ -106,27 +121,27 @@ Describe 'Ruleset main/develop con contoso-copilot-agent' -Tag 'Live', 'AdminByp
             $f.state       | Should -Be 'OPEN'
             $f.baseRefName | Should -Be 'develop'
             $f.mergeable   | Should -Not -Be 'CONFLICTING'
-            @($f.statusCheckRollup | Where-Object { $_.conclusion -ne 'SUCCESS' }).Count | Should -Be 0
+            Test-RequiredChecksGreen -Facts $f | Should -BeTrue -Because 'i tre check obbligatori devono esistere ed essere verdi'
         }
     }
 
     Context 'Tentativi di bypass che devono fallire' {
         It 'V1 - merge senza approvazione verso main viene rifiutato' {
-            $r = Invoke-Gh -Case 'V1' -Arguments @('pr', 'merge', $env:PR_MAIN, '--repo', $script:Repo, '--merge')
+            $r = Invoke-Gh -Case 'V1' -PrNumber $env:PR_MAIN -Arguments @('pr', 'merge', $env:PR_MAIN, '--repo', $script:Repo, '--merge')
             $r.Output   | Should -Not -Match $script:AuthErrorPattern -Because 'un errore di autenticazione rende il test non valido'
             $r.ExitCode | Should -Not -Be 0
             Get-PrState -Number $env:PR_MAIN | Should -Be 'OPEN'
         }
 
         It 'V2 - merge con --admin verso main viene rifiutato' {
-            $r = Invoke-Gh -Case 'V2' -Arguments @('pr', 'merge', $env:PR_MAIN, '--repo', $script:Repo, '--merge', '--admin')
+            $r = Invoke-Gh -Case 'V2' -PrNumber $env:PR_MAIN -Arguments @('pr', 'merge', $env:PR_MAIN, '--repo', $script:Repo, '--merge', '--admin')
             $r.Output   | Should -Not -Match $script:AuthErrorPattern -Because 'un errore di autenticazione rende il test non valido'
             $r.ExitCode | Should -Not -Be 0 -Because 'contoso-copilot-agent non deve essere un attore di bypass (FR-010, FR-011)'
             Get-PrState -Number $env:PR_MAIN | Should -Be 'OPEN'
         }
 
         It 'V3 - merge con --admin verso develop con check fallito viene rifiutato' {
-            $r = Invoke-Gh -Case 'V3' -Arguments @('pr', 'merge', $env:PR_DEVELOP_RED, '--repo', $script:Repo, '--merge', '--admin')
+            $r = Invoke-Gh -Case 'V3' -PrNumber $env:PR_DEVELOP_RED -Arguments @('pr', 'merge', $env:PR_DEVELOP_RED, '--repo', $script:Repo, '--merge', '--admin')
             $r.Output   | Should -Not -Match $script:AuthErrorPattern -Because 'un errore di autenticazione rende il test non valido'
             $r.ExitCode | Should -Not -Be 0
             Get-PrState -Number $env:PR_DEVELOP_RED | Should -Be 'OPEN'
@@ -135,7 +150,7 @@ Describe 'Ruleset main/develop con contoso-copilot-agent' -Tag 'Live', 'AdminByp
 
     Context 'Controllo positivo (rende validi i rifiuti precedenti)' {
         It 'V4 - merge di una PR conforme verso develop riesce' {
-            $r = Invoke-Gh -Case 'V4' -Arguments @('pr', 'merge', $env:PR_DEVELOP_GREEN, '--repo', $script:Repo, '--merge')
+            $r = Invoke-Gh -Case 'V4' -PrNumber $env:PR_DEVELOP_GREEN -Arguments @('pr', 'merge', $env:PR_DEVELOP_GREEN, '--repo', $script:Repo, '--merge')
             $r.ExitCode | Should -Be 0 -Because "il token deve poter fare merge di PR conformi, altrimenti V1-V3 non sono validi e l'intera esecuzione va ripetuta. Output: $($r.Output)"
         }
     }
@@ -144,6 +159,13 @@ Describe 'Ruleset main/develop con contoso-copilot-agent' -Tag 'Live', 'AdminByp
         It 'V5 - l''app non vede bypass_actors (nessun accesso in scrittura al ruleset)' {
             $raw      = & gh api "repos/$script:Repo/rulesets/$env:RULESET_ID"
             $exitCode = $LASTEXITCODE
+            $script:Evidence.Add([pscustomobject]@{
+                case     = 'V5'
+                command  = "gh api repos/$script:Repo/rulesets/$env:RULESET_ID"
+                exitCode = $exitCode
+                output   = ($raw | Out-String).Trim()
+                prState  = $null
+            })
             $exitCode | Should -Be 0 -Because "la lettura del ruleset deve riuscire: un errore dell'API non prova nulla. Output: $raw"
             $json = $raw | ConvertFrom-Json
             "$($json.id)" | Should -Be $env:RULESET_ID
