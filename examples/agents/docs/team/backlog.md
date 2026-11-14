@@ -52,12 +52,12 @@ Il file `feature.md` contiene questa tabella. L'Organizzatore compila la colonna
 | DoD-F3 | Tutti i test automatici sono verdi sul ramo della Feature | Comandi `dotnet test` e `Invoke-Pester`, numero di test superati e falliti | Organizzatore, Reviewer |
 | DoD-F4 | Ogni input non valido e ogni errore previsto dai Task ha un test verde | Nomi dei test di errore | Reviewer antagonista |
 | DoD-F5 | La documentazione della Feature è scritta e rispetta [writing-rules.md](writing-rules.md) | Percorsi dei file: log, riferimento API, manuali | Reviewer ottimista |
-| DoD-F6 | I controlli di stato della PR sono verdi (`build`, `test-dotnet`, `test-powershell`) | Esito di `gh pr checks <numero>` | Organizzatore, Reviewer |
-| DoD-F7 | I due Reviewer hanno esito `APPROVA`; nessun rilievo `alta` o `media` è aperto | Esito e data delle due review | Organizzatore |
+| DoD-F6 | I controlli di stato della PR sono verdi sull'ultimo commit (`build`, `test-dotnet`, `test-powershell`) | Esito di `gh pr checks <numero>` e hash del commit, in un commento della PR | Organizzatore, Reviewer |
+| DoD-F7 | I due Reviewer hanno esito `APPROVA` sull'ultimo commit; nessun rilievo `alta` o `media` è aperto | Esito, data e hash del commit delle due review, in un commento della PR | Organizzatore |
 | DoD-F8 | La PR è unita in `develop` con un merge commit | Numero della PR e hash del merge | Organizzatore |
-| DoD-F9 | Il backlog è aggiornato: stato `done`, evidenze compilate | Commit del backlog | Organizzatore |
+| DoD-F9 | Il backlog è aggiornato con una PR che modifica solo `docs/backlog/`: evidenze da DoD-F6 a DoD-F8 compilate | Numero della PR di aggiornamento | Organizzatore, Reviewer ottimista |
 
-Ordine: l'Organizzatore compila le evidenze da DoD-F1 a DoD-F6 **prima** delle review. I Reviewer controllano solo queste voci (e le voci aggiunte dal Pianificatore). L'Organizzatore chiude DoD-F7 quando ha i due esiti `APPROVA`, poi DoD-F8 e DoD-F9 dopo il merge. Per un'Epic i Reviewer controllano da DoD-E1 a DoD-E5; DoD-E6, DoD-E7 e DoD-E8 si chiudono dopo.
+Ordine: l'Organizzatore compila in `feature.md` le evidenze da DoD-F1 a DoD-F5 e registra DoD-F6 in un commento della PR, **prima** delle review. Un commit nuovo sul ramo avvia controlli nuovi: per questo DoD-F6 e DoD-F7 non entrano nel ramo prima del merge. I Reviewer controllano solo queste voci (e le voci aggiunte dal Pianificatore). L'Organizzatore chiude DoD-F7 quando ha i due esiti `APPROVA`, poi DoD-F8 e DoD-F9 dopo il merge. Per un'Epic i Reviewer controllano da DoD-E1 a DoD-E5; DoD-E6, DoD-E7 e DoD-E8 si chiudono dopo.
 
 ## Definition of Done di un'Epic
 
