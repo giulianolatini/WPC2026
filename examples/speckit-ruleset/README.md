@@ -39,6 +39,8 @@ Il workflow `verify-ruleset-admin.yml` ha gli input `owner` e `repo` separati (r
 
 Il piano e il contratto descrivono la matrice V1–V6: l'ordine di esecuzione è quello della suite.
 
+**Differenza dal template.** La specifica di questo esempio chiede 0 approvazioni su `develop` (FR-009). Il template `examples/agents/` aggiunge il ruleset `develop-approval`: anche `develop` richiede l'approvazione di un code owner. Con quel ruleset attivo la PR di V4 deve essere approvata dal code owner; la suite lo controlla.
+
 ## Attenzione
 
 - I test con il tag `Live` eseguono merge **reali**. Eseguili solo in un repository di laboratorio.

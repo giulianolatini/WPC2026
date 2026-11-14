@@ -147,6 +147,12 @@ Describe 'Ruleset main/develop con contoso-copilot-agent' -Tag 'Live', 'AdminByp
             $f.mergeable   | Should -Be 'MERGEABLE'
             Get-BehindBy -Facts $f | Should -Be 0 -Because 'la PR deve contenere tutti i commit del ramo base'
             Test-RequiredChecksGreen -Facts $f | Should -BeTrue -Because 'i tre check obbligatori devono esistere ed essere verdi'
+            # Se develop richiede l'approvazione di un code owner (ruleset develop-approval del template), la PR conforme deve averla.
+            $needsApproval = & gh api "repos/$script:Repo/rules/branches/develop" --jq '[.[] | select(.type == "pull_request") | .parameters.require_code_owner_review] | any'
+            $LASTEXITCODE | Should -Be 0
+            if ("$needsApproval" -eq 'true') {
+                $f.reviewDecision | Should -Be 'APPROVED' -Because 'con develop-approval attivo V4 riesce solo su una PR approvata dal code owner'
+            }
             $script:FixtureOk['PR_DEVELOP_GREEN'] = $true
         }
     }

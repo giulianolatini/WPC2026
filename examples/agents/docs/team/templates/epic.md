@@ -29,7 +29,7 @@ Ogni risultato si verifica con un test o con un comando.
 
 ## Definition of Done
 
-Le voci vengono da `docs/team/backlog.md`. Il Pianificatore può aggiungere voci (da `DoD-E9`). Solo il PO può togliere una voce, con una decisione in `decisions.md`.
+Le voci vengono da `docs/team/backlog.md`. Il Pianificatore può aggiungere voci (da `DoD-E9`). Solo il PO può togliere una voce, con una ADR in `decisions.md`.
 
 | ID | Voce | Soddisfatta | Evidenza |
 |---|---|---|---|
