@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="it" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="generator" content="tools/build_site.py — non modificare a mano">
+<title>07-LiteLLM-Introduzione — WPC2026</title>
+<link rel="stylesheet" href="../assets/fonts.css">
+<link rel="stylesheet" href="../assets/vendor/highlight/github.min.css" id="hl-light">
+<link rel="stylesheet" href="../assets/vendor/highlight/github-dark.min.css" id="hl-dark" disabled>
+<link rel="stylesheet" href="../assets/styles.css">
+<script src="../assets/vendor/mermaid/mermaid.min.js"></script>
+<script>try{var p=JSON.parse(localStorage.getItem('wpc2026.prefs')||'{}');var t=p.theme;if(t!=='light'&&t!=='dark')t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body>
+<div class="topbar">
+  <h1><a href="../index.html" style="color:inherit;text-decoration:none">WPC2026</a> <span class="ver">07-LiteLLM-Introduzione</span></h1>
+  <label>Tema <select id="pref-theme"><option value="auto">automatico</option><option value="light">chiaro</option><option value="dark">scuro</option></select></label>
+  <label>Testo <select id="pref-body"></select></label>
+  <label>Codice <select id="pref-code"></select></label>
+</div>
+<nav class="docnav"><a href="../index.html">← Runbook</a><ul><li><a href="01-Installazione.html">01-Installazione</a></li><li><a href="02-Configurazione-Copilot.html">02-Configurazione-Copilot</a></li><li><a href="03-Security-Best-Practices.html">03-Security-Best-Practices</a></li><li><a href="04-Security-Review-OWASP-ISO27001.html">04-Security-Review-OWASP-ISO27001</a></li><li><a href="05-Team-Agenti.html">05-Team-Agenti</a></li><li><a href="06-BYOK-GitHub-Copilot.html">06-BYOK-GitHub-Copilot</a></li><li><a href="07-LiteLLM-Introduzione.html">07-LiteLLM-Introduzione</a></li><li><a href="Decisions.html">Decisions</a></li><li><a href="Sources.html">Sources</a></li><li><a href="Review-Perplexity.html">Review-Perplexity</a></li></ul></nav><article class="doc"><h1 id="07--introduzione-a-litellm-e-alle-feature-del-rilascio-stable">07 — Introduzione a LiteLLM e alle feature del rilascio stable</h1>
+<p>Questo documento presenta LiteLLM e le feature disponibili nel rilascio stable usato in questo repository: <strong>1.108.2</strong>, linea LTS 1.108.
+L'installazione è nel documento <a href="01-Installazione.html">01</a>. La configurazione con GitHub Copilot è in <a href="02-Configurazione-Copilot.html#4-github-copilot-con-litellm-come-gateway">02 §4</a>. La sicurezza è in <a href="03-Security-Best-Practices.html">03</a>.</p>
+<h2 id="indice">Indice</h2>
+<ol>
+<li><a href="#1-che-cosè-litellm">Che cos'è LiteLLM</a></li>
+<li><a href="#2-litellm-tra-vs-code-e-i-provider">LiteLLM tra VS Code e i provider</a></li>
+<li><a href="#3-rilasci-stable-lts-e-tag">Rilasci: stable, LTS e tag</a></li>
+<li><a href="#4-feature-del-proxy">Feature del proxy</a></li>
+<li><a href="#5-feature-enterprise">Feature Enterprise</a></li>
+<li><a href="#6-feature-usate-negli-esempi-di-questo-repository">Feature usate negli esempi di questo repository</a></li>
+<li><a href="#7-rischi">Rischi</a></li>
+<li><a href="#8-quando-usare-litellm">Quando usare LiteLLM</a></li>
+</ol>
+<h2 id="1-che-cosè-litellm">1. Che cos'è LiteLLM</h2>
+<p>LiteLLM è una libreria open source che offre una sola interfaccia, nel formato OpenAI, per chiamare più di 100 modelli LLM (<a href="Sources.html#s-182">S-182</a>). Si usa in due modi:</p>
+<table>
+<thead>
+<tr>
+<th>Modo</th>
+<th>Che cos'è</th>
+<th>Per chi</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Python SDK</strong></td>
+<td>Libreria per chiamare i modelli dal codice: <code>completion()</code>, <code>embedding()</code>, router con nuovi tentativi e fallback</td>
+<td>Sviluppatori che scrivono un'applicazione</td>
+</tr>
+<tr>
+<td><strong>Proxy Server</strong> (<em>LLM Gateway</em>, <em>AI Gateway</em>)</td>
+<td>Servizio da ospitare in proprio, compatibile con l'API OpenAI</td>
+<td>Team di piattaforma che controllano l'accesso ai modelli in un'organizzazione</td>
+</tr>
+</tbody>
+</table>
+<p>Questo repository usa il <strong>proxy</strong>: i client compatibili OpenAI lo usano senza modifiche al codice. VS Code lo vede come un Custom Endpoint (<a href="06-BYOK-GitHub-Copilot.html#4-provider-e-custom-endpoint">06 §4</a>).</p>
+<h2 id="2-litellm-tra-vs-code-e-i-provider">2. LiteLLM tra VS Code e i provider</h2>
+<figure class="mermaid-wrap"><pre class="mermaid" data-src="flowchart LR
+    VS[VS Code&lt;br/&gt;harness Copilot] --&gt;|1 endpoint, 1 virtual key| LL[LiteLLM proxy&lt;br/&gt;127.0.0.1:4000]
+    LL --&gt;|chiave Anthropic| A[Anthropic API]
+    LL --&gt;|chiave OpenAI| O[OpenAI API]
+    LL --&gt;|chiave Google| G[Gemini API]
+    LL --&gt;|chiave OpenRouter| R[OpenRouter]
+    LL --&gt;|token Hugging Face| H[Hugging Face]
+    LL -.-&gt;|spesa, log, chiavi| DB[(PostgreSQL&lt;br/&gt;profilo esteso)]
+">flowchart LR
+    VS[VS Code&lt;br/&gt;harness Copilot] --&gt;|1 endpoint, 1 virtual key| LL[LiteLLM proxy&lt;br/&gt;127.0.0.1:4000]
+    LL --&gt;|chiave Anthropic| A[Anthropic API]
+    LL --&gt;|chiave OpenAI| O[OpenAI API]
+    LL --&gt;|chiave Google| G[Gemini API]
+    LL --&gt;|chiave OpenRouter| R[OpenRouter]
+    LL --&gt;|token Hugging Face| H[Hugging Face]
+    LL -.-&gt;|spesa, log, chiavi| DB[(PostgreSQL&lt;br/&gt;profilo esteso)]
+</pre><details class="mermaid-src"><summary>Sorgente Mermaid</summary><pre class="code"><code class="language-plaintext">flowchart LR
+    VS[VS Code&lt;br/&gt;harness Copilot] --&gt;|1 endpoint, 1 virtual key| LL[LiteLLM proxy&lt;br/&gt;127.0.0.1:4000]
+    LL --&gt;|chiave Anthropic| A[Anthropic API]
+    LL --&gt;|chiave OpenAI| O[OpenAI API]
+    LL --&gt;|chiave Google| G[Gemini API]
+    LL --&gt;|chiave OpenRouter| R[OpenRouter]
+    LL --&gt;|token Hugging Face| H[Hugging Face]
+    LL -.-&gt;|spesa, log, chiavi| DB[(PostgreSQL&lt;br/&gt;profilo esteso)]
+</code></pre></details></figure>
+<ul>
+<li>VS Code manda il nome di un alias (<code>model_name</code>). Il proxy lo traduce nel modello del provider e nel suo formato (<a href="Sources.html#s-022">S-022</a>).</li>
+<li>Le chiavi dei provider stanno solo sul gateway. Il client ha una chiave del gateway.</li>
+<li>Il proxy espone i tre formati che VS Code usa: Chat Completions, Responses e Messages (<a href="Sources.html#s-028">S-028</a>, <a href="Sources.html#s-029">S-029</a>).</li>
+</ul>
+<h2 id="3-rilasci-stable-lts-e-tag">3. Rilasci: stable, LTS e tag</h2>
+<table>
+<thead>
+<tr>
+<th>Concetto</th>
+<th>Significato</th>
+<th>Fonte</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Versione stable</td>
+<td>Una <em>release candidate</em> che ha superato i controlli e una seconda serie di prove manuali. Forma <code>1.x.x</code></td>
+<td><a href="Sources.html#s-185">S-185</a></td>
+</tr>
+<tr>
+<td>Nomi dalla 1.84.0</td>
+<td>Versioni in forma standard: senza i suffissi <code>-stable</code> e <code>-nightly</code>; una versione <em>minor</em> per il rilascio settimanale, una <em>patch</em> per le correzioni</td>
+<td><a href="Sources.html#s-186">S-186</a></td>
+</tr>
+<tr>
+<td>Giorno di rilascio</td>
+<td>Dal 2 novembre 2026 release candidate e stable escono il martedì</td>
+<td><a href="Sources.html#s-187">S-187</a></td>
+</tr>
+<tr>
+<td>Linea LTS</td>
+<td>Prova di un mese, dalla settimana del 2 novembre 2026. Prima linea: <strong>1.108</strong>. Le patch LTS portano correzioni alla traduzione dei formati e al calcolo dei costi, e nuovi endpoint</td>
+<td><a href="Sources.html#s-184">S-184</a></td>
+</tr>
+<tr>
+<td>Supporto delle versioni</td>
+<td>La regola delle quattro linee stable più recenti è sospesa durante la prova LTS</td>
+<td><a href="Sources.html#s-184">S-184</a></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Tag delle immagini Docker</strong></p>
+<table>
+<thead>
+<tr>
+<th>Tag</th>
+<th>Comportamento</th>
+<th>Uso in questo repository</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>1.108.2</code> (o <code>v1.108.2</code>)</td>
+<td>Versione fissa</td>
+<td><strong>Sì</strong> (<a href="Decisions.html#d-018">D-018</a>)</td>
+</tr>
+<tr>
+<td><code>lts</code></td>
+<td>Segue l'ultima patch LTS</td>
+<td>No: è un tag mobile</td>
+</tr>
+<tr>
+<td><code>latest</code></td>
+<td>Segue l'ultima stable</td>
+<td>No: è un tag mobile</td>
+</tr>
+<tr>
+<td><code>main-stable</code></td>
+<td>Vecchio tag mobile, deprecato</td>
+<td>No</td>
+</tr>
+</tbody>
+</table>
+<p>Raccomandazione del vendor per la produzione: fissa l'ultima versione stable <code>1.x.x</code> (<a href="Sources.html#s-185">S-185</a>). I tag mobili sono stati compromessi nell'incidente di ottobre 2026 (<a href="Sources.html#s-104">S-104</a>).</p>
+<p><strong>La versione 1.108.2.</strong> È una patch sopra la 1.108.1, senza nuove migrazioni del database e senza nuovi provider. Contiene correzioni, tra cui: livelli di servizio di Bedrock Converse, PDF in base64 verso Claude, instradamento con tag e con <em>prompt cache</em>, righe di spesa durante il riavvio di PostgreSQL, <code>response_format: json_object</code> sulle rotte <code>openai/responses/*</code> (<a href="Sources.html#s-119">S-119</a>).</p>
+<blockquote>
+<p>⚠️ Dopo la prova LTS la politica di supporto può cambiare: la pagina non dice cosa succede alla fine del mese. Controlla <a href="Sources.html#s-184">S-184</a> prima del talk.</p>
+</blockquote>
+<h2 id="4-feature-del-proxy">4. Feature del proxy</h2>
+<p>La documentazione di LiteLLM non è divisa per versione. Questa tabella elenca le feature descritte nella documentazione corrente il 2026-11-14, con la versione stable 1.108.2 come riferimento.</p>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Cosa fa</th>
+<th>Dove si configura</th>
+<th>Fonte</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>API unificata</td>
+<td>Un endpoint compatibile OpenAI per i modelli di più provider</td>
+<td><code>model_list</code> in <code>config.yaml</code></td>
+<td><a href="Sources.html#s-182">S-182</a>, <a href="Sources.html#s-022">S-022</a></td>
+</tr>
+<tr>
+<td>Alias dei modelli</td>
+<td>Nome stabile (<code>model_name</code>) separato dal modello del provider</td>
+<td><code>model_list</code></td>
+<td><a href="Sources.html#s-022">S-022</a></td>
+</tr>
+<tr>
+<td>Formati <code>/v1/chat/completions</code>, <code>/v1/responses</code>, <code>/v1/messages</code></td>
+<td>Traduce tra i formati OpenAI e Anthropic</td>
+<td>Rotta scelta dal client</td>
+<td><a href="Sources.html#s-028">S-028</a>, <a href="Sources.html#s-029">S-029</a></td>
+</tr>
+<tr>
+<td><em>Virtual keys</em></td>
+<td>Chiavi del gateway per utente o team, con budget e limiti di frequenza</td>
+<td>Admin UI o API; richiede il database</td>
+<td><a href="Sources.html#s-031">S-031</a>, <a href="Sources.html#s-182">S-182</a></td>
+</tr>
+<tr>
+<td>Tracciamento della spesa</td>
+<td>Spesa per chiave, team e utente, su tutti i provider</td>
+<td>Database</td>
+<td><a href="Sources.html#s-182">S-182</a></td>
+</tr>
+<tr>
+<td>Bilanciamento e fallback</td>
+<td>Distribuisce le richieste tra più <em>deployment</em> e passa a un altro in caso di errore</td>
+<td><code>router_settings</code>, <code>fallbacks</code></td>
+<td><a href="Sources.html#s-182">S-182</a></td>
+</tr>
+<tr>
+<td><em>Guardrail</em></td>
+<td>Filtri sul contenuto, mascheramento di dati personali, controlli di sicurezza</td>
+<td><code>guardrails</code> in <code>config.yaml</code></td>
+<td><a href="Sources.html#s-182">S-182</a></td>
+</tr>
+<tr>
+<td>Cache</td>
+<td>Riusa le risposte</td>
+<td><code>cache</code> in <code>litellm_settings</code></td>
+<td><a href="Sources.html#s-182">S-182</a></td>
+</tr>
+<tr>
+<td>Log e osservabilità</td>
+<td>Log centralizzati; integrazioni con Langfuse, MLflow, Helicone</td>
+<td><code>callbacks</code></td>
+<td><a href="Sources.html#s-182">S-182</a></td>
+</tr>
+<tr>
+<td>Admin UI</td>
+<td>Interfaccia web per chiavi, modelli, spesa</td>
+<td><code>/ui</code></td>
+<td><a href="Sources.html#s-148">S-148</a></td>
+</tr>
+<tr>
+<td>MCP Gateway</td>
+<td>Espone strumenti MCP con controllo di accesso per chiave</td>
+<td>Admin UI o <code>config.yaml</code></td>
+<td><a href="Sources.html#s-182">S-182</a></td>
+</tr>
+<tr>
+<td>Agent Gateway</td>
+<td>Registra e chiama agenti A2A</td>
+<td>Admin UI</td>
+<td><a href="Sources.html#s-182">S-182</a></td>
+</tr>
+<tr>
+<td><em>Health check</em></td>
+<td>Controlla lo stato del proxy e dei modelli</td>
+<td><code>/health/*</code></td>
+<td><a href="Sources.html#s-117">S-117</a></td>
+</tr>
+<tr>
+<td>Thinking e reasoning</td>
+<td>Porta il contenuto di ragionamento dei modelli</td>
+<td>Parametri del modello</td>
+<td><a href="Sources.html#s-110">S-110</a></td>
+</tr>
+</tbody>
+</table>
+<p>⚠️ I nomi delle sezioni di <code>config.yaml</code> nella colonna «Dove si configura» sono un orientamento: controlla la sintassi esatta in <a href="Sources.html#s-022">S-022</a> prima di usarli.</p>
+<h2 id="5-feature-enterprise">5. Feature Enterprise</h2>
+<p>Alcune feature richiedono una licenza Enterprise (<a href="Sources.html#s-183">S-183</a>).</p>
+<table>
+<thead>
+<tr>
+<th>Area</th>
+<th>Feature Enterprise</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Accesso</td>
+<td>SSO per l'Admin UI; autenticazione JWT</td>
+</tr>
+<tr>
+<td>Sicurezza</td>
+<td>Integrazione con <em>secret manager</em> (AWS, Google, Azure, HashiCorp Vault); liste di indirizzi IP permessi; rotazione delle chiavi; limiti di dimensione delle richieste; controllo delle rotte pubbliche e private</td>
+</tr>
+<tr>
+<td>Audit</td>
+<td>Log di audit con periodo di conservazione</td>
+</tr>
+<tr>
+<td>Log e privacy</td>
+<td>Log per team; disattivazione dei log per un team</td>
+</tr>
+<tr>
+<td>Aspetto</td>
+<td>Pagina Swagger personalizzata</td>
+</tr>
+</tbody>
+</table>
+<p>⚠️ Per altre voci (metriche Prometheus, controllo dei guardrail per chiave, esportazione della spesa) la pagina non dice in modo chiaro se serve la licenza. Controlla la pagina prima di progettare su queste feature.</p>
+<p>Conseguenza per questo repository: la baseline raccomanda l'SSO per l'Admin UI (<a href="02-Configurazione-Copilot.html#41-quando-usare-un-gateway">02 §4.1</a>), ma l'SSO è una feature Enterprise. Senza licenza proteggi l'Admin UI con il bind su <code>127.0.0.1</code> e la procedura del primo amministratore (<a href="Sources.html#s-148">S-148</a>).</p>
+<h2 id="6-feature-usate-negli-esempi-di-questo-repository">6. Feature usate negli esempi di questo repository</h2>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>File</th>
+<th>Profilo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Alias dei modelli per 5 provider</td>
+<td><a href="../../examples/litellm/config.yaml"><code>examples/litellm/config.yaml</code></a></td>
+<td>minimo ed esteso</td>
+</tr>
+<tr>
+<td>Chiavi dei provider da variabili d'ambiente (<code>os.environ/…</code>)</td>
+<td><code>config.yaml</code>, <code>.env</code></td>
+<td>minimo ed esteso</td>
+</tr>
+<tr>
+<td>Parametri del provider OpenRouter (<code>extra_body.provider</code>)</td>
+<td><code>config.yaml</code></td>
+<td>minimo ed esteso</td>
+</tr>
+<tr>
+<td>Formato <code>/v1/messages</code> per Claude</td>
+<td><a href="../../examples/vscode/chatLanguageModels.litellm.json"><code>chatLanguageModels.litellm.json</code></a></td>
+<td>minimo ed esteso</td>
+</tr>
+<tr>
+<td><em>Virtual keys</em>, budget, spesa, Admin UI</td>
+<td><code>compose.extended.yaml</code> con PostgreSQL</td>
+<td>esteso (<a href="02-Configurazione-Copilot.html#44-profilo-esteso-virtual-keys-per-utente">02 §4.4</a>)</td>
+</tr>
+<tr>
+<td><em>Health check</em></td>
+<td>Runbook</td>
+<td>minimo ed esteso</td>
+</tr>
+</tbody>
+</table>
+<p>Gli esempi <strong>non</strong> usano: guardrail, cache, bilanciamento tra deployment, MCP Gateway, Agent Gateway, integrazioni di osservabilità.</p>
+<h2 id="7-rischi">7. Rischi</h2>
+<p>Un gateway concentra le chiavi di tutti i provider: una compromissione ha un impatto più grande di una chiave su un client. Nel 2026 LiteLLM ha avuto due incidenti di supply chain e vulnerabilità critiche del proxy (<a href="Sources.html#s-104">S-104</a>, <a href="Sources.html#s-105">S-105</a>, <a href="Sources.html#s-106">S-106</a>).</p>
+<p>Applica sempre l'hardening minimo di <a href="02-Configurazione-Copilot.html#41-quando-usare-un-gateway">02 §4.1</a> e le pratiche di <a href="03-Security-Best-Practices.html">03</a>: versione fissa, bind su <code>127.0.0.1</code>, solo <em>virtual keys</em> agli sviluppatori.</p>
+<h2 id="8-quando-usare-litellm">8. Quando usare LiteLLM</h2>
+<table>
+<thead>
+<tr>
+<th>Contesto</th>
+<th>Scelta</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Un solo sviluppatore, pochi provider</td>
+<td>BYOK nativo (<a href="06-BYOK-GitHub-Copilot.html">06</a>)</td>
+</tr>
+<tr>
+<td>Team con chiavi condivise, budget, elenco dei modelli permessi, log centrali</td>
+<td>Gateway LiteLLM con hardening</td>
+</tr>
+<tr>
+<td>Organizzazione con Copilot Business o Enterprise</td>
+<td>Valuta prima il BYOK enterprise di GitHub (<a href="06-BYOK-GitHub-Copilot.html#2-i-due-meccanismi-byok-locale-e-byok-enterprise">06 §2</a>)</td>
+</tr>
+</tbody>
+</table>
+<p>Il criterio completo è nella decisione <a href="Decisions.html#d-017">D-017</a>.</p></article>
+<script type="application/json" id="fonts-data">[
+  {
+    "id": "blexmono",
+    "label": "BlexMono Nerd Font (IBM Plex Mono)",
+    "mono": true,
+    "body": false
+  },
+  {
+    "id": "firacode",
+    "label": "FiraCode Nerd Font",
+    "mono": true,
+    "body": false
+  },
+  {
+    "id": "googlesanscode",
+    "label": "GoogleSansCode Nerd Font",
+    "mono": true,
+    "body": false
+  },
+  {
+    "id": "monoid",
+    "label": "Monoid Nerd Font",
+    "mono": true,
+    "body": false
+  },
+  {
+    "id": "opendyslexic",
+    "label": "OpenDyslexic Nerd Font",
+    "mono": true,
+    "body": true
+  },
+  {
+    "id": "saucecodepro",
+    "label": "SauceCodePro Nerd Font (Source Code Pro)",
+    "mono": true,
+    "body": false
+  },
+  {
+    "id": "ubuntusans",
+    "label": "UbuntuSans Nerd Font",
+    "mono": true,
+    "body": true
+  }
+]</script>
+<script src="../assets/vendor/highlight/highlight.min.js"></script>
+<script src="../assets/vendor/highlight/languages/bash.min.js"></script>
+<script src="../assets/vendor/highlight/languages/powershell.min.js"></script>
+<script src="../assets/vendor/highlight/languages/yaml.min.js"></script>
+<script src="../assets/vendor/highlight/languages/json.min.js"></script>
+<script src="../assets/vendor/highlight/languages/ini.min.js"></script>
+<script src="../assets/vendor/highlight/languages/dockerfile.min.js"></script>
+<script src="../assets/vendor/highlight/languages/plaintext.min.js"></script>
+<script src="../assets/common.js"></script>
+<script src="../assets/doc.js"></script>
+</body>
+</html>
