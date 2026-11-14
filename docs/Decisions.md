@@ -812,13 +812,14 @@ L'opzione 3 resta possibile: S-402 e S-403 sono «Non applicabile» e S-404 scri
 
 - `backlog.md` definisce le voci standard: da DoD-F1 a DoD-F9 per una Feature, da DoD-E1 a DoD-E8 per un'Epic, ognuna con l'evidenza richiesta e chi la verifica;
 - i modelli `templates/epic.md` e `templates/feature.md` aprono con l'obiettivo di completamento e contengono la tabella;
-- l'Organizzatore compila le evidenze; i due Reviewer non approvano con una voce `non soddisfatta` o `senza evidenza`; il merge e lo stato `done` richiedono la Definition of Done completa;
+- l'Organizzatore compila le evidenze; i due Reviewer controllano le voci che esistono prima delle review e non approvano con una voce `non soddisfatta` o `senza evidenza`;
+- due soglie, perché alcune voci esistono solo dopo il merge: il merge in `develop` richiede le voci da DoD-F1 a DoD-F7 (in `main`: da DoD-E1 a DoD-E6); lo stato `done` richiede tutte le voci;
 - solo il PO può togliere una voce;
 - i criteri di accettazione dei Task hanno la forma «Dato…, quando…, allora…», un campo **Verifica** e almeno un criterio per gli errori.
 
 **Razionale.** La Scrum Guide definisce la Definition of Done come descrizione formale dello stato richiesto e dice che un lavoro che non la rispetta non si rilascia. Una tabella con evidenze rende il controllo oggettivo anche per un modello economico. Due livelli separati evitano di confondere «il Task funziona» con «la Feature è finita».
 
-**Conseguenze.** Più lavoro per l'Organizzatore prima delle review. Dopo il merge serve una PR per registrare DoD-F8 e DoD-F9. I Reviewer non eseguono comandi: controllano le evidenze contro i file. La Scrum Guide applica la Definition of Done all'Increment: l'uso per Feature ed Epic è un adattamento di questo template.
+**Conseguenze.** Più lavoro per l'Organizzatore prima delle review. Dopo il merge serve una PR per registrare le voci da DoD-F6 a DoD-F9, con l'approvazione del Reviewer ottimista. I Reviewer non eseguono comandi: controllano le evidenze contro i file. La Scrum Guide applica la Definition of Done all'Increment: l'uso per Feature ed Epic è un adattamento di questo template.
 
 **Fonti.** [S-170](Sources.md#s-170).
 
