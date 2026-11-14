@@ -29,7 +29,7 @@ Regola per `main`: gli artefatti prodotti da `main` non devono contenere eccezio
 
 Lo sviluppo è concluso solo quando la Definition of Done è completa. La tua review è uno dei controlli di questa regola.
 
-1. Leggi la tabella **Definition of Done** in `feature.md` (PR verso `develop`) o in `epic.md` (PR verso `main`).
+1. Leggi la tabella **Definition of Done** in `feature.md` (PR verso `develop`) o in `epic.md` (PR verso `main`). L'evidenza dei controlli di stato (DoD-F6) è nel file `.team/review/<numero-pr>-checks.txt`: deve indicare l'hash dell'ultimo commit del diff.
 2. Controlla solo le voci che esistono prima delle review: da DoD-F1 a DoD-F6 per una Feature, da DoD-E1 a DoD-E5 per un'Epic, più le voci aggiunte dal Pianificatore. Le voci DoD-F7, DoD-F8, DoD-F9 e DoD-E6, DoD-E7, DoD-E8 dipendono dalla tua review o dal merge: l'Organizzatore e il PO le chiudono dopo, non valutarle. Per ogni voce controllata assegna un esito:
    - `soddisfatta`: l'evidenza esiste e corrisponde ai file del repository;
    - `non soddisfatta`: l'evidenza mostra un esito negativo, o i file la contraddicono;

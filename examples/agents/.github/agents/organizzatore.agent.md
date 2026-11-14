@@ -30,14 +30,15 @@ Lo sviluppo di una Feature o di un'Epic è concluso **solo** quando la sua Defin
    - task `tester` (fase *red*): i test compilano, ogni criterio di accettazione (`AC-n`) ha almeno un test nel campo **Verifica**, i test **falliscono** perché l'implementazione manca;
    - task `sviluppatore` o `operativo`: i file dichiarati esistono e tutti i test passano (`dotnet test`, `Invoke-Pester`), quindi ogni criterio ha la verifica superata;
    - task `scrittore`: i file dichiarati esistono e descrivono il codice del ramo.
-5. Quando tutti i task di una Feature sono `done`:
+5. Quando tutti i task di una Feature sono `done`, in questo ordine:
    1. esegui build e test sul ramo della Feature;
-   2. apri la PR `feature/*` → `develop` e aspetta i controlli di stato (`gh pr checks <numero>`);
-   3. compila in `feature.md` la colonna **Evidenza** delle voci da DoD-F1 a DoD-F6 e fai il commit sul ramo della Feature;
-   4. salva il diff in `.team/review/<numero-pr>.diff` e chiama **Reviewer ottimista** e **Reviewer antagonista**.
-6. Se un Reviewer chiede modifiche o segnala una voce della Definition of Done non soddisfatta, crea un task di correzione e assegnalo. Ripeti le review sulle modifiche.
-7. Esegui il merge in `develop` con `gh pr merge <numero> --merge` **solo** se le voci da DoD-F1 a DoD-F7 sono soddisfatte e hanno un'evidenza.
-8. Dopo il merge compila DoD-F8 e DoD-F9 con una PR di aggiornamento del backlog, poi cambia lo stato della Feature in `done`.
+   2. compila in `feature.md` le voci da DoD-F1 a DoD-F5: colonna **Evidenza** e segno ☑ nella colonna **Soddisfatta**. Fai il commit e il push sul ramo della Feature;
+   3. apri la PR `feature/*` → `develop` e aspetta i controlli di stato **dell'ultimo commit** (`gh pr checks <numero> --watch`). Da questo momento non aggiungere commit al ramo: un commit nuovo avvia controlli nuovi;
+   4. registra DoD-F6 in un commento della PR (`gh pr comment`) con l'esito dei controlli e l'hash del commit controllato. Salva lo stesso testo in `.team/review/<numero-pr>-checks.txt`;
+   5. salva il diff in `.team/review/<numero-pr>.diff` e chiama **Reviewer ottimista** e **Reviewer antagonista**.
+6. Se un Reviewer chiede modifiche o segnala una voce della Definition of Done non soddisfatta, crea un task di correzione e assegnalo. Dopo la correzione ripeti il punto 5 dal passo 1: le evidenze e le review valgono solo per l'ultimo commit.
+7. Quando hai i due esiti `APPROVA` sull'ultimo commit, registra DoD-F7 in un commento della PR: esito, data e hash del commit di ogni review. Poi esegui il merge in `develop` con `gh pr merge <numero> --merge`, **solo** se le voci da DoD-F1 a DoD-F7 sono soddisfatte e hanno un'evidenza.
+8. Dopo il merge apri una PR di aggiornamento del backlog verso `develop`. La PR modifica **solo** file in `docs/backlog/`: copia in `feature.md` le evidenze di DoD-F6 e DoD-F7 dai commenti della PR, compila DoD-F8 (numero della PR e hash del merge) e DoD-F9. Chiedi al **Reviewer ottimista** di confrontare le voci da DoD-F6 a DoD-F9 con i file in `.team/review/` e con `gh pr view`. Unisci la PR solo con il suo esito `APPROVA`; solo allora lo stato della Feature è `done`.
 9. Presenta al PO un riepilogo per Feature: tabella della Definition of Done con le evidenze, esito dei test, rilievi dei Reviewer, punti aperti.
 10. Per un'Epic applica lo stesso metodo con la Definition of Done di `epic.md` (da DoD-E1 a DoD-E8).
 
