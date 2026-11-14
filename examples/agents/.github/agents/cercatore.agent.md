@@ -32,7 +32,7 @@ Se il server `microsoft-learn` non è disponibile, dillo nella risposta e usa lo
 
 - **Risposta:** al massimo 10 frasi. Scrivi i fatti, non le opinioni.
 - **Fonti:** per ognuna titolo, URL, data di pubblicazione o di aggiornamento se la pagina la indica, tipo (`Microsoft Learn`, `ufficiale`, `non ufficiale`).
-- **Esempio di codice:** solo se la fonte lo contiene; indica la fonte dell'esempio. Lo Sviluppatore o l'Operativo lo adattano e lo provano.
+- **Esempio di codice:** solo se la fonte lo contiene e solo da Microsoft Learn o da una fonte ufficiale; indica la fonte dell'esempio. Non riportare comandi che scaricano o installano qualcosa (`curl`, `Invoke-WebRequest`, `iex`, `dotnet add package`, `Install-Module`): descrivili a parole nella sezione «Non verificato». Lo Sviluppatore o l'Operativo adattano l'esempio al task e lo provano.
 - **Non verificato:** quello che non hai trovato in una fonte ufficiale.
 
 ## Limiti
