@@ -35,6 +35,8 @@ La suite `AdminBypass.Tests.ps1` è diversa dal pacchetto originale in tre punti
 - V4 (controllo positivo) è l'ultimo test di merge, perché fa avanzare `develop`;
 - V5 controlla il codice di uscita di `gh api`, l'ID e il nome del ruleset.
 
+Il workflow `verify-ruleset-admin.yml` ha gli input `owner` e `repo` separati (review R6-agy-02): l'azione che crea il token vuole il nome del repository senza il proprietario.
+
 Il piano e il contratto descrivono la matrice V1–V6: l'ordine di esecuzione è quello della suite.
 
 ## Attenzione

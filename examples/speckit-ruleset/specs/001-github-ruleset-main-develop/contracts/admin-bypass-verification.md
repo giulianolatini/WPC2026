@@ -6,7 +6,8 @@
 
 | Input | Tipo | Esempio | Note |
 |---|---|---|---|
-| `repository` | string | `contoso/sample-app` | Oppure `contoso/sample-app-ruleset-lab` |
+| `owner` | string | `contoso` | Proprietario del repository |
+| `repo` | string | `sample-app-ruleset-lab` | Nome del repository senza il proprietario; oppure `sample-app` |
 | `pr_main` | number | `101` | PR → `main`, check verdi, senza approvazione |
 | `pr_develop_red` | number | `102` | PR → `develop`, `test-dotnet` fallito |
 | `pr_develop_green` | number | `103` | PR → `develop`, check verdi |

@@ -4,10 +4,14 @@ name: Verify ruleset (--admin) with contoso-copilot-agent
 on:
   workflow_dispatch:
     inputs:
-      repository:
-        description: "Repository da verificare (owner/repo)"
+      owner:
+        description: "Organizzazione o utente proprietario del repository"
         required: true
-        default: "contoso/sample-app-ruleset-lab"
+        default: "contoso"
+      repo:
+        description: "Nome del repository da verificare, senza il proprietario"
+        required: true
+        default: "sample-app-ruleset-lab"
       pr_main:
         description: "PR verso main, check verdi, senza approvazione"
         required: true
@@ -36,8 +40,8 @@ jobs:
         with:
           client-id: ${{ vars.COPILOT_AGENT_CLIENT_ID }}
           private-key: ${{ secrets.COPILOT_AGENT_PRIVATE_KEY }}
-          owner: contoso
-          repositories: ${{ inputs.repository }}
+          owner: ${{ inputs.owner }}
+          repositories: ${{ inputs.repo }}
           permission-contents: write
           permission-pull-requests: write
 
@@ -49,7 +53,7 @@ jobs:
         shell: pwsh
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
-          RULESET_REPO: ${{ inputs.repository }}
+          RULESET_REPO: ${{ inputs.owner }}/${{ inputs.repo }}
           PR_MAIN: ${{ inputs.pr_main }}
           PR_DEVELOP_RED: ${{ inputs.pr_develop_red }}
           PR_DEVELOP_GREEN: ${{ inputs.pr_develop_green }}
