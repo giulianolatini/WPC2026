@@ -1,11 +1,11 @@
 ---
 title: Runbook WPC2026 — GitHub Copilot in VS Code con LLM via API (nativo e LiteLLM)
-version: 1.0.0
+version: 1.1.0
 ---
 
 # Runbook WPC2026
 
-Questo runbook guida l'installazione e la configurazione descritte in [01-Installazione](../01-Installazione.md) e [02-Configurazione-Copilot](../02-Configurazione-Copilot.md).
+Questo runbook guida l'installazione e la configurazione descritte in [01-Installazione](../01-Installazione.md) e [02-Configurazione-Copilot](../02-Configurazione-Copilot.md), e la prova del team di agenti di [05-Team-Agenti](../05-Team-Agenti.md) (fase F9).
 Il sito offline in `site/` si genera da questo file con `tools/update-site.sh` (o `tools/update-site.ps1`).
 
 **Regole di scrittura del file** (il generatore le legge):
@@ -31,9 +31,13 @@ Il sito offline in `site/` si genera da questo file con `tools/update-site.sh` (
 | LITELLM_VERSION | version | 1.108.2 | 1.108.2 | Versione LTS di LiteLLM ([D-018](../Decisions.md#d-018)) |
 | ADMIN_ID | name | wpc-admin | wpc-admin | Utente `proxy_admin` (profilo esteso) |
 | ADMIN_EMAIL | email | tu@example.com | tu@example.com | Email del `proxy_admin` (profilo esteso) |
-| SPECKIT_VERSION | version | 1.3.2 | 1.3.2 | Versione di Spec Kit ([S-085](../Sources.md#s-085)) |
+| SPECKIT_VERSION | version | 1.4.0 | 1.4.0 | Versione di Spec Kit ⚠️ da controllare ([S-085](../Sources.md#s-085), [D-042](../Decisions.md#d-042)) |
 | SPECKIT_PROJECT | name | wpc-speckit-demo | wpc-speckit-demo | Cartella del progetto di prova Spec Kit |
 | PG_MAJOR | major | 16 | 16 | Versione principale di PostgreSQL del profilo esteso: immagine Docker (S-301) e installazione con uv (S-402) ([D-030](../Decisions.md#d-030)) |
+| TEAM_PROJECT | path | $HOME/Sviluppo/GITHUB/team-demo | $HOME\Sviluppo\GITHUB\team-demo | Clone locale del repository di prova del team di agenti (fase F9) |
+| GH_OWNER | name | contoso | contoso | Organizzazione o utente GitHub del repository di prova |
+| GH_REPO | name | team-demo | team-demo | Nome del repository di prova |
+| PO_USER | name | release-approver | release-approver | Utente GitHub del Product Owner, unico *code owner* |
 
 ## F1 — Prerequisiti
 
@@ -641,18 +645,183 @@ git status --short
 
 **Esito atteso:** gli artefatti di specifica, piano e task sono creati nel progetto.
 
-## F9 — Chiusura
+## F9 — Team di agenti
 
-### S-901 — Revoca le chiavi della demo
+Questa fase installa e prova il team di agenti di [05-Team-Agenti](../05-Team-Agenti.md) in un repository **di prova**. È facoltativa.
+⚠️ Ruleset, `CODEOWNERS`, CI e script non sono stati provati su GitHub ([D-039](../Decisions.md#d-039)): usa un repository di laboratorio.
+
+### S-911 — Controlla i requisiti del team
+<!-- step: os=all path=all profile=all -->
+
+```bash os=all
+git --version
+gh --version
+gh auth status
+dotnet --version
+pwsh --version
+specify version
+```
+
+**Esito atteso:** .NET SDK 10, PowerShell 7.4 o successivo, Spec Kit `{{SPECKIT_VERSION}}`; `gh` ha un accesso valido ([05 §6](../05-Team-Agenti.md#6-installazione-del-team-in-un-repository)).
+
+### S-912 — Crea il repository di prova con i rami GitFlow
+<!-- step: os=all path=all profile=all -->
+
+- [ ] Crea su GitHub il repository `{{GH_OWNER}}/{{GH_REPO}}` con un primo commit su `main`. Per i ruleset usa un'organizzazione.
+- [ ] Clona il repository e crea i rami:
+
+```bash os=all
+gh repo clone "{{GH_OWNER}}/{{GH_REPO}}" "{{TEAM_PROJECT}}"
+cd "{{TEAM_PROJECT}}"
+git switch -c develop
+git push -u origin develop
+git switch -c feature/000-team-agenti
+```
+
+**Esito atteso:** `git branch --show-current` mostra `feature/000-team-agenti`; `develop` esiste su GitHub ([gitflow.md](../../examples/agents/docs/team/gitflow.md)).
+
+### S-913 — Inizializza Spec Kit e l'estensione git
+<!-- step: os=all path=all profile=all -->
+
+```bash os=all
+cd "{{TEAM_PROJECT}}"
+specify init --here --force --integration copilot
+specify extension add git
+```
+
+- [ ] Leggi gli script in `.specify/` prima del commit ([04 AZ-10](../04-Security-Review-OWASP-ISO27001.md#9-azioni)).
+
+**Esito atteso:** esistono `.specify/` e `.specify/extensions/git/git-config.yml`. ⚠️ Comando `specify extension add git` da provare ([D-040](../Decisions.md#d-040)).
+
+### S-914 — Copia il template del team
+<!-- step: os=all path=all profile=all -->
+
+```bash os=macos,debian,opensuse
+cp -R "{{REPO_DIR}}/examples/agents/." "{{TEAM_PROJECT}}/"
+cd "{{TEAM_PROJECT}}"
+grep -n 'branch_prefix' .specify/extensions/git/git-config.yml
+ls .github/agents
+```
+
+```powershell os=windows
+Copy-Item -Recurse -Force "{{REPO_DIR}}\examples\agents\*" "{{TEAM_PROJECT}}\"
+Copy-Item -Recurse -Force "{{REPO_DIR}}\examples\agents\.github" "{{TEAM_PROJECT}}\"
+Copy-Item -Recurse -Force "{{REPO_DIR}}\examples\agents\.specify" "{{TEAM_PROJECT}}\"
+Copy-Item -Force "{{REPO_DIR}}\examples\agents\.gitignore" "{{TEAM_PROJECT}}\"
+Set-Location "{{TEAM_PROJECT}}"
+Select-String -Path .specify\extensions\git\git-config.yml -Pattern 'branch_prefix'
+Get-ChildItem .github\agents
+```
+
+- [ ] Apri `.github/CODEOWNERS` e sostituisci `@release-approver` con `@{{PO_USER}}`.
+
+**Esito atteso:** `branch_prefix: "feature"`; 9 file `.agent.md`; `CODEOWNERS` contiene solo `* @{{PO_USER}}`.
+
+### S-915 — Configura VS Code per il team
+<!-- step: os=all path=all profile=all -->
+
+- [ ] Aggiungi nel Language Models editor i modelli del team ([05 §4](../05-Team-Agenti.md#4-modelli-e-costi)): Anthropic, OpenAI, OpenRouter.
+- [ ] Attiva `chat.agentHost.byokModels.enabled` e `github.copilot.chat.cli.customAgents.enabled` ([05 §5](../05-Team-Agenti.md#5-vincoli-tecnici-di-vs-code)). Riavvia VS Code.
+- [ ] Per ogni file in `.github/agents/` controlla il campo `model`: accetta l'ID che il completamento propone.
+- [ ] Scegli per la sessione un modello BYOK, non **Auto**.
+
+**Esito atteso:** il selettore degli agenti mostra **Organizzatore** e **Pianificatore**; le altre 7 figure non compaiono.
+
+### S-916 — Unisci il template in develop e porta la CI su main
+<!-- step: os=all path=all profile=all -->
+
+```bash os=all
+cd "{{TEAM_PROJECT}}"
+git add -A
+git commit -m "chore: add the agent team template"
+git push -u origin feature/000-team-agenti
+gh pr create --base develop --title "chore: add the agent team template" --body "Template del team di agenti"
+gh pr checks --watch
+```
+
+- [ ] Unisci la PR in `develop` con un merge commit. Apri una PR `develop` → `main` e uniscila.
+
+**Esito atteso:** i controlli `build`, `test-dotnet` e `test-powershell` hanno un'esecuzione verde su `develop` e su `main`. ⚠️ `ci.yml` richiede una soluzione .NET nella radice del repository.
+
+### S-917 — Applica i ruleset
+<!-- step: os=all path=all profile=all -->
+
+Esegui questo passo con il tuo utente (permesso *Administration*), **mai** con l'identità dell'agente ([S-174](../Sources.md#s-174)).
+
+```powershell os=all
+cd "{{TEAM_PROJECT}}"
+gh api apps/github-actions --jq .id
+./scripts/Set-Rulesets.ps1 -Repository "{{GH_OWNER}}/{{GH_REPO}}" -WhatIf
+./scripts/Set-Rulesets.ps1 -Repository "{{GH_OWNER}}/{{GH_REPO}}"
+gh api "repos/{{GH_OWNER}}/{{GH_REPO}}/rules/branches/main" --jq '.[].type'
+```
+
+**Esito atteso:** il primo comando mostra l'ID usato in `integration_id` (atteso `15368` ⚠️); `main` ha le regole `deletion`, `non_fast_forward`, `pull_request`, `required_status_checks`. ⚠️ Lo script richiede il team `release-emergency` nell'organizzazione.
+
+### S-918 — Pianifica con il Pianificatore
+<!-- step: os=all path=all profile=all -->
+
+- [ ] Seleziona l'agente **Pianificatore** e descrivi una Feature piccola.
+- [ ] Rispondi alle domande; leggi il what-if dell'Avversario (al massimo 2 alternative).
+- [ ] Di' al Pianificatore che le scelte sono complete.
+- [ ] Controlla `docs/backlog/`: ogni `epic.md` e `feature.md` apre con l'obiettivo di completamento e ha la tabella **Definition of Done** con tutte le voci standard.
+- [ ] Controlla un Task: i criteri di accettazione hanno la forma «Dato…, quando…, allora…» e il campo **Verifica**.
+
+```bash os=all
+cd "{{TEAM_PROJECT}}"
+git branch --show-current
+grep -rn "DoD-F9\|DoD-E8" docs/backlog
+```
+
+**Esito atteso:** il ramo ha la forma `feature/<NNN>-<slug>`; `grep` trova le ultime voci standard in ogni `feature.md` ed `epic.md` ([D-038](../Decisions.md#d-038)).
+
+### S-919 — Sviluppa una Feature con l'Organizzatore
+<!-- step: os=all path=all profile=all -->
+
+- [ ] Seleziona l'agente **Organizzatore** e chiedi di sviluppare la Feature.
+- [ ] Controlla l'ordine: Tester (*red*), Sviluppatore o Operativo (*green*), Scrittore.
+- [ ] Controlla che l'Organizzatore compili la colonna **Evidenza** prima di chiamare i Reviewer.
+- [ ] Controlla la risposta dei due Reviewer: una riga per ogni voce della Definition of Done.
+- [ ] Incolla nell'output del passo la tabella **Definition of Done** di `feature.md`.
+
+```bash os=all
+cd "{{TEAM_PROJECT}}"
+dotnet test
+gh pr list --state all --limit 5
+```
+
+**Esito atteso:** test verdi; la PR è unita in `develop` solo con le voci da DoD-F1 a DoD-F7 soddisfatte e con evidenza.
+
+### S-920 — Verifica i rifiuti di GitHub
+<!-- step: os=all path=all profile=all -->
+
+⚠️ Esegui questo passo solo nel repository di laboratorio.
+
+```bash os=all
+cd "{{TEAM_PROJECT}}"
+git switch develop
+git commit --allow-empty -m "test: direct push must be rejected"
+git push origin develop
+git reset --hard origin/develop
+```
+
+- [ ] Con l'identità dell'agente (GitHub App o account di servizio) prova `gh pr merge <numero> --merge --admin` su una PR verso `main` senza la tua approvazione.
+
+**Esito atteso:** GitHub rifiuta il push diretto e il merge con `--admin`; la PR resta aperta ([S-175](../Sources.md#s-175), [esempio](../../examples/speckit-ruleset/README.md)).
+
+## F10 — Chiusura
+
+### S-1001 — Revoca le chiavi della demo
 <!-- step: os=all path=all profile=all -->
 
 - [ ] Revoca le chiavi dei provider usate per la demo nelle rispettive console.
 - [ ] Profilo esteso: revoca le virtual keys di prova dall'Admin UI.
+- [ ] Fase F9: revoca il token dell'identità dell'agente e cancella il repository di laboratorio, se non serve più.
 - [ ] Ferma il proxy (`docker compose … down`, `systemctl --user stop litellm`, `launchctl bootout …`, `Stop-ScheduledTask …`).
 
 **Esito atteso:** nessuna chiave della demo resta valida.
 
-### S-902 — Esporta le evidenze
+### S-1002 — Esporta le evidenze
 <!-- step: os=all path=all profile=all -->
 
 - [ ] Nel sito: **Esporta evidenze (Markdown)** e **Esporta sessione (JSON)**.
