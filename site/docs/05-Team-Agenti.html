@@ -109,7 +109,7 @@ I file del team sono in <a href="../../examples/agents/README.md"><code>examples
 </tr>
 <tr>
 <td>Nome dei rami di Feature</td>
-<td><code>feature/&lt;NNN&gt;-&lt;slug&gt;</code>, creato da Spec Kit (proposta da confermare)</td>
+<td><code>feature/&lt;NNN&gt;-&lt;slug&gt;</code>, creato da Spec Kit</td>
 <td><a href="Decisions.html#d-040">D-040</a></td>
 </tr>
 </tbody>
@@ -439,6 +439,7 @@ Copy-Item -Force examples\agents\.gitignore C:\percorso\del\progetto\
 </ul>
 <p><strong>Esito atteso:</strong> il selettore degli agenti mostra <strong>Organizzatore</strong> e <strong>Pianificatore</strong>. Le altre figure non compaiono nel selettore.</p>
 <h2 id="7-uso-del-team">7. Uso del team</h2>
+<p>La procedura con comandi, parametri ed evidenze è la fase F9 del <a href="../index.html">runbook</a>.</p>
 <h3 id="71-pianificazione">7.1 Pianificazione</h3>
 <ul>
 <li class="task"><input type="checkbox" disabled> Seleziona l'agente <strong>Pianificatore</strong> e descrivi l'esigenza.</li>
@@ -587,7 +588,7 @@ Copy-Item -Force examples\agents\.gitignore C:\percorso\del\progetto\
 <li><code>gh pr merge --admin</code> usa i privilegi di amministratore per unire una PR che non rispetta i requisiti (<a href="Sources.html#s-175">S-175</a>). Per questo l'agente non usa il token del PO.</li>
 <li><strong>Identità separata.</strong> L'Organizzatore usa una GitHub App o un account di servizio con i soli permessi <em>Contents: write</em> e <em>Pull requests: write</em>, senza <em>Administration</em> e fuori dalla lista di bypass (<a href="Sources.html#s-177">S-177</a>). Il PO è l'unico code owner.</li>
 <li>Il caso svolto <a href="../../examples/speckit-ruleset/README.md"><code>examples/speckit-ruleset/</code></a> contiene la specifica, il piano e i test che verificano il rifiuto di <code>--admin</code>.</li>
-<li>⚠️ Niente di questo è stato provato su GitHub. Con il piano Free i ruleset funzionano solo nei repository pubblici (P-13).</li>
+<li>⚠️ Niente di questo è stato provato su GitHub. Con il piano Free i ruleset funzionano solo nei repository pubblici; per i repository privati servono i piani Pro, Team o Enterprise Cloud (<a href="Sources.html#s-171">S-171</a>). Il bypass di un team richiede un'organizzazione.</li>
 </ul>
 <h3 id="92-regola-di-qualità-di-main">9.2 Regola di qualità di <code>main</code></h3>
 <p>Obiettivo del PO: gli artefatti prodotti da <code>main</code> non contengono eccezioni non gestite e non si fermano per un'anomalia prevedibile.</p>
@@ -595,7 +596,7 @@ Copy-Item -Force examples\agents\.gitignore C:\percorso\del\progetto\
 <ol>
 <li>il Pianificatore scrive un criterio di accettazione per ogni input non valido e ogni errore previsto;</li>
 <li>il Tester scrive un test per ognuno di questi criteri (voce DoD-F4) e i test d'integrazione della Release (voce DoD-E3);</li>
-<li>chi implementa valida gli input, cattura le eccezioni che può gestire e mantiene un gestore globale che registra l'errore e termina con un codice di uscita diverso da zero (<a href="Sources.html#s-178">S-178</a>);</li>
+<li>chi implementa valida gli input e cattura solo le eccezioni da cui il codice può riprendersi (<a href="Sources.html#s-178">S-178</a>); un gestore globale registra l'errore prima della terminazione (<a href="Sources.html#s-179">S-179</a>);</li>
 <li>il Reviewer antagonista assegna severità <code>alta</code> a ogni eccezione non gestita in una PR verso <code>main</code> (voce DoD-E4).</li>
 </ol>
 <h2 id="10-sicurezza">10. Sicurezza</h2>
@@ -608,6 +609,7 @@ Copy-Item -Force examples\agents\.gitignore C:\percorso\del\progetto\
 </ul>
 <h2 id="11-punti-da-provare">11. Punti da provare</h2>
 <ul>
+<li class="task"><input type="checkbox" disabled> ⚠️ Versione di Spec Kit (<code>specify version</code>) e comando <code>specify extension add git</code>: P-13 indica la 1.4.0, la rilettura diretta non lo conferma.</li>
 <li class="task"><input type="checkbox" disabled> ⚠️ Formato dell'ID nel campo <code>model</code> per un modello BYOK nell'harness Copilot.</li>
 <li class="task"><input type="checkbox" disabled> ⚠️ <code>chat.agentHost.byokModels.enabled</code>: i subagent usano il modello del loro file? Il provider OpenRouter funziona nell'Agent Host?</li>
 <li class="task"><input type="checkbox" disabled> ⚠️ <code>github.copilot.chat.cli.customAgents.enabled</code>: nome e default dell'impostazione nella tua versione di VS Code.</li>
