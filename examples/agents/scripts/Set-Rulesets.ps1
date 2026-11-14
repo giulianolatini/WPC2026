@@ -63,6 +63,8 @@ foreach ($file in Get-ChildItem -Path $RulesetDirectory -Filter '*.json') {
 
 # Verifica: regole attive effettive sui due rami.
 foreach ($branch in 'main', 'develop') {
-    $types = gh api "repos/$Repository/rules/branches/$branch" --jq '.[].type' | Sort-Object -Unique
+    $rawTypes = gh api "repos/$Repository/rules/branches/$branch" --jq '.[].type'
+    if ($LASTEXITCODE -ne 0) { throw "Impossibile leggere le regole del ramo '$branch'." }
+    $types = $rawTypes | Sort-Object -Unique
     Write-Host "$branch -> $($types -join ', ')"
 }
