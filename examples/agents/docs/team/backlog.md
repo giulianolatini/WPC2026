@@ -99,13 +99,15 @@ Regole:
 - Una sola figura lo completa.
 - Ha un solo risultato, che si può verificare.
 - Non richiede scelte di prodotto: le scelte sono già in `decisions.md`.
-- Per il codice: un task `tester` (test che falliscono) e poi un task `sviluppatore` o `operativo` che dipende dal primo.
+- Per il codice: un task `tester` (test che falliscono) e poi un task `sviluppatore` o `operativo` che dipende dal primo. Il task `tester` è `done` con i test rossi: i criteri di accettazione risultano superati solo alla chiusura del task di implementazione.
 
 ## Stati
 
 | Elemento | Stati | `done` significa |
 |---|---|---|
-| Task | `todo`, `in-corso`, `in-review`, `done`, `bloccato` | Tutti i criteri di accettazione sono superati, con la verifica indicata |
+| Task `tester` | `todo`, `in-corso`, `in-review`, `done`, `bloccato` | I test compilano, coprono ogni criterio di accettazione e falliscono perché l'implementazione manca (*red*) |
+| Task `sviluppatore`, `operativo` | come sopra | Tutti i test passano: ogni criterio di accettazione ha la verifica superata (*green*) |
+| Task `scrittore` | come sopra | I documenti indicati esistono e descrivono il codice del ramo |
 | Feature | `todo`, `in-corso`, `in-review`, `done` | Definition of Done della Feature completa (da DoD-F1 a DoD-F9) |
 | Epic | `todo`, `in-corso`, `done` | Definition of Done dell'Epic completa (da DoD-E1 a DoD-E8) |
 
