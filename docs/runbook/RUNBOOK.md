@@ -691,6 +691,8 @@ specify extension add git
 
 - [ ] Leggi gli script in `.specify/` prima del commit ([04 AZ-10](../04-Security-Review-OWASP-ISO27001.md#9-azioni)).
 
+- [ ] Annota la versione di `specify version`: va nella ADR-001 del progetto (passo S-914).
+
 **Esito atteso:** esistono `.specify/` e `.specify/extensions/git/git-config.yml`. ⚠️ Comando `specify extension add git` da provare ([D-040](../Decisions.md#d-040)).
 
 ### S-914 — Copia il template del team
@@ -707,6 +709,7 @@ ls .github/agents
 Copy-Item -Recurse -Force "{{REPO_DIR}}\examples\agents\*" "{{TEAM_PROJECT}}\"
 Copy-Item -Recurse -Force "{{REPO_DIR}}\examples\agents\.github" "{{TEAM_PROJECT}}\"
 Copy-Item -Recurse -Force "{{REPO_DIR}}\examples\agents\.specify" "{{TEAM_PROJECT}}\"
+Copy-Item -Recurse -Force "{{REPO_DIR}}\examples\agents\.vscode" "{{TEAM_PROJECT}}\"
 Copy-Item -Force "{{REPO_DIR}}\examples\agents\.gitignore" "{{TEAM_PROJECT}}\"
 Set-Location "{{TEAM_PROJECT}}"
 Select-String -Path .specify\extensions\git\git-config.yml -Pattern 'branch_prefix'
@@ -714,18 +717,20 @@ Get-ChildItem .github\agents
 ```
 
 - [ ] Apri `.github/CODEOWNERS` e sostituisci `@release-approver` con `@{{PO_USER}}`.
+- [ ] Copia `docs/team/templates/decisions.md` in `docs/backlog/decisions.md` e scrivi nella ADR-001 la versione di Spec Kit ([D-044](../Decisions.md#d-044)).
 
-**Esito atteso:** `branch_prefix: "feature"`; 9 file `.agent.md`; `CODEOWNERS` contiene solo `* @{{PO_USER}}`.
+**Esito atteso:** `branch_prefix: "feature"`; 10 file `.agent.md`; `.vscode/mcp.json` esiste; `CODEOWNERS` contiene solo `* @{{PO_USER}}`; `docs/backlog/decisions.md` ha la ADR-001.
 
 ### S-915 — Configura VS Code per il team
 <!-- step: os=all path=all profile=all -->
 
 - [ ] Aggiungi nel Language Models editor i modelli del team ([05 §4](../05-Team-Agenti.md#4-modelli-e-costi)): Anthropic, OpenAI, OpenRouter.
 - [ ] Attiva `chat.agentHost.byokModels.enabled` e `github.copilot.chat.cli.customAgents.enabled` ([05 §5](../05-Team-Agenti.md#5-vincoli-tecnici-di-vs-code)). Riavvia VS Code.
+- [ ] Leggi `.vscode/mcp.json`, poi avvia il server MCP `microsoft-learn` per il Cercatore. In Copilot CLI: `/plugin install microsoftdocs/mcp` ([S-188](../Sources.md#s-188)).
 - [ ] Per ogni file in `.github/agents/` controlla il campo `model`: accetta l'ID che il completamento propone.
 - [ ] Scegli per la sessione un modello BYOK, non **Auto**.
 
-**Esito atteso:** il selettore degli agenti mostra **Organizzatore** e **Pianificatore**; le altre 7 figure non compaiono.
+**Esito atteso:** il selettore degli agenti mostra **Organizzatore** e **Pianificatore**; le altre 8 figure non compaiono; il server `microsoft-learn` è avviato.
 
 ### S-916 — Crea la soluzione minima per la CI
 <!-- step: os=all path=all profile=all -->
@@ -775,7 +780,8 @@ git pull --ff-only
 
 Esegui questo passo con il tuo utente (permesso *Administration*), **mai** con l'identità dell'agente ([S-174](../Sources.md#s-174)).
 
-- [ ] Crea nell'organizzazione `{{GH_OWNER}}` il team `release-emergency` con il solo sostituto del PO. Lo script si ferma se il team non esiste.
+- [ ] Organizzazione: crea in `{{GH_OWNER}}` il team `release-emergency` con il solo sostituto del PO. Lo script si ferma se il team non esiste.
+- [ ] Account personale (piano Free o Pro): non c'è un team. Salta il secondo comando e aggiungi `-WithoutEmergencyTeam` ai due comandi dello script. Con il piano Free il repository deve essere pubblico ([05 §9.2](../05-Team-Agenti.md#92-piani-github-e-configurazione-free)).
 
 ```bash os=all
 cd "{{TEAM_PROJECT}}"
@@ -786,14 +792,15 @@ pwsh -File ./scripts/Set-Rulesets.ps1 -Repository "{{GH_OWNER}}/{{GH_REPO}}"
 gh api "repos/{{GH_OWNER}}/{{GH_REPO}}/rules/branches/main" --jq '.[].type'
 ```
 
-**Esito atteso:** il primo comando mostra l'ID usato in `integration_id` (atteso `15368` ⚠️); `main` ha le regole `deletion`, `non_fast_forward`, `pull_request`, `required_status_checks`. Il secondo comando mostra `release-emergency`.
+**Esito atteso:** il primo comando mostra l'ID usato in `integration_id` (atteso `15368` ⚠️); `main` ha le regole `deletion`, `non_fast_forward`, `pull_request`, `required_status_checks`. Da questo momento ogni PR verso `main` e verso `develop` richiede la tua approvazione. Il secondo comando mostra `release-emergency`.
 
 ### S-919 — Pianifica con il Pianificatore
 <!-- step: os=all path=all profile=all -->
 
 - [ ] Controlla che il ramo corrente sia `develop` aggiornato (`git status -sb`).
 - [ ] Seleziona l'agente **Pianificatore** e descrivi una Feature piccola.
-- [ ] Rispondi alle domande; leggi il what-if dell'Avversario (al massimo 2 alternative).
+- [ ] Il Pianificatore controlla la versione di Spec Kit: se ti chiede di aggiornare, rispondi; con il sì controlla la ADR nuova in `docs/backlog/decisions.md`.
+- [ ] Rispondi alle domande; leggi il what-if dell'Avversario (al massimo 2 alternative). Chiedi un fatto tecnico su C#: il Pianificatore chiama il Cercatore, che risponde con fonti di Microsoft Learn.
 - [ ] Di' al Pianificatore che le scelte sono complete.
 - [ ] Controlla `docs/backlog/`: ogni `epic.md` e `feature.md` apre con l'obiettivo di completamento e ha la tabella **Definition of Done** con tutte le voci standard.
 - [ ] Controlla un Task: i criteri di accettazione hanno la forma «Dato…, quando…, allora…» e il campo **Verifica**.
@@ -821,7 +828,9 @@ dotnet test
 gh pr list --state all --limit 5
 ```
 
-**Esito atteso:** test verdi; la PR è unita in `develop` solo con le voci da DoD-F1 a DoD-F7 soddisfatte e con evidenza.
+- [ ] Approva la PR su GitHub quando l'Organizzatore te la presenta: prima della tua approvazione il merge deve fallire.
+
+**Esito atteso:** test verdi; la PR è unita in `develop` solo con le voci da DoD-F1 a DoD-F7 soddisfatte e con evidenza, dopo la tua approvazione.
 
 ### S-921 — Verifica i rifiuti di GitHub
 <!-- step: os=all path=all profile=all -->
