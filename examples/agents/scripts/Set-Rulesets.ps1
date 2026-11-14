@@ -24,8 +24,10 @@ param(
 $ErrorActionPreference = 'Stop'
 $org = $Repository.Split('/')[0]
 
-$teamId = [int](gh api "orgs/$org/teams/$EmergencyTeamSlug" --jq '.id')
-if ($LASTEXITCODE -ne 0 -or $teamId -le 0) { throw "Team '$EmergencyTeamSlug' non trovato in '$org'." }
+# Con un errore dell'API (es. 404) `--jq '.id'` stampa "null": valida il testo prima della conversione.
+$rawTeamId = gh api "orgs/$org/teams/$EmergencyTeamSlug" --jq '.id' 2>$null
+if ($LASTEXITCODE -ne 0 -or "$rawTeamId" -notmatch '^\d+$') { throw "Team '$EmergencyTeamSlug' non trovato in '$org'." }
+$teamId = [int]"$rawTeamId"
 
 $existing = gh api "repos/$Repository/rulesets" --paginate | ConvertFrom-Json
 if ($LASTEXITCODE -ne 0) { throw "Impossibile leggere i ruleset di $Repository." }
@@ -45,12 +47,13 @@ foreach ($file in Get-ChildItem -Path $RulesetDirectory -Filter '*.json') {
         if ($match) {
             if ($PSCmdlet.ShouldProcess("$Repository ruleset '$($ruleset.name)' (id $($match.id))", 'PUT')) {
                 gh api -X PUT "repos/$Repository/rulesets/$($match.id)" --input $body | Out-Null
+                if ($LASTEXITCODE -ne 0) { throw "Aggiornamento di '$($ruleset.name)' fallito." }
             }
         }
         elseif ($PSCmdlet.ShouldProcess("$Repository ruleset '$($ruleset.name)'", 'POST')) {
             gh api -X POST "repos/$Repository/rulesets" --input $body | Out-Null
+            if ($LASTEXITCODE -ne 0) { throw "Creazione di '$($ruleset.name)' fallita." }
         }
-        if ($LASTEXITCODE -ne 0) { throw "Applicazione di '$($ruleset.name)' fallita." }
     }
     finally {
         Remove-Item $body -ErrorAction SilentlyContinue
