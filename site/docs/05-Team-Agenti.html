@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="it" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="generator" content="tools/build_site.py — non modificare a mano">
+<title>05-Team-Agenti — WPC2026</title>
+<link rel="stylesheet" href="../assets/fonts.css">
+<link rel="stylesheet" href="../assets/vendor/highlight/github.min.css" id="hl-light">
+<link rel="stylesheet" href="../assets/vendor/highlight/github-dark.min.css" id="hl-dark" disabled>
+<link rel="stylesheet" href="../assets/styles.css">
+<script src="../assets/vendor/mermaid/mermaid.min.js"></script>
+<script>try{var p=JSON.parse(localStorage.getItem('wpc2026.prefs')||'{}');var t=p.theme;if(t!=='light'&&t!=='dark')t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body>
+<div class="topbar">
+  <h1><a href="../index.html" style="color:inherit;text-decoration:none">WPC2026</a> <span class="ver">05-Team-Agenti</span></h1>
+  <label>Tema <select id="pref-theme"><option value="auto">automatico</option><option value="light">chiaro</option><option value="dark">scuro</option></select></label>
+  <label>Testo <select id="pref-body"></select></label>
+  <label>Codice <select id="pref-code"></select></label>
+</div>
+<nav class="docnav"><a href="../index.html">← Runbook</a><ul><li><a href="01-Installazione.html">01-Installazione</a></li><li><a href="02-Configurazione-Copilot.html">02-Configurazione-Copilot</a></li><li><a href="03-Security-Best-Practices.html">03-Security-Best-Practices</a></li><li><a href="04-Security-Review-OWASP-ISO27001.html">04-Security-Review-OWASP-ISO27001</a></li><li><a href="05-Team-Agenti.html">05-Team-Agenti</a></li><li><a href="Decisions.html">Decisions</a></li><li><a href="Sources.html">Sources</a></li><li><a href="Review-Perplexity.html">Review-Perplexity</a></li></ul></nav><article class="doc"><h1 id="05--team-di-agenti-per-lo-sviluppo-spec-driven">05 — Team di agenti per lo sviluppo spec-driven</h1>
+<p>Questo documento descrive un team di agenti orchestrato per sviluppare un progetto software con GitHub Copilot in VS Code.
+Il team usa i modelli configurati con chiavi proprie (BYOK) nel documento <a href="02-Configurazione-Copilot.html">02-Configurazione-Copilot.md</a>: modelli costosi per analisi e pianificazione, modelli economici per l'implementazione.
+I file del team sono in <a href="../../examples/agents/README.md"><code>examples/agents/</code></a>.</p>
+<h2 id="indice">Indice</h2>
+<ol>
+<li><a href="#1-scelte-del-product-owner">Scelte del Product Owner</a></li>
+<li><a href="#2-le-figure-del-team">Le figure del team</a></li>
+<li><a href="#3-architettura">Architettura</a></li>
+<li><a href="#4-modelli-e-costi">Modelli e costi</a></li>
+<li><a href="#5-vincoli-tecnici-di-vs-code">Vincoli tecnici di VS Code</a></li>
+<li><a href="#6-installazione-del-team-in-un-repository">Installazione del team in un repository</a></li>
+<li><a href="#7-uso-del-team">Uso del team</a></li>
+<li><a href="#8-gitflow-e-regole-di-qualità">GitFlow e regole di qualità</a></li>
+<li><a href="#9-sicurezza">Sicurezza</a></li>
+<li><a href="#10-punti-da-provare">Punti da provare</a></li>
+</ol>
+<h2 id="1-scelte-del-product-owner">1. Scelte del Product Owner</h2>
+<table>
+<thead>
+<tr>
+<th>Scelta</th>
+<th>Valore</th>
+<th>Decisione</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Forma tecnica</td>
+<td><em>Custom agents</em> di VS Code (file <code>.agent.md</code>) con subagent</td>
+<td><a href="Decisions.html#d-033">D-033</a></td>
+</tr>
+<tr>
+<td>Harness</td>
+<td>Copilot; Local come riserva</td>
+<td><a href="Decisions.html#d-033">D-033</a></td>
+</tr>
+<tr>
+<td>Posizione</td>
+<td>Template in <code>examples/agents/</code> di questo repository</td>
+<td><a href="Decisions.html#d-033">D-033</a></td>
+</tr>
+<tr>
+<td>Modelli</td>
+<td>Misto per ruolo: Anthropic, OpenAI, OpenRouter</td>
+<td><a href="Decisions.html#d-034">D-034</a></td>
+</tr>
+<tr>
+<td>Backlog</td>
+<td>GitHub Spec Kit per le specifiche, file Markdown per Epic, Feature, Task</td>
+<td><a href="Decisions.html#d-035">D-035</a></td>
+</tr>
+<tr>
+<td>Brainstorming</td>
+<td>Il PO apre direttamente il Pianificatore</td>
+<td><a href="Decisions.html#d-035">D-035</a></td>
+</tr>
+<tr>
+<td>Merge in <code>develop</code></td>
+<td>Organizzatore, dopo le due review e i test verdi</td>
+<td><a href="Decisions.html#d-035">D-035</a></td>
+</tr>
+<tr>
+<td>Branching</td>
+<td>GitFlow completo, con hotfix e back-merge</td>
+<td><a href="Decisions.html#d-035">D-035</a></td>
+</tr>
+<tr>
+<td>TDD</td>
+<td>Solo il Tester modifica i test</td>
+<td><a href="Decisions.html#d-035">D-035</a></td>
+</tr>
+<tr>
+<td>Regole di scrittura</td>
+<td>Testo originale ispirato ad ASD-STE100, nel repository</td>
+<td><a href="Decisions.html#d-036">D-036</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="2-le-figure-del-team">2. Le figure del team</h2>
+<table>
+<thead>
+<tr>
+<th>Figura</th>
+<th>Compito</th>
+<th>Scrive</th>
+<th>Non fa</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Organizzatore</strong></td>
+<td>Parla con il PO, assegna i task, controlla i risultati, apre le PR, unisce le Feature in <code>develop</code></td>
+<td>Stato del backlog, log</td>
+<td>Codice, test, decisioni di prodotto, merge in <code>main</code></td>
+</tr>
+<tr>
+<td><strong>Pianificatore</strong></td>
+<td>Brainstorming 1to1 con il PO; scompone in Epic, Feature, Task con SOLID e TDD; mantiene le regole di scrittura</td>
+<td><code>specs/</code>, <code>docs/backlog/</code>, <code>docs/team/writing-rules.md</code></td>
+<td>Decisioni al posto del PO</td>
+</tr>
+<tr>
+<td><strong>Avversario</strong></td>
+<td>Contraddice la scelta del PO: what-if con al massimo 2 alternative</td>
+<td>Niente (solo risposta)</td>
+<td>Raccomandazioni, modifiche ai file</td>
+</tr>
+<tr>
+<td><strong>Tester</strong></td>
+<td>Test automatici prima del codice: NUnit per C#, Pester per PowerShell; test d'integrazione della Release</td>
+<td><code>tests/</code></td>
+<td>Codice di produzione</td>
+</tr>
+<tr>
+<td><strong>Sviluppatore</strong></td>
+<td>Implementa in C# i task; snippet C# per lo Scrittore</td>
+<td>Codice C#</td>
+<td>Modifiche ai test</td>
+</tr>
+<tr>
+<td><strong>Operativo</strong></td>
+<td>Automazioni e task operativi in PowerShell; snippet PowerShell per lo Scrittore</td>
+<td>Script PowerShell</td>
+<td>Modifiche ai test, comandi distruttivi</td>
+</tr>
+<tr>
+<td><strong>Scrittore</strong></td>
+<td>Log di sviluppo, riferimento di librerie e API, manuale utente, manuale per sviluppatori</td>
+<td><code>docs/</code></td>
+<td>Codice, snippet</td>
+</tr>
+<tr>
+<td><strong>Reviewer ottimista</strong></td>
+<td>Review dell'<em>happy path</em>: efficienza, chiarezza, semplicità, manutenibilità</td>
+<td>Niente (solo rilievi)</td>
+<td>Modifiche ai file</td>
+</tr>
+<tr>
+<td><strong>Reviewer antagonista</strong></td>
+<td>Review contro l'<em>happy path</em>: eccezioni non gestite, resilienza, anomalie</td>
+<td>Niente (solo rilievi)</td>
+<td>Modifiche ai file</td>
+</tr>
+</tbody>
+</table>
+<p>Ogni figura è un file in <a href="../../examples/agents/README.md"><code>examples/agents/.github/agents/</code></a>. Il file contiene il modello, gli strumenti permessi e le istruzioni (<a href="Sources.html#s-007">S-007</a>, <a href="Sources.html#s-072">S-072</a>).</p>
+<h2 id="3-architettura">3. Architettura</h2>
+<figure class="mermaid-wrap"><pre class="mermaid" data-src="flowchart TD
+    PO([Product Owner]) --&gt;|esigenze| ORG[Organizzatore&lt;br/&gt;modello intermedio]
+    PO &lt;--&gt;|brainstorming 1to1| PIA[Pianificatore&lt;br/&gt;modello alto, effort high]
+    PIA --&gt;|what-if| AVV[Avversario&lt;br/&gt;modello medio, effort low]
+    PIA --&gt;|specifiche e backlog| BL[(specs/ e docs/backlog/)]
+    BL --&gt; ORG
+    ORG --&gt;|test red| TES[Tester]
+    ORG --&gt;|C#| SVI[Sviluppatore]
+    ORG --&gt;|PowerShell| OPE[Operativo]
+    ORG --&gt;|documenti| SCR[Scrittore]
+    ORG --&gt;|PR| REV{Reviewer ottimista&lt;br/&gt;Reviewer antagonista}
+    REV --&gt;|approvano| DEV[(develop)]
+    DEV --&gt; REL[(release)]
+    REL --&gt;|approvazione del PO| MAIN[(main)]
+">flowchart TD
+    PO([Product Owner]) --&gt;|esigenze| ORG[Organizzatore&lt;br/&gt;modello intermedio]
+    PO &lt;--&gt;|brainstorming 1to1| PIA[Pianificatore&lt;br/&gt;modello alto, effort high]
+    PIA --&gt;|what-if| AVV[Avversario&lt;br/&gt;modello medio, effort low]
+    PIA --&gt;|specifiche e backlog| BL[(specs/ e docs/backlog/)]
+    BL --&gt; ORG
+    ORG --&gt;|test red| TES[Tester]
+    ORG --&gt;|C#| SVI[Sviluppatore]
+    ORG --&gt;|PowerShell| OPE[Operativo]
+    ORG --&gt;|documenti| SCR[Scrittore]
+    ORG --&gt;|PR| REV{Reviewer ottimista&lt;br/&gt;Reviewer antagonista}
+    REV --&gt;|approvano| DEV[(develop)]
+    DEV --&gt; REL[(release)]
+    REL --&gt;|approvazione del PO| MAIN[(main)]
+</pre><details class="mermaid-src"><summary>Sorgente Mermaid</summary><pre class="code"><code class="language-plaintext">flowchart TD
+    PO([Product Owner]) --&gt;|esigenze| ORG[Organizzatore&lt;br/&gt;modello intermedio]
+    PO &lt;--&gt;|brainstorming 1to1| PIA[Pianificatore&lt;br/&gt;modello alto, effort high]
+    PIA --&gt;|what-if| AVV[Avversario&lt;br/&gt;modello medio, effort low]
+    PIA --&gt;|specifiche e backlog| BL[(specs/ e docs/backlog/)]
+    BL --&gt; ORG
+    ORG --&gt;|test red| TES[Tester]
+    ORG --&gt;|C#| SVI[Sviluppatore]
+    ORG --&gt;|PowerShell| OPE[Operativo]
+    ORG --&gt;|documenti| SCR[Scrittore]
+    ORG --&gt;|PR| REV{Reviewer ottimista&lt;br/&gt;Reviewer antagonista}
+    REV --&gt;|approvano| DEV[(develop)]
+    DEV --&gt; REL[(release)]
+    REL --&gt;|approvazione del PO| MAIN[(main)]
+</code></pre></details></figure>
+<ul>
+<li>Il PO parla con due agenti: <strong>Organizzatore</strong> e <strong>Pianificatore</strong>. Le altre figure sono subagent nascosti dal selettore degli agenti (<code>user-invocable: false</code>).</li>
+<li>L'Organizzatore chiama Tester, Sviluppatore, Operativo, Scrittore e i due Reviewer. Il Pianificatore chiama solo l'Avversario.</li>
+<li>Le figure comunicano con i file del repository: specifiche, backlog, test, codice, log. Un subagent non vede la conversazione di chi lo chiama (<a href="Sources.html#s-165">S-165</a>).</li>
+</ul>
+<h2 id="4-modelli-e-costi">4. Modelli e costi</h2>
+<p>Criterio: il costo del modello segue la quantità di ragionamento del compito. Il Pianificatore ragiona su tutto il progetto; le figure operative lavorano su task atomici.</p>
+<table>
+<thead>
+<tr>
+<th>Figura</th>
+<th>Provider</th>
+<th>Modello</th>
+<th>Effort</th>
+<th>Prezzo input / output (USD per 1M token)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Pianificatore</td>
+<td>Anthropic</td>
+<td><code>claude-fable-5-2</code></td>
+<td><code>high</code></td>
+<td>8 / 40 (<a href="Sources.html#s-040">S-040</a>)</td>
+</tr>
+<tr>
+<td>Organizzatore</td>
+<td>Anthropic</td>
+<td><code>claude-sonnet-5-5</code></td>
+<td>default</td>
+<td>2 / 10 (<a href="Sources.html#s-040">S-040</a>)</td>
+</tr>
+<tr>
+<td>Avversario</td>
+<td>OpenAI</td>
+<td><code>gpt-6.1-sol</code></td>
+<td><code>low</code></td>
+<td>⚠️ da verificare (<a href="Sources.html#s-102">S-102</a>)</td>
+</tr>
+<tr>
+<td>Sviluppatore, Operativo</td>
+<td>OpenAI</td>
+<td><code>gpt-5.4-mini</code></td>
+<td>default</td>
+<td>⚠️ da verificare (<a href="Sources.html#s-102">S-102</a>)</td>
+</tr>
+<tr>
+<td>Tester, Scrittore</td>
+<td>Anthropic</td>
+<td><code>claude-haiku-5-5</code></td>
+<td>default</td>
+<td>da 0,10 / 0,50 (<a href="Sources.html#s-040">S-040</a>)</td>
+</tr>
+<tr>
+<td>Reviewer ottimista</td>
+<td>OpenRouter</td>
+<td><code>deepseek/deepseek-v4.1-flash</code></td>
+<td>default</td>
+<td>⚠️ da verificare (<a href="Sources.html#s-166">S-166</a>)</td>
+</tr>
+<tr>
+<td>Reviewer antagonista</td>
+<td>OpenRouter</td>
+<td><code>qwen/qwen3-coder</code></td>
+<td>default</td>
+<td>⚠️ da verificare (<a href="Sources.html#s-166">S-166</a>)</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>I due Reviewer usano due modelli diversi: due punti di vista e due «famiglie» di errori.</li>
+<li>L'Avversario usa un provider diverso dal Pianificatore, con effort <code>low</code>: il ragionamento limitato evita più di 2 alternative.</li>
+<li>OpenAI non ha più modelli con il nome «Codex» correnti: le figure di codice usano i modelli generali indicati per il coding (<a href="Sources.html#s-102">S-102</a>).</li>
+<li>Gli ID e i prezzi con ⚠️ vengono da pagine non ufficiali o senza prezzo: il prompt <a href="Review-Perplexity.html#p-12--modelli-e-prezzi-per-il-team-di-agenti">P-12</a> li verifica.</li>
+</ul>
+<h2 id="5-vincoli-tecnici-di-vs-code">5. Vincoli tecnici di VS Code</h2>
+<table>
+<thead>
+<tr>
+<th>Vincolo</th>
+<th>Effetto sul team</th>
+<th>Fonte</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Un subagent non può fare domande all'utente</td>
+<td>Il PO apre il Pianificatore direttamente per il brainstorming</td>
+<td><a href="Sources.html#s-165">S-165</a></td>
+</tr>
+<tr>
+<td>Un subagent non riceve la conversazione principale</td>
+<td>L'Organizzatore usa un modulo di consegna completo per ogni task</td>
+<td><a href="Sources.html#s-165">S-165</a></td>
+</tr>
+<tr>
+<td>Un subagent con modello più costoso del modello principale non parte; un subagent BYOK mantiene il suo modello</td>
+<td>Tutte le figure usano modelli BYOK</td>
+<td><a href="Sources.html#s-165">S-165</a></td>
+</tr>
+<tr>
+<td>I subagent non chiamano altri subagent, senza un'impostazione dedicata</td>
+<td>Lo Scrittore chiede gli snippet tramite l'Organizzatore</td>
+<td><a href="Sources.html#s-165">S-165</a></td>
+</tr>
+<tr>
+<td>Gli <em>handoff</em> e il campo <code>agents</code> esistono solo nell'harness Local, che termina a febbraio 2027</td>
+<td>Il team usa i subagent dell'harness Copilot</td>
+<td><a href="Sources.html#s-072">S-072</a>, <a href="Sources.html#s-068">S-068</a></td>
+</tr>
+<tr>
+<td>Nell'harness Copilot il BYOK è sperimentale</td>
+<td>Punto da provare; riserva: harness Local</td>
+<td><a href="Sources.html#s-068">S-068</a></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Differenze per l'harness Local (riserva).</strong> Nei file <code>.agent.md</code>:</p>
+<ul>
+<li>togli <code>target: github-copilot</code> o usa <code>target: vscode</code>;</li>
+<li>scrivi <code>model</code> come <code>&lt;nome del modello&gt; (&lt;vendor&gt;)</code>;</li>
+<li>aggiungi <code>agents: [...]</code> all'Organizzatore e al Pianificatore per limitare i subagent permessi;</li>
+<li>lo strumento per i subagent è <code>agent/runSubagent</code> (<a href="Sources.html#s-072">S-072</a>, <a href="Sources.html#s-165">S-165</a>).</li>
+</ul>
+<h2 id="6-installazione-del-team-in-un-repository">6. Installazione del team in un repository</h2>
+<p><strong>Requisiti:</strong> VS Code con GitHub Copilot (<a href="01-Installazione.html">01</a>), modelli BYOK di Anthropic, OpenAI e OpenRouter (<a href="02-Configurazione-Copilot.html#3-configurazione-nativa-verso-i-provider">02 §3</a>), <code>git</code>, <code>gh</code>, .NET SDK, PowerShell 7, GitHub Spec Kit (<a href="02-Configurazione-Copilot.html#appendice-a--github-spec-kit-con-copilot">02 Appendice A</a>).</p>
+<ul>
+<li class="task"><input type="checkbox" disabled> Crea i rami <code>main</code> e <code>develop</code> nel repository del progetto e proteggili con un ruleset (<a href="../../examples/agents/docs/team/gitflow.md">gitflow.md</a>).</li>
+<li class="task"><input type="checkbox" disabled> Crea un ramo <code>feature/E00-F00-team-agenti</code> da <code>develop</code>.</li>
+<li class="task"><input type="checkbox" disabled> Copia il contenuto di <code>examples/agents/</code> nella radice del repository:</li>
+</ul>
+<pre class="code"><code class="language-bash">cp -R examples/agents/. /percorso/del/progetto/
+</code></pre>
+<pre class="code"><code class="language-powershell">Copy-Item -Recurse -Force examples\agents\* C:\percorso\del\progetto\
+Copy-Item -Recurse -Force examples\agents\.github C:\percorso\del\progetto\
+Copy-Item -Force examples\agents\.gitignore C:\percorso\del\progetto\
+</code></pre>
+<ul>
+<li class="task"><input type="checkbox" disabled> Se il progetto ha già un <code>.gitignore</code>, aggiungi la riga <code>.team/</code> invece di copiare il file.</li>
+<li class="task"><input type="checkbox" disabled> Inizializza Spec Kit nel progetto con l'integrazione Copilot (<a href="02-Configurazione-Copilot.html#appendice-a--github-spec-kit-con-copilot">02 Appendice A</a>). ⚠️ Opzione per una cartella esistente: da verificare (<a href="Review-Perplexity.html#p-13--gitflow-spec-kit-e-tdd-con-nunit-e-pester">P-13</a>).</li>
+<li class="task"><input type="checkbox" disabled> Apri il progetto in VS Code. Per ogni file in <code>.github/agents/</code> controlla il campo <code>model</code>: cancella l'ID e accetta l'ID che il completamento propone per il tuo modello BYOK ⚠️.</li>
+<li class="task"><input type="checkbox" disabled> Applica la baseline di sicurezza (<a href="03-Security-Best-Practices.html#7-baseline-di-configurazione">03 §7</a>).</li>
+<li class="task"><input type="checkbox" disabled> Apri la PR verso <code>develop</code> e uniscila.</li>
+</ul>
+<p><strong>Esito atteso:</strong> il selettore degli agenti mostra <strong>Organizzatore</strong> e <strong>Pianificatore</strong>. Le altre figure non compaiono nel selettore.</p>
+<h2 id="7-uso-del-team">7. Uso del team</h2>
+<h3 id="71-pianificazione">7.1 Pianificazione</h3>
+<ul>
+<li class="task"><input type="checkbox" disabled> Seleziona l'agente <strong>Pianificatore</strong> e descrivi l'esigenza.</li>
+<li class="task"><input type="checkbox" disabled> Rispondi alle domande. Per le scelte importanti il Pianificatore presenta il what-if dell'Avversario.</li>
+<li class="task"><input type="checkbox" disabled> Di' al Pianificatore quando le scelte sono complete. Il Pianificatore scrive <code>specs/</code>, <code>docs/backlog/</code> e aggiorna <code>docs/team/writing-rules.md</code>.</li>
+<li class="task"><input type="checkbox" disabled> Leggi il backlog e approvalo, o chiedi modifiche.</li>
+</ul>
+<h3 id="72-sviluppo-di-una-feature">7.2 Sviluppo di una Feature</h3>
+<ul>
+<li class="task"><input type="checkbox" disabled> Seleziona l'agente <strong>Organizzatore</strong> e chiedi di sviluppare la Feature (es. <code>E01-F01</code>).</li>
+<li class="task"><input type="checkbox" disabled> L'Organizzatore crea il ramo <code>feature/*</code> e per ogni task chiama, in ordine: Tester (<em>red</em>), Sviluppatore o Operativo (<em>green</em> e <em>refactor</em>), Scrittore.</li>
+<li class="task"><input type="checkbox" disabled> L'Organizzatore apre la PR verso <code>develop</code> e chiama i due Reviewer.</li>
+<li class="task"><input type="checkbox" disabled> Se i due Reviewer approvano e i test sono verdi, l'Organizzatore unisce la PR e ti presenta il riepilogo.</li>
+</ul>
+<h3 id="73-release">7.3 Release</h3>
+<ul>
+<li class="task"><input type="checkbox" disabled> Chiedi all'Organizzatore di preparare la Release. L'Organizzatore crea <code>release/&lt;versione&gt;</code> da <code>develop</code>.</li>
+<li class="task"><input type="checkbox" disabled> Il Tester scrive ed esegue i test d'integrazione.</li>
+<li class="task"><input type="checkbox" disabled> I due Reviewer esaminano la PR verso <code>main</code>.</li>
+<li class="task"><input type="checkbox" disabled> Leggi il riepilogo, approva in modo esplicito ed esegui tu il merge in <code>main</code>.</li>
+<li class="task"><input type="checkbox" disabled> L'Organizzatore apre la PR di riallineamento verso <code>develop</code>.</li>
+</ul>
+<h2 id="8-gitflow-e-regole-di-qualità">8. GitFlow e regole di qualità</h2>
+<p>Il template usa GitFlow (<a href="Sources.html#s-167">S-167</a>): <code>feature/*</code> → <code>develop</code> → <code>release/*</code> → <code>main</code>, più <code>hotfix/*</code>. Le regole complete sono in <a href="../../examples/agents/docs/team/gitflow.md">gitflow.md</a>.</p>
+<blockquote>
+<p>Questo repository (WPC2026) usa GitHub Flow. GitFlow vale per il repository che riceve il template.</p>
+</blockquote>
+<p>Regola di qualità di <code>main</code>: gli artefatti prodotti da <code>main</code> non contengono eccezioni non gestite e non si fermano per un'anomalia prevedibile. Tre controlli la applicano:</p>
+<ol>
+<li>il Pianificatore scrive la gestione degli errori nei criteri di accettazione di ogni task di codice;</li>
+<li>il Tester scrive test per input non validi ed errori attesi, e i test d'integrazione della Release;</li>
+<li>il Reviewer antagonista assegna severità <code>alta</code> a ogni eccezione non gestita in una PR verso <code>main</code>.</li>
+</ol>
+<h2 id="9-sicurezza">9. Sicurezza</h2>
+<ul>
+<li><strong>Privilegio minimo.</strong> Ogni figura ha solo gli strumenti necessari: i Reviewer e l'Avversario leggono soltanto; solo l'Organizzatore usa <code>git</code> e <code>gh</code> per le PR (<a href="03-Security-Best-Practices.html#3-github-copilot-in-vs-code">03 §3</a>).</li>
+<li><strong>Segreti.</strong> Le istruzioni di ogni figura vietano di leggere <code>.env</code>, chiavi e token. Mantieni attiva la sandbox dell'agente (<a href="03-Security-Best-Practices.html#7-baseline-di-configurazione">03 §7</a>).</li>
+<li><strong>Codice verso i provider.</strong> Con il BYOK il codice del progetto va ai provider dei modelli. I due Reviewer mandano i diff a provider scelti da OpenRouter: configura i <em>guardrail</em> di OpenRouter (provider permessi, nessuna conservazione dei dati) prima di usare il team su codice riservato (<a href="Sources.html#s-115">S-115</a>, <a href="Sources.html#s-151">S-151</a>).</li>
+<li><strong>Merge automatico.</strong> L'Organizzatore unisce solo in <code>develop</code>. Il ruleset di GitHub deve impedire il merge in <code>main</code> senza l'approvazione del PO: le istruzioni di un agente non sono un controllo di sicurezza.</li>
+<li><strong>Prompt injection.</strong> Un file del repository o una pagina web possono contenere istruzioni per l'agente. Lascia lo strumento <code>web</code> solo al Pianificatore (<a href="04-Security-Review-OWASP-ISO27001.html">04</a>).</li>
+</ul>
+<h2 id="10-punti-da-provare">10. Punti da provare</h2>
+<ul>
+<li class="task"><input type="checkbox" disabled> ⚠️ Formato dell'ID nel campo <code>model</code> per un modello BYOK nell'harness Copilot.</li>
+<li class="task"><input type="checkbox" disabled> ⚠️ BYOK sperimentale nell'harness Copilot: i subagent usano il modello del loro file?</li>
+<li class="task"><input type="checkbox" disabled> ⚠️ <code>reasoning-effort</code> applicato a un modello BYOK (<code>high</code> per il Pianificatore, <code>low</code> per l'Avversario).</li>
+<li class="task"><input type="checkbox" disabled> ⚠️ ID e prezzi dei modelli OpenAI e OpenRouter della tabella in §4.</li>
+<li class="task"><input type="checkbox" disabled> ⚠️ Nomi dei rami creati da Spec Kit rispetto a <code>feature/*</code> di GitFlow.</li>
+<li class="task"><input type="checkbox" disabled> ⚠️ Chiamate agli strumenti dei due modelli OpenRouter (sola lettura dei file).</li>
+</ul></article>
+<script type="application/json" id="fonts-data">[
+  {
+    "id": "blexmono",
+    "label": "BlexMono Nerd Font (IBM Plex Mono)",
+    "mono": true,
+    "body": false
+  },
+  {
+    "id": "firacode",
+    "label": "FiraCode Nerd Font",
+    "mono": true,
+    "body": false
+  },
+  {
+    "id": "googlesanscode",
+    "label": "GoogleSansCode Nerd Font",
+    "mono": true,
+    "body": false
+  },
+  {
+    "id": "monoid",
+    "label": "Monoid Nerd Font",
+    "mono": true,
+    "body": false
+  },
+  {
+    "id": "opendyslexic",
+    "label": "OpenDyslexic Nerd Font",
+    "mono": true,
+    "body": true
+  },
+  {
+    "id": "saucecodepro",
+    "label": "SauceCodePro Nerd Font (Source Code Pro)",
+    "mono": true,
+    "body": false
+  },
+  {
+    "id": "ubuntusans",
+    "label": "UbuntuSans Nerd Font",
+    "mono": true,
+    "body": true
+  }
+]</script>
+<script src="../assets/vendor/highlight/highlight.min.js"></script>
+<script src="../assets/vendor/highlight/languages/bash.min.js"></script>
+<script src="../assets/vendor/highlight/languages/powershell.min.js"></script>
+<script src="../assets/vendor/highlight/languages/yaml.min.js"></script>
+<script src="../assets/vendor/highlight/languages/json.min.js"></script>
+<script src="../assets/vendor/highlight/languages/ini.min.js"></script>
+<script src="../assets/vendor/highlight/languages/dockerfile.min.js"></script>
+<script src="../assets/vendor/highlight/languages/plaintext.min.js"></script>
+<script src="../assets/common.js"></script>
+<script src="../assets/doc.js"></script>
+</body>
+</html>

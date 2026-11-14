@@ -19,9 +19,9 @@
   <label>Testo <select id="pref-body"></select></label>
   <label>Codice <select id="pref-code"></select></label>
 </div>
-<nav class="docnav"><a href="../index.html">← Runbook</a><ul><li><a href="01-Installazione.html">01-Installazione</a></li><li><a href="02-Configurazione-Copilot.html">02-Configurazione-Copilot</a></li><li><a href="03-Security-Best-Practices.html">03-Security-Best-Practices</a></li><li><a href="04-Security-Review-OWASP-ISO27001.html">04-Security-Review-OWASP-ISO27001</a></li><li><a href="Decisions.html">Decisions</a></li><li><a href="Sources.html">Sources</a></li><li><a href="Review-Perplexity.html">Review-Perplexity</a></li></ul></nav><article class="doc"><h1 id="review-con-perplexity-pro--prompt-di-verifica">Review con Perplexity Pro — prompt di verifica</h1>
+<nav class="docnav"><a href="../index.html">← Runbook</a><ul><li><a href="01-Installazione.html">01-Installazione</a></li><li><a href="02-Configurazione-Copilot.html">02-Configurazione-Copilot</a></li><li><a href="03-Security-Best-Practices.html">03-Security-Best-Practices</a></li><li><a href="04-Security-Review-OWASP-ISO27001.html">04-Security-Review-OWASP-ISO27001</a></li><li><a href="05-Team-Agenti.html">05-Team-Agenti</a></li><li><a href="Decisions.html">Decisions</a></li><li><a href="Sources.html">Sources</a></li><li><a href="Review-Perplexity.html">Review-Perplexity</a></li></ul></nav><article class="doc"><h1 id="review-con-perplexity-pro--prompt-di-verifica">Review con Perplexity Pro — prompt di verifica</h1>
 <p>Questo documento contiene i prompt per la review preliminare con un LLM diverso (Perplexity Pro).
-Lo scopo è confermare o confutare le affermazioni di <a href="01-Installazione.html">01-Installazione.md</a> e <a href="02-Configurazione-Copilot.html">02-Configurazione-Copilot.md</a>.</p>
+Lo scopo è confermare o confutare le affermazioni di <a href="01-Installazione.html">01-Installazione.md</a> e <a href="02-Configurazione-Copilot.html">02-Configurazione-Copilot.md</a>. I prompt P-11, P-12 e P-13 verificano <a href="05-Team-Agenti.html">05-Team-Agenti.md</a>.</p>
 <h2 id="procedura">Procedura</h2>
 <ul>
 <li class="task"><input type="checkbox" disabled> Esegui un prompt alla volta in Perplexity Pro, in un thread nuovo.</li>
@@ -156,6 +156,42 @@ A2. La mappatura seguente è corretta? Proponi controlli Annex A mancanti o erra
 A3. Come si inserisce l'uso di assistenti di coding AI con BYOK nel risk assessment (6.1.2) e nello Statement of Applicability (6.1.3)? Serve riferirsi a ISO/IEC 42001?
 A4. L'Amendment 1:2024 di ISO/IEC 27001 (cambiamento climatico in 4.1 e 4.2) ha impatti su questo ambito?
 A5. Rischi mancanti nel registro: furto chiavi dal gateway, prompt injection, lettura .env, costi non controllati, codice trattato da provider terzi, script non verificati, indisponibilità del gateway.
+[INCOLLA QUI LE ISTRUZIONI COMUNI]
+</code></pre>
+<hr />
+<h2 id="p-11--custom-agents-subagent-e-harness-di-vs-code">P-11 — Custom agents, subagent e harness di VS Code</h2>
+<pre class="code"><code class="language-text">Agisci da esperto di GitHub Copilot in VS Code (novembre 2026). Verifica sulla documentazione ufficiale.
+A1. Nell'harness Copilot un file .github/agents/&lt;nome&gt;.agent.md con &quot;target: github-copilot&quot; accetta i campi: name, description, model (lista), model-policy, reasoning-effort, tools, user-invocable, disable-model-invocation. Il campo &quot;agents&quot; e gli &quot;handoffs&quot; funzionano solo nell'harness Local.
+A2. L'harness Local è deprecato e sarà rimosso entro febbraio 2027.
+A3. Nell'harness Copilot i modelli BYOK (Anthropic, OpenAI, OpenRouter con chiave propria) funzionano solo con una configurazione sperimentale (&quot;Agent Host BYOK&quot;). Qual è il nome del setting e lo stato attuale?
+A4. Qual è il formato esatto dell'ID nel campo &quot;model&quot; per un modello BYOK nell'harness Copilot (esempio per claude-sonnet-5-5 di Anthropic e per un modello OpenRouter)?
+A5. Un custom agent chiamato come subagent usa il modello del suo campo &quot;model&quot;. Se il modello è BYOK, il controllo sulla fascia di costo del modello principale non lo blocca.
+A6. Un subagent non può fare domande all'utente, non riceve la cronologia della conversazione principale e, senza chat.subagents.allowInvocationsFromSubagents, non può chiamare altri subagent. Questi limiti valgono anche nell'harness Copilot (strumento &quot;task&quot;)?
+A7. Il campo &quot;reasoning-effort&quot; si applica ai modelli BYOK? Quali valori accetta per i modelli Claude e GPT?
+A8. Con &quot;user-invocable: false&quot; e &quot;disable-model-invocation: false&quot; un agente è nascosto dal selettore ma resta chiamabile come subagent. Senza il campo &quot;agents&quot;, esiste un modo nell'harness Copilot per limitare quali subagent un agente può chiamare?
+[INCOLLA QUI LE ISTRUZIONI COMUNI]
+</code></pre>
+<hr />
+<h2 id="p-12--modelli-e-prezzi-per-il-team-di-agenti">P-12 — Modelli e prezzi per il team di agenti</h2>
+<pre class="code"><code class="language-text">Agisci da analista dei modelli LLM per lo sviluppo software (novembre 2026). Usa le pagine ufficiali di prezzi e modelli.
+A1. Anthropic: claude-fable-5-2 costa 8/40 USD per 1M token (input/output), claude-sonnet-5-5 2/10, claude-haiku-5-5 da 0,10/0,50. claude-fable-5-2 è il modello più capace e accetta effort &quot;high&quot; o superiore.
+A2. OpenAI: i modelli con nome &quot;Codex&quot; (es. gpt-5.3-codex) sono deprecati o spenti. gpt-6.1-sol è un modello quasi di frontiera a costo ridotto; gpt-5.4-mini è il modello &quot;mini&quot; indicato per coding e subagent. Dai ID esatti e prezzi input/output di: gpt-6-astra, gpt-6.1-sol, gpt-6-luna, gpt-5.4-mini.
+A3. OpenRouter: esistono gli slug deepseek/deepseek-v4.1-flash e qwen/qwen3-coder? Dai prezzo input/output, finestra di contesto, supporto del tool calling.
+A4. Per una review di codice C# e PowerShell in sola lettura, quali 2 modelli economici su OpenRouter (meno di 1 USD per 1M token in input) hanno il tool calling più affidabile? Indica alternative agli slug di A3.
+A5. Per generare codice C# su task atomici e test NUnit, gpt-5.4-mini e claude-haiku-5-5 sono scelte adeguate nella fascia economica? Indica un'alternativa per ciascuno, con prezzo.
+A6. OpenRouter permette di limitare i provider e di escludere quelli che conservano i dati (parametri provider.data_collection, allow_fallbacks, guardrail di account). I parametri si possono impostare a livello di account, senza modificare la richiesta del client?
+[INCOLLA QUI LE ISTRUZIONI COMUNI]
+</code></pre>
+<hr />
+<h2 id="p-13--gitflow-spec-kit-e-tdd-con-nunit-e-pester">P-13 — GitFlow, Spec Kit e TDD con NUnit e Pester</h2>
+<pre class="code"><code class="language-text">Agisci da esperto di processi di sviluppo (.NET, PowerShell, Git). Verifica su fonti ufficiali.
+A1. GitFlow (V. Driessen): feature/* nasce da develop e si chiude in develop; release/* nasce da develop e si chiude in main e poi in develop; hotfix/* nasce da main e si chiude in main e in develop; ogni versione in main ha un tag.
+A2. GitHub Spec Kit (release corrente): quali nomi di ramo crea /speckit-specify? Si possono configurare per usare il prefisso feature/ di GitFlow? Qual è il comando per inizializzare Spec Kit in una cartella esistente con l'integrazione Copilot?
+A3. Spec Kit produce spec.md, plan.md e tasks.md per ogni feature nella cartella specs/. Come si mappa questa struttura su Epic, Feature e Task?
+A4. NUnit (versione corrente) con .NET: comando &quot;dotnet test&quot;, attributi [Test], [TestCase], Assert.That, Assert.Throws per le eccezioni attese. Indica la versione corrente e il template &quot;dotnet new nunit&quot;.
+A5. Pester (versione corrente) con PowerShell 7: Describe, Context, It, Should -Throw, Mock, comando Invoke-Pester. Indica la versione corrente.
+A6. In un ruleset di GitHub si può: richiedere una PR per main e develop, richiedere l'approvazione di un utente specifico su main, bloccare i push diretti e i force-push, richiedere controlli di stato. Un agente che usa &quot;gh pr merge&quot; con il token dell'utente rispetta il ruleset?
+A7. Per C#: quali pratiche garantiscono che un'applicazione non termini per eccezioni non gestite (gestore globale, validazione degli input, Result pattern)? Indica la documentazione Microsoft Learn.
 [INCOLLA QUI LE ISTRUZIONI COMUNI]
 </code></pre>
 <hr />
