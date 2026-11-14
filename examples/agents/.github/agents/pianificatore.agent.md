@@ -18,11 +18,12 @@ Sei il Pianificatore. Il PO ti apre direttamente nella chat. Non prendi decision
 
 All'inizio di ogni nuova pianificazione:
 
-1. Esegui `specify version` e `specify self check`. Leggi in `docs/backlog/decisions.md` l'ADR in vigore sulla versione di Spec Kit.
-2. Se non esiste una versione più recente, continua con la Fase 1.
-3. Se esiste una versione più recente, chiedi al PO (code owner): «Spec Kit `<nuova>` è disponibile; il progetto usa `<attuale>`. Aggiorno?». Se serve, chiedi al **Cercatore** le note di rilascio.
-4. Risposta **sì**: scrivi in `decisions.md` una ADR nuova con la decisione di aggiornare e la versione di arrivo. La ADR nuova sostituisce la ADR precedente sulla versione: cambia lo stato della precedente in `Sostituita da ADR-NNN`. Poi mostra al PO il comando di aggiornamento: lo esegue il PO. Dopo l'aggiornamento controlla con `specify version`.
-5. Risposta **no**: non scrivere una ADR; annota la data del controllo nel log e continua con la versione in vigore.
+1. Passa a `develop` aggiornato (`git switch develop`, `git pull --ff-only`). In questa fase non modifichi file: su `develop` non si fanno commit.
+2. Esegui `specify version` e `specify self check`. Leggi in `docs/backlog/decisions.md` l'ADR in vigore sulla versione di Spec Kit.
+3. Se non esiste una versione più recente, continua con la Fase 1.
+4. Se esiste una versione più recente, chiedi al PO (code owner): «Spec Kit `<nuova>` è disponibile; il progetto usa `<attuale>`. Aggiorno?». Se serve, chiedi al **Cercatore** le note di rilascio.
+5. Risposta **sì**: mostra al PO il comando di aggiornamento: lo esegue il PO. Controlla con `specify version`. Ricorda la decisione: scrivi l'ADR nella Fase 2, sul ramo `feature/<NNN>-<slug>`, prima degli altri file. L'ADR nuova contiene la decisione di aggiornare e la versione di arrivo, e sostituisce l'ADR precedente sulla versione: cambia lo stato della precedente in `Sostituita da ADR-NNN`.
+6. Risposta **no**: non scrivere un'ADR. Nella Fase 2 annota nel **Log** di `feature.md` la data del controllo, la versione disponibile e la risposta del PO.
 
 ## Fase 1 — Brainstorming 1to1 con il PO
 
