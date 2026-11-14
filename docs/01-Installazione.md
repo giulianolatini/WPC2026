@@ -147,7 +147,7 @@ sudo zypper install code
 Scegli il percorso:
 
 - **Percorso A — Docker:** installa Docker (3.1). `uv` non è necessario.
-- **Percorso B — servizio locale:** installa `uv` (3.3) e, su Windows, PowerShell 7 (3.2). Docker non è necessario.
+- **Percorso B — servizio locale:** installa `uv` (3.3) e, su Windows, PowerShell 7 (3.2). PowerShell 7 serve su ogni sistema solo per il team di agenti. Docker non è necessario.
 
 ### 3.1 Docker
 
@@ -246,17 +246,51 @@ docker version
 docker compose version
 ```
 
-### 3.2 PowerShell 7 (solo Windows)
+### 3.2 PowerShell 7
 
-Il servizio Windows (§6.4) e la generazione delle chiavi (§4) usano PowerShell 7 (`pwsh.exe`). Windows include solo Windows PowerShell 5.1.
+PowerShell 7 (`pwsh`) serve su **Windows** per il servizio (§6.4) e per la generazione delle chiavi (§4): Windows include solo Windows PowerShell 5.1.
+Serve su **tutti i sistemi** per il team di agenti: script `.ps1`, test Pester e `Set-Rulesets.ps1` ([05](05-Team-Agenti.md)). Versione minima per il team: 7.4.
 
-- [ ] Installa PowerShell 7:
+**Windows**
 
 ```powershell
 winget install --id Microsoft.PowerShell -e
 ```
 
-- [ ] Verifica: `pwsh -Version`.
+**macOS (Homebrew)**
+
+```bash
+brew install powershell
+```
+
+> ⚠️ La formula Homebrew è mantenuta dalla comunità Homebrew e compila PowerShell dal codice sorgente: Microsoft non la supporta. Il metodo che Microsoft indica come preferito è il pacchetto PKG firmato, dalla pagina delle release ([S-190](Sources.md#s-190), [S-191](Sources.md#s-191)). Se hai installato il vecchio *cask*, toglilo prima: `brew uninstall --cask powershell`.
+
+**Debian e Ubuntu (apt, repository Microsoft)**
+
+```bash
+sudo apt-get update
+sudo apt-get install -y wget
+source /etc/os-release
+wget -q "https://packages.microsoft.com/config/$ID/$VERSION_ID/packages-microsoft-prod.deb"
+sudo dpkg -i packages-microsoft-prod.deb
+rm packages-microsoft-prod.deb
+sudo apt-get update
+sudo apt-get install -y powershell
+```
+
+Il repository `packages.microsoft.com` è il metodo preferito da Microsoft per Ubuntu LTS (22.04, 24.04, 26.04) e Debian (12, 13) ([S-192](Sources.md#s-192), [S-193](Sources.md#s-193)). Su Ubuntu il repository Microsoft contiene anche pacchetti .NET con versioni diverse da quelle di Ubuntu: scegli una sola origine per .NET.
+
+**openSUSE**
+
+Microsoft non pubblica un pacchetto `zypper` di PowerShell e non supporta openSUSE: la distribuzione è supportata dalla comunità ([S-194](Sources.md#s-194)). Con .NET SDK già installato usa il *global tool*:
+
+```bash
+dotnet tool install --global PowerShell
+```
+
+Il comando aggiunge `~/.dotnet/tools` al `PATH`: apri un terminale nuovo ([S-191](Sources.md#s-191)). ⚠️ Da provare su openSUSE. In alternativa segui la pagina PowerShell del wiki di openSUSE.
+
+- [ ] Verifica su ogni sistema: `pwsh -Version`.
 
 ### 3.3 uv
 
