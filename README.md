@@ -36,6 +36,8 @@ Il talk non dichiara un vincitore: presenta i **criteri di scelta** ([docs/Decis
 │   ├── 03-Security-Best-Practices.md # best practice Microsoft e LiteLLM, baseline sicura
 │   ├── 04-Security-Review-OWASP-ISO27001.md # review degli esempi: OWASP LLM/Agentic, ISO 27001
 │   ├── 05-Team-Agenti.md         # team di agenti orchestrato per lo sviluppo spec-driven
+│   ├── 06-BYOK-GitHub-Copilot.md # il concetto di BYOK in GitHub Copilot, in dettaglio
+│   ├── 07-LiteLLM-Introduzione.md # LiteLLM e le feature del rilascio stable
 │   ├── Decisions.md              # registro cronologico delle decisioni (ADR con razionale)
 │   ├── Sources.md                # fonti documentali (titolo + URL, ancore S-NNN)
 │   ├── Review-Perplexity.md      # prompt di verifica con un secondo LLM
@@ -43,7 +45,8 @@ Il talk non dichiara un vincitore: presenta i **criteri di scelta** ([docs/Decis
 ├── examples/
 │   ├── litellm/                  # config.yaml, Compose minimo/esteso, .env.example, unit di servizio
 │   ├── vscode/                   # chatLanguageModels.json (nativo, LiteLLM), settings.secure.jsonc
-│   └── agents/                   # template: 9 custom agents, GitFlow, backlog, regole di scrittura
+│   ├── agents/                   # template: 9 custom agents, GitFlow, backlog con Definition of Done, ruleset, CI
+│   └── speckit-ruleset/          # caso svolto con Spec Kit: specifica, piano e test dei ruleset (non provato)
 ├── site/                         # sito offline GENERATO: non modificare a mano
 │   ├── index.html                # runbook interattivo: sessioni, parametri, evidenze
 │   ├── docs/                     # documenti di docs/ in HTML
@@ -59,6 +62,7 @@ Il talk non dichiara un vincitore: presenta i **criteri di scelta** ([docs/Decis
 
 1. Leggi [docs/01-Installazione.md](docs/01-Installazione.md) e installa gli strumenti.
 2. Segui [docs/02-Configurazione-Copilot.md](docs/02-Configurazione-Copilot.md): prima il percorso nativo (§3), poi LiteLLM (§4).
+   Per i concetti leggi [docs/06-BYOK-GitHub-Copilot.md](docs/06-BYOK-GitHub-Copilot.md) e [docs/07-LiteLLM-Introduzione.md](docs/07-LiteLLM-Introduzione.md).
 3. Usa i file in [examples/](examples/) come base.
 4. Per eseguire la procedura e registrare le evidenze, apri [site/index.html](site/index.html) nel browser (anche offline). La sorgente è [docs/runbook/RUNBOOK.md](docs/runbook/RUNBOOK.md).
 5. Per sviluppare un progetto con un team di agenti, leggi [docs/05-Team-Agenti.md](docs/05-Team-Agenti.md) e copia il template [examples/agents/](examples/agents/README.md).
