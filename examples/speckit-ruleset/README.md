@@ -31,7 +31,7 @@ Il passo `/speckit-tasks` non è stato eseguito: `tasks.md` non esiste.
 
 La suite `AdminBypass.Tests.ps1` è diversa dal pacchetto originale in tre punti (review R6-codex-04 e R6-codex-05):
 
-- un contesto nuovo controlla lo stato delle tre PR di test prima dei rifiuti;
+- un contesto nuovo controlla lo stato delle tre PR di test prima dei rifiuti: aperta, ramo base, `MERGEABLE`, aggiornata rispetto alla base, check richiesti; un merge parte solo se questo controllo è superato (R7-codex-03, R7-codex-04);
 - V4 (controllo positivo) è l'ultimo test di merge, perché fa avanzare `develop`;
 - V5 controlla il codice di uscita di `gh api`, l'ID e il nome del ruleset.
 

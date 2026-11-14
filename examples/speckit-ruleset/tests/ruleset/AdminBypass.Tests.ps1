@@ -9,6 +9,7 @@
     Esegue merge REALI. Lanciare solo da .github/workflows/verify-ruleset-admin.yml.
     I rifiuti V1-V3 sono validi solo se anche lo stato delle PR di test e V4 sono superati:
     se uno di questi test fallisce, l'intera esecuzione non è valida.
+    Un merge (V1-V4) parte solo se il controllo di stato della sua PR è superato; altrimenti il test è Skipped.
     Escluso dalla CI ordinaria con: Invoke-Pester -ExcludeTagFilter Live
     Variabili richieste: GH_TOKEN, RULESET_REPO, PR_MAIN, PR_DEVELOP_RED,
     PR_DEVELOP_GREEN, RULESET_ID.
@@ -19,6 +20,8 @@ Describe 'Ruleset main/develop con contoso-copilot-agent' -Tag 'Live', 'AdminByp
     BeforeAll {
         $script:Repo     = $env:RULESET_REPO
         $script:Evidence = [System.Collections.Generic.List[object]]::new()
+        # Una PR di test entra qui solo se il suo stato è quello previsto: i merge partono solo per queste PR.
+        $script:FixtureOk = @{}
 
         foreach ($name in 'GH_TOKEN', 'RULESET_REPO', 'PR_MAIN', 'PR_DEVELOP_RED', 'PR_DEVELOP_GREEN', 'RULESET_ID') {
             if (-not [Environment]::GetEnvironmentVariable($name)) {
@@ -62,10 +65,19 @@ Describe 'Ruleset main/develop con contoso-copilot-agent' -Tag 'Live', 'AdminByp
             $true
         }
 
+        # Commit del ramo base che mancano nel ramo della PR: con la policy strict una PR non aggiornata
+        # viene rifiutata per questo motivo, non per la regola che il test vuole provare.
+        function Get-BehindBy {
+            param($Facts)
+            $raw = & gh api "repos/$script:Repo/compare/$($Facts.baseRefName)...$($Facts.headRefName)" --jq '.behind_by'
+            if ($LASTEXITCODE -ne 0) { throw "Impossibile confrontare $($Facts.headRefName) con $($Facts.baseRefName)." }
+            [int]"$raw"
+        }
+
         # Stato della PR di test: serve per attribuire il rifiuto alla regola giusta.
         function Get-PrFacts {
             param([Parameter(Mandatory)][string] $Number)
-            $raw = & gh pr view $Number --repo $script:Repo --json state,baseRefName,mergeable,reviewDecision,statusCheckRollup
+            $raw = & gh pr view $Number --repo $script:Repo --json state,baseRefName,headRefName,mergeable,reviewDecision,statusCheckRollup
             if ($LASTEXITCODE -ne 0) { throw "Impossibile leggere la PR $Number." }
             $raw | ConvertFrom-Json
         }
@@ -85,6 +97,12 @@ Describe 'Ruleset main/develop con contoso-copilot-agent' -Tag 'Live', 'AdminByp
             }
         }
 
+        It 'main richiede l''approvazione di un code owner (ruleset main-release-approval attivo)' {
+            $required = & gh api "repos/$script:Repo/rules/branches/main" --jq '[.[] | select(.type == "pull_request") | .parameters.require_code_owner_review] | any'
+            $LASTEXITCODE | Should -Be 0
+            "$required"   | Should -Be 'true'
+        }
+
         It 'develop ha le regole attive pull_request, required_status_checks, non_fast_forward, deletion' {
             $types = & gh api "repos/$script:Repo/rules/branches/develop" --jq '.[].type'
             foreach ($t in 'pull_request', 'required_status_checks', 'non_fast_forward', 'deletion') {
@@ -100,33 +118,40 @@ Describe 'Ruleset main/develop con contoso-copilot-agent' -Tag 'Live', 'AdminByp
             $f = Get-PrFacts -Number $env:PR_MAIN
             $f.state          | Should -Be 'OPEN'
             $f.baseRefName    | Should -Be 'main'
-            $f.mergeable      | Should -Not -Be 'CONFLICTING'
+            $f.mergeable      | Should -Be 'MERGEABLE'
+            Get-BehindBy -Facts $f | Should -Be 0 -Because 'la PR deve contenere tutti i commit del ramo base'
             $f.reviewDecision | Should -Not -Be 'APPROVED'
             Test-RequiredChecksGreen -Facts $f |
                 Should -BeTrue -Because 'con i tre check verdi l''unico requisito mancante è l''approvazione del code owner'
+            $script:FixtureOk['PR_MAIN'] = $true
         }
 
         It 'PR_DEVELOP_RED: aperta, verso develop, senza conflitti, test-dotnet fallito' {
             $f = Get-PrFacts -Number $env:PR_DEVELOP_RED
             $f.state       | Should -Be 'OPEN'
             $f.baseRefName | Should -Be 'develop'
-            $f.mergeable   | Should -Not -Be 'CONFLICTING'
+            $f.mergeable   | Should -Be 'MERGEABLE'
+            Get-BehindBy -Facts $f | Should -Be 0 -Because 'la PR deve contenere tutti i commit del ramo base'
             $failed = @($f.statusCheckRollup | Where-Object { $_.name -eq 'test-dotnet' })
             $failed.Count         | Should -BeGreaterThan 0 -Because 'il check test-dotnet deve essere stato eseguito'
             $failed[0].conclusion | Should -Be 'FAILURE'
+            $script:FixtureOk['PR_DEVELOP_RED'] = $true
         }
 
         It 'PR_DEVELOP_GREEN: aperta, verso develop, senza conflitti, check verdi' {
             $f = Get-PrFacts -Number $env:PR_DEVELOP_GREEN
             $f.state       | Should -Be 'OPEN'
             $f.baseRefName | Should -Be 'develop'
-            $f.mergeable   | Should -Not -Be 'CONFLICTING'
+            $f.mergeable   | Should -Be 'MERGEABLE'
+            Get-BehindBy -Facts $f | Should -Be 0 -Because 'la PR deve contenere tutti i commit del ramo base'
             Test-RequiredChecksGreen -Facts $f | Should -BeTrue -Because 'i tre check obbligatori devono esistere ed essere verdi'
+            $script:FixtureOk['PR_DEVELOP_GREEN'] = $true
         }
     }
 
     Context 'Tentativi di bypass che devono fallire' {
         It 'V1 - merge senza approvazione verso main viene rifiutato' {
+            if (-not $script:FixtureOk['PR_MAIN']) { Set-ItResult -Skipped -Because 'lo stato della PR di test non è quello previsto: nessun merge viene tentato'; return }
             $r = Invoke-Gh -Case 'V1' -PrNumber $env:PR_MAIN -Arguments @('pr', 'merge', $env:PR_MAIN, '--repo', $script:Repo, '--merge')
             $r.Output   | Should -Not -Match $script:AuthErrorPattern -Because 'un errore di autenticazione rende il test non valido'
             $r.ExitCode | Should -Not -Be 0
@@ -134,6 +159,7 @@ Describe 'Ruleset main/develop con contoso-copilot-agent' -Tag 'Live', 'AdminByp
         }
 
         It 'V2 - merge con --admin verso main viene rifiutato' {
+            if (-not $script:FixtureOk['PR_MAIN']) { Set-ItResult -Skipped -Because 'lo stato della PR di test non è quello previsto: nessun merge viene tentato'; return }
             $r = Invoke-Gh -Case 'V2' -PrNumber $env:PR_MAIN -Arguments @('pr', 'merge', $env:PR_MAIN, '--repo', $script:Repo, '--merge', '--admin')
             $r.Output   | Should -Not -Match $script:AuthErrorPattern -Because 'un errore di autenticazione rende il test non valido'
             $r.ExitCode | Should -Not -Be 0 -Because 'contoso-copilot-agent non deve essere un attore di bypass (FR-010, FR-011)'
@@ -141,6 +167,7 @@ Describe 'Ruleset main/develop con contoso-copilot-agent' -Tag 'Live', 'AdminByp
         }
 
         It 'V3 - merge con --admin verso develop con check fallito viene rifiutato' {
+            if (-not $script:FixtureOk['PR_DEVELOP_RED']) { Set-ItResult -Skipped -Because 'lo stato della PR di test non è quello previsto: nessun merge viene tentato'; return }
             $r = Invoke-Gh -Case 'V3' -PrNumber $env:PR_DEVELOP_RED -Arguments @('pr', 'merge', $env:PR_DEVELOP_RED, '--repo', $script:Repo, '--merge', '--admin')
             $r.Output   | Should -Not -Match $script:AuthErrorPattern -Because 'un errore di autenticazione rende il test non valido'
             $r.ExitCode | Should -Not -Be 0
@@ -150,6 +177,7 @@ Describe 'Ruleset main/develop con contoso-copilot-agent' -Tag 'Live', 'AdminByp
 
     Context 'Controllo positivo (rende validi i rifiuti precedenti)' {
         It 'V4 - merge di una PR conforme verso develop riesce' {
+            if (-not $script:FixtureOk['PR_DEVELOP_GREEN']) { Set-ItResult -Skipped -Because 'lo stato della PR di test non è quello previsto: nessun merge viene tentato'; return }
             $r = Invoke-Gh -Case 'V4' -PrNumber $env:PR_DEVELOP_GREEN -Arguments @('pr', 'merge', $env:PR_DEVELOP_GREEN, '--repo', $script:Repo, '--merge')
             $r.ExitCode | Should -Be 0 -Because "il token deve poter fare merge di PR conformi, altrimenti V1-V3 non sono validi e l'intera esecuzione va ripetuta. Output: $($r.Output)"
         }
