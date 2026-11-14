@@ -1,6 +1,6 @@
 ---
 name: Scrittore
-description: Scrive la documentazione in italiano per Epic e Feature: log di sviluppo, riferimento di librerie e API, manuale utente, manuale per sviluppatori.
+description: "Scrive la documentazione in italiano per Epic e Feature: log di sviluppo, riferimento di librerie e API, manuale utente, manuale per sviluppatori."
 target: github-copilot
 model: ['claude-haiku-5-5']
 model-policy: preferred

@@ -597,12 +597,12 @@ Spec Kit implementa lo *spec-driven development*: la specifica guida l'agente ne
 uv tool install specify-cli
 ```
 
-- [ ] (Raccomandato per il talk) Fissa una release. Ultima release: `v1.3.2` (2026-11-06) ([S-085](Sources.md#s-085)):
+- [ ] (Raccomandato per il talk) Fissa una release. Release indicata da P-13: `v1.4.0` (2026-11-10); il 2026-11-06 l'ultima era `v1.3.2` ([S-085](Sources.md#s-085)). ⚠️ Controlla la versione corrente prima del talk:
 
 ```bash
-uv tool install specify-cli --from git+https://github.com/github/spec-kit.git@v1.3.2
+uv tool install specify-cli --from git+https://github.com/github/spec-kit.git@v1.4.0
 # oppure da PyPI
-uv tool install specify-cli==1.3.2
+uv tool install specify-cli==1.4.0
 ```
 
 - [ ] Verifica: `specify version`. Controlla gli aggiornamenti: `specify self check` ([S-081](Sources.md#s-081)).
