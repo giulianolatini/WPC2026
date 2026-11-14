@@ -45,7 +45,7 @@ Il talk non dichiara un vincitore: presenta i **criteri di scelta** ([docs/Decis
 ├── examples/
 │   ├── litellm/                  # config.yaml, Compose minimo/esteso, .env.example, unit di servizio
 │   ├── vscode/                   # chatLanguageModels.json (nativo, LiteLLM), settings.secure.jsonc
-│   ├── agents/                   # template: 9 custom agents, GitFlow, backlog con Definition of Done, ruleset, CI
+│   ├── agents/                   # template: 10 custom agents, GitFlow, backlog con Definition of Done, ruleset, CI
 │   └── speckit-ruleset/          # caso svolto con Spec Kit: specifica, piano e test dei ruleset (non provato)
 ├── site/                         # sito offline GENERATO: non modificare a mano
 │   ├── index.html                # runbook interattivo: sessioni, parametri, evidenze
