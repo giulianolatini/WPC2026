@@ -34,7 +34,7 @@ I file del team sono in [`examples/agents/`](../examples/agents/README.md). Il d
 | Regole di scrittura | Testo originale ispirato ad ASD-STE100, nel repository | [D-036](Decisions.md#d-036) |
 | Completamento | Lo sviluppo è concluso solo con la Definition of Done completa | [D-038](Decisions.md#d-038) |
 | Protezione dei rami | Due ruleset, `CODEOWNERS`, identità separata per l'agente | [D-039](Decisions.md#d-039) |
-| Nome dei rami di Feature | `feature/<NNN>-<slug>`, creato da Spec Kit (proposta da confermare) | [D-040](Decisions.md#d-040) |
+| Nome dei rami di Feature | `feature/<NNN>-<slug>`, creato da Spec Kit | [D-040](Decisions.md#d-040) |
 
 ## 2. Le figure del team
 
@@ -172,6 +172,8 @@ Copy-Item -Force examples\agents\.gitignore C:\percorso\del\progetto\
 
 ## 7. Uso del team
 
+La procedura con comandi, parametri ed evidenze è la fase F9 del [runbook](runbook/RUNBOOK.md).
+
 ### 7.1 Pianificazione
 
 - [ ] Seleziona l'agente **Pianificatore** e descrivi l'esigenza.
@@ -242,7 +244,7 @@ Le istruzioni di un agente non sono un controllo: GitHub deve rifiutare le opera
 - `gh pr merge --admin` usa i privilegi di amministratore per unire una PR che non rispetta i requisiti ([S-175](Sources.md#s-175)). Per questo l'agente non usa il token del PO.
 - **Identità separata.** L'Organizzatore usa una GitHub App o un account di servizio con i soli permessi *Contents: write* e *Pull requests: write*, senza *Administration* e fuori dalla lista di bypass ([S-177](Sources.md#s-177)). Il PO è l'unico code owner.
 - Il caso svolto [`examples/speckit-ruleset/`](../examples/speckit-ruleset/README.md) contiene la specifica, il piano e i test che verificano il rifiuto di `--admin`.
-- ⚠️ Niente di questo è stato provato su GitHub. Con il piano Free i ruleset funzionano solo nei repository pubblici (P-13).
+- ⚠️ Niente di questo è stato provato su GitHub. Con il piano Free i ruleset funzionano solo nei repository pubblici; per i repository privati servono i piani Pro, Team o Enterprise Cloud ([S-171](Sources.md#s-171)). Il bypass di un team richiede un'organizzazione.
 
 ### 9.2 Regola di qualità di `main`
 
@@ -252,7 +254,7 @@ Nessuna pratica garantisce che un processo non termini mai: l'evento `AppDomain.
 
 1. il Pianificatore scrive un criterio di accettazione per ogni input non valido e ogni errore previsto;
 2. il Tester scrive un test per ognuno di questi criteri (voce DoD-F4) e i test d'integrazione della Release (voce DoD-E3);
-3. chi implementa valida gli input, cattura le eccezioni che può gestire e mantiene un gestore globale che registra l'errore e termina con un codice di uscita diverso da zero ([S-178](Sources.md#s-178));
+3. chi implementa valida gli input e cattura solo le eccezioni da cui il codice può riprendersi ([S-178](Sources.md#s-178)); un gestore globale registra l'errore prima della terminazione ([S-179](Sources.md#s-179));
 4. il Reviewer antagonista assegna severità `alta` a ogni eccezione non gestita in una PR verso `main` (voce DoD-E4).
 
 ## 10. Sicurezza
@@ -265,6 +267,7 @@ Nessuna pratica garantisce che un processo non termini mai: l'evento `AppDomain.
 
 ## 11. Punti da provare
 
+- [ ] ⚠️ Versione di Spec Kit (`specify version`) e comando `specify extension add git`: P-13 indica la 1.4.0, la rilettura diretta non lo conferma.
 - [ ] ⚠️ Formato dell'ID nel campo `model` per un modello BYOK nell'harness Copilot.
 - [ ] ⚠️ `chat.agentHost.byokModels.enabled`: i subagent usano il modello del loro file? Il provider OpenRouter funziona nell'Agent Host?
 - [ ] ⚠️ `github.copilot.chat.cli.customAgents.enabled`: nome e default dell'impostazione nella tua versione di VS Code.

@@ -29,7 +29,7 @@ Sei il Tester. Scrivi i test automatici dei task del backlog. Nel ciclo TDD il t
 ## Versioni dei framework
 
 - **NUnit 5:** usa `Assert.That` con i vincoli. Per un'eccezione attesa in codice asincrono scrivi `await Assert.ThrowsAsync<T>(...)`. Non usare `TestDelegate`: usa `Action`.
-- **Pester 6** (PowerShell 7.4 o successivo): usa `Should -Invoke` per i mock e `New-PesterConfiguration` per configurare l'esecuzione. Assegna il tag `Live` ai test che cambiano un sistema reale: la CI li esclude.
+- **Pester 6** (PowerShell 7.4 o successivo): usa `Should -Invoke` per i mock (`Assert-MockCalled` non esiste più) e `New-PesterConfiguration` per configurare l'esecuzione. Ogni file di test è autonomo: non dipende da un altro file. Assegna il tag `Live` ai test che cambiano un sistema reale: la CI li esclude.
 
 ## Limiti
 

@@ -20,7 +20,7 @@ Il ramo `feature/<NNN>-<slug>` è il ramo che l'estensione `git` di Spec Kit cre
 2. Un ramo `feature/*` contiene una sola Feature del backlog.
 3. Su un ramo `release/*` entrano solo correzioni e test d'integrazione, non funzioni nuove.
 4. Dopo il merge di una Release o di un hotfix in `main`, l'Organizzatore apre la PR di riallineamento verso `develop` (*back-merge*).
-5. Ogni versione in `main` ha un tag `v<versione>`.
+5. Ogni versione in `main` ha un tag `v<versione>`. Se esiste un ramo `release/*` aperto, un hotfix si riallinea in quel ramo e non in `develop`.
 6. Il merge usa sempre un merge commit (`gh pr merge --merge`). Nessuna figura usa `gh pr merge --admin`.
 7. **Nessun merge senza Definition of Done.** Una PR non si unisce se una voce della Definition of Done richiesta per quel ramo non è soddisfatta o non ha un'evidenza.
 
