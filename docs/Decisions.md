@@ -893,10 +893,10 @@ L'opzione 3 resta possibile: S-402 e S-403 sono «Non applicabile» e S-404 scri
 
 **Opzioni considerate.** (1) Nuova fase dopo la chiusura. (2) Nuova fase F9 «Team di agenti» prima della chiusura, che diventa F10. (3) Un secondo runbook.
 
-**Decisione.** Opzione 2. La fase F9 ha i passi S-911…S-920. La chiusura è la fase F10 con i passi S-1001 e S-1002. Gli identificativi S-901 e S-902 non si riusano. Nuovi parametri: `TEAM_PROJECT`, `GH_OWNER`, `GH_REPO`, `PO_USER`. Il default di `SPECKIT_VERSION` diventa `1.4.0`.
+**Decisione.** Opzione 2. La fase F9 ha i passi S-911…S-921. La chiusura è la fase F10 con i passi S-1001 e S-1002. Gli identificativi S-901 e S-902 non si riusano. Nuovi parametri: `TEAM_PROJECT`, `GH_OWNER`, `GH_REPO`, `PO_USER`. Il default di `SPECKIT_VERSION` diventa `1.4.0`.
 
 **Razionale.** La revoca delle chiavi deve restare l'ultima azione. Un identificativo riusato collegherebbe le evidenze di una sessione salvata a un passo diverso.
 
-**Conseguenze.** Una sessione salvata prima di questa modifica perde lo stato dei due passi di chiusura. ⚠️ I passi S-916, S-917 e S-920 usano ruleset e script non provati su GitHub. ⚠️ La versione di Spec Kit non è confermata dalla rilettura diretta ([Review-Perplexity.md](Review-Perplexity.md#registro-degli-esiti)).
+**Conseguenze.** Una sessione salvata prima di questa modifica perde lo stato dei due passi di chiusura. ⚠️ I passi S-917, S-918 e S-921 usano ruleset e script non provati su GitHub. ⚠️ La versione di Spec Kit non è confermata dalla rilettura diretta ([Review-Perplexity.md](Review-Perplexity.md#registro-degli-esiti)).
 
 **Fonti.** [S-080](Sources.md#s-080), [S-171](Sources.md#s-171), [S-174](Sources.md#s-174), [S-175](Sources.md#s-175).

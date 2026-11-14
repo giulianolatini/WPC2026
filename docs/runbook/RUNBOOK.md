@@ -727,7 +727,27 @@ Get-ChildItem .github\agents
 
 **Esito atteso:** il selettore degli agenti mostra **Organizzatore** e **Pianificatore**; le altre 7 figure non compaiono.
 
-### S-916 — Unisci il template in develop e porta la CI su main
+### S-916 — Crea la soluzione minima per la CI
+<!-- step: os=all path=all profile=all -->
+
+`ci.yml` richiede una soluzione .NET nella radice e almeno un test Pester in `tests/`. Salta questo passo se il repository li contiene già.
+
+```powershell os=all
+cd "{{TEAM_PROJECT}}"
+dotnet new sln -n TeamDemo
+dotnet new classlib -o src/TeamDemo
+dotnet new nunit -o tests/TeamDemo.Tests
+dotnet sln add src/TeamDemo tests/TeamDemo.Tests
+dotnet add tests/TeamDemo.Tests reference src/TeamDemo
+Set-Content -Path tests/Smoke.Tests.ps1 -Value 'Describe "Smoke" { It "runs" { $true | Should -BeTrue } }'
+dotnet build
+dotnet test
+Invoke-Pester -Path tests
+```
+
+**Esito atteso:** `dotnet build` senza errori; `dotnet test` e `Invoke-Pester` senza test falliti. ⚠️ Da provare: il template `dotnet new nunit` con NUnit 5 e gli argomenti di `dotnet test` in `ci.yml` ([S-181](../Sources.md#s-181)).
+
+### S-917 — Unisci il template in develop e porta la CI su main
 <!-- step: os=all path=all profile=all -->
 
 ```bash os=all
@@ -741,9 +761,9 @@ gh pr checks --watch
 
 - [ ] Unisci la PR in `develop` con un merge commit. Apri una PR `develop` → `main` e uniscila.
 
-**Esito atteso:** i controlli `build`, `test-dotnet` e `test-powershell` hanno un'esecuzione verde su `develop` e su `main`. ⚠️ `ci.yml` richiede una soluzione .NET nella radice del repository.
+**Esito atteso:** i controlli `build`, `test-dotnet` e `test-powershell` hanno un'esecuzione verde su `develop` e su `main`. La soluzione del passo S-916 dà alla CI il codice da compilare e i test da eseguire.
 
-### S-917 — Applica i ruleset
+### S-918 — Applica i ruleset
 <!-- step: os=all path=all profile=all -->
 
 Esegui questo passo con il tuo utente (permesso *Administration*), **mai** con l'identità dell'agente ([S-174](../Sources.md#s-174)).
@@ -758,7 +778,7 @@ gh api "repos/{{GH_OWNER}}/{{GH_REPO}}/rules/branches/main" --jq '.[].type'
 
 **Esito atteso:** il primo comando mostra l'ID usato in `integration_id` (atteso `15368` ⚠️); `main` ha le regole `deletion`, `non_fast_forward`, `pull_request`, `required_status_checks`. ⚠️ Lo script richiede il team `release-emergency` nell'organizzazione.
 
-### S-918 — Pianifica con il Pianificatore
+### S-919 — Pianifica con il Pianificatore
 <!-- step: os=all path=all profile=all -->
 
 - [ ] Seleziona l'agente **Pianificatore** e descrivi una Feature piccola.
@@ -775,7 +795,7 @@ grep -rn "DoD-F9\|DoD-E8" docs/backlog
 
 **Esito atteso:** il ramo ha la forma `feature/<NNN>-<slug>`; `grep` trova le ultime voci standard in ogni `feature.md` ed `epic.md` ([D-038](../Decisions.md#d-038)).
 
-### S-919 — Sviluppa una Feature con l'Organizzatore
+### S-920 — Sviluppa una Feature con l'Organizzatore
 <!-- step: os=all path=all profile=all -->
 
 - [ ] Seleziona l'agente **Organizzatore** e chiedi di sviluppare la Feature.
@@ -792,7 +812,7 @@ gh pr list --state all --limit 5
 
 **Esito atteso:** test verdi; la PR è unita in `develop` solo con le voci da DoD-F1 a DoD-F7 soddisfatte e con evidenza.
 
-### S-920 — Verifica i rifiuti di GitHub
+### S-921 — Verifica i rifiuti di GitHub
 <!-- step: os=all path=all profile=all -->
 
 ⚠️ Esegui questo passo solo nel repository di laboratorio.
