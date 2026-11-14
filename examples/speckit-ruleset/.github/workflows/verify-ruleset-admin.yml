@@ -1,0 +1,75 @@
+name: Verify ruleset (--admin) with contoso-copilot-agent
+
+# Esegue merge REALI: solo avvio manuale. Vedi specs/001-github-ruleset-main-develop/plan.md
+on:
+  workflow_dispatch:
+    inputs:
+      repository:
+        description: "Repository da verificare (owner/repo)"
+        required: true
+        default: "contoso/sample-app-ruleset-lab"
+      pr_main:
+        description: "PR verso main, check verdi, senza approvazione"
+        required: true
+      pr_develop_red:
+        description: "PR verso develop con test-dotnet fallito"
+        required: true
+      pr_develop_green:
+        description: "PR verso develop con check verdi (controllo positivo)"
+        required: true
+      ruleset_id:
+        description: "ID del ruleset main-release-approval"
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  verify-admin-bypass:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Token di installazione di contoso-copilot-agent
+        id: app-token
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ vars.COPILOT_AGENT_CLIENT_ID }}
+          private-key: ${{ secrets.COPILOT_AGENT_PRIVATE_KEY }}
+          owner: contoso
+          repositories: ${{ inputs.repository }}
+          permission-contents: write
+          permission-pull-requests: write
+
+      - name: Installa Pester 6.2.0
+        shell: pwsh
+        run: Install-Module Pester -RequiredVersion 6.2.0 -Force -Scope CurrentUser
+
+      - name: Esegui la verifica
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          RULESET_REPO: ${{ inputs.repository }}
+          PR_MAIN: ${{ inputs.pr_main }}
+          PR_DEVELOP_RED: ${{ inputs.pr_develop_red }}
+          PR_DEVELOP_GREEN: ${{ inputs.pr_develop_green }}
+          RULESET_ID: ${{ inputs.ruleset_id }}
+        run: |
+          $config = New-PesterConfiguration
+          $config.Run.Path = './tests/ruleset'
+          $config.Run.Exit = $true
+          $config.Filter.Tag = 'AdminBypass'
+          $config.Output.Verbosity = 'Detailed'
+          $config.TestResult.Enabled = $true
+          $config.TestResult.OutputPath = 'ruleset-admin-results.xml'
+          $config.TestResult.OutputFormat = 'NUnitXml'
+          Invoke-Pester -Configuration $config
+
+      - name: Evidenze
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: ruleset-admin-evidence
+          path: |
+            ruleset-admin-results.xml
+            ruleset-admin-evidence.json
