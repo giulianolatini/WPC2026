@@ -137,6 +137,18 @@ Describe 'Ruleset main/develop con contoso-copilot-agent' -Tag 'Live', 'AdminByp
             $failed = @($f.statusCheckRollup | Where-Object { $_.name -eq 'test-dotnet' })
             $failed.Count         | Should -BeGreaterThan 0 -Because 'il check test-dotnet deve essere stato eseguito'
             $failed[0].conclusion | Should -Be 'FAILURE'
+            # test-dotnet fallito deve essere l'UNICO requisito mancante: gli altri check sono verdi
+            # e, se develop richiede l'approvazione di un code owner, la PR è approvata.
+            foreach ($name in 'build', 'test-powershell') {
+                $other = @($f.statusCheckRollup | Where-Object { $_.name -eq $name })
+                $other.Count         | Should -BeGreaterThan 0 -Because "il check $name deve essere stato eseguito"
+                $other[0].conclusion | Should -Be 'SUCCESS'
+            }
+            $needsApproval = & gh api "repos/$script:Repo/rules/branches/develop" --jq '[.[] | select(.type == "pull_request") | .parameters.require_code_owner_review] | any'
+            $LASTEXITCODE | Should -Be 0
+            if ("$needsApproval" -eq 'true') {
+                $f.reviewDecision | Should -Be 'APPROVED' -Because 'con develop-approval attivo una PR non approvata è rifiutata per l''approvazione, non per il check fallito'
+            }
             $script:FixtureOk['PR_DEVELOP_RED'] = $true
         }
 

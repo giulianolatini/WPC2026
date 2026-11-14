@@ -7,6 +7,7 @@ Il formato segue il template ADR di Nygard, con una sezione **Razionale** esplic
 
 - Il registro è *append-only*. Non modifica una decisione `Accepted`: scrivi una nuova decisione che la sostituisce (`Superseded by D-NNN`).
 - Ogni decisione ha uno stato: `Proposed` → `Accepted` | `Rejected` → `Superseded`.
+- Una decisione nuova può sostituire solo una parte di una decisione precedente. In quel caso la decisione precedente ha lo stato `Accepted; in parte sostituita da D-NNN` e indica la parte sostituita: il resto resta valido.
 - `Proposed` indica una scelta dell'assistente che il PO deve confermare.
 - Ogni decisione punta alle fonti in [Sources.md](Sources.md).
 
@@ -48,11 +49,11 @@ Il formato segue il template ADR di Nygard, con una sezione **Razionale** esplic
 | [D-032](#d-032) | 2026-11-07 | Nerd Fonts in WOFF2: sette famiglie e release fissata | Accepted |
 | [D-033](#d-033) | 2026-11-14 | Team di agenti: custom agents di VS Code, template in `examples/agents/` | Accepted |
 | [D-034](#d-034) | 2026-11-14 | Team di agenti: modelli per figura (misto per ruolo) | Superseded by D-037 |
-| [D-035](#d-035) | 2026-11-14 | Team di agenti: flusso di lavoro, GitFlow, TDD e backlog | Accepted |
+| [D-035](#d-035) | 2026-11-14 | Team di agenti: flusso di lavoro, GitFlow, TDD e backlog | Accepted; in parte sostituita da D-043 |
 | [D-036](#d-036) | 2026-11-14 | Regole di scrittura originali ispirate ad ASD-STE100 | Accepted |
 | [D-037](#d-037) | 2026-11-14 | Team di agenti: modelli per figura dopo la verifica P-12 | Accepted |
 | [D-038](#d-038) | 2026-11-14 | Definition of Done per Epic e Feature; criteri di accettazione verificabili | Accepted |
-| [D-039](#d-039) | 2026-11-14 | Protezione di `main` e `develop`: due ruleset, CODEOWNERS, identità separata | Accepted |
+| [D-039](#d-039) | 2026-11-14 | Protezione di `main` e `develop`: due ruleset, CODEOWNERS, identità separata | Accepted; in parte sostituita da D-043 |
 | [D-040](#d-040) | 2026-11-14 | Rami di Feature con il nome creato da Spec Kit | Accepted |
 | [D-041](#d-041) | 2026-11-14 | Due documenti nuovi: BYOK in GitHub Copilot e introduzione a LiteLLM | Accepted |
 | [D-042](#d-042) | 2026-11-14 | Runbook: fase F9 per il team di agenti; la chiusura diventa F10 | Accepted |
@@ -730,7 +731,7 @@ L'opzione 3 resta possibile: S-402 e S-403 sono «Non applicabile» e S-404 scri
 <a id="d-035"></a>
 ## D-035 — Team di agenti: flusso di lavoro, GitFlow, TDD e backlog
 
-- **Data:** 2026-11-14 — **Stato:** Accepted — **Decisore:** PO (brainstorming del 2026-11-14)
+- **Data:** 2026-11-14 — **Stato:** Accepted; in parte sostituita da [D-043](#d-043) (merge in `develop`: ora serve l'approvazione del PO, senza merge automatico) — **Decisore:** PO (brainstorming del 2026-11-14)
 
 **Contesto.** La richiesta lascia aperti cinque punti: dove vive il backlog; come avviene il brainstorming 1to1 (un subagent non può fare domande all'utente); chi unisce le Feature in `develop`; hotfix e riallineamento in GitFlow; chi modifica i test nel ciclo TDD.
 
@@ -830,7 +831,7 @@ L'opzione 3 resta possibile: S-402 e S-403 sono «Non applicabile» e S-404 scri
 <a id="d-039"></a>
 ## D-039 — Protezione di `main` e `develop`: due ruleset, CODEOWNERS e identità separata per l'agente
 
-- **Data:** 2026-11-14 — **Stato:** Accepted — **Decisore:** PO ("Configurazione + spec come esempio"; "Identità separata")
+- **Data:** 2026-11-14 — **Stato:** Accepted; in parte sostituita da [D-043](#d-043) (i ruleset sono tre: anche `develop` richiede l'approvazione di un code owner) — **Decisore:** PO ("Configurazione + spec come esempio"; "Identità separata")
 
 **Contesto.** P-13 ha mostrato che un ruleset non può nominare un utente e che `gh pr merge --admin` o un bypass possono saltare le regole. Il PO ha prodotto con Spec Kit 1.4.0 e Perplexity un pacchetto: due ruleset, `CODEOWNERS`, CI, script di applicazione, specifica, piano e test di verifica.
 
@@ -897,11 +898,11 @@ L'opzione 3 resta possibile: S-402 e S-403 sono «Non applicabile» e S-404 scri
 
 **Opzioni considerate.** (1) Nuova fase dopo la chiusura. (2) Nuova fase F9 «Team di agenti» prima della chiusura, che diventa F10. (3) Un secondo runbook.
 
-**Decisione.** Opzione 2. La fase F9 ha i passi S-911…S-921. La chiusura è la fase F10 con i passi S-1001 e S-1002. Gli identificativi S-901 e S-902 non si riusano. Nuovi parametri: `TEAM_PROJECT`, `GH_OWNER`, `GH_REPO`, `PO_USER`. Il default di `SPECKIT_VERSION` diventa `1.4.0`.
+**Decisione.** Opzione 2. La fase F9 ha i passi S-911…S-922. La chiusura è la fase F10 con i passi S-1001 e S-1002. Gli identificativi S-901 e S-902 non si riusano. Nuovi parametri: `TEAM_PROJECT`, `GH_OWNER`, `GH_REPO`, `PO_USER`. Il default di `SPECKIT_VERSION` diventa `1.4.0`.
 
 **Razionale.** La revoca delle chiavi deve restare l'ultima azione. Un identificativo riusato collegherebbe le evidenze di una sessione salvata a un passo diverso.
 
-**Conseguenze.** Una sessione salvata prima di questa modifica perde lo stato dei due passi di chiusura. ⚠️ I passi S-917, S-918 e S-921 usano ruleset e script non provati su GitHub. ⚠️ La versione di Spec Kit non è confermata dalla rilettura diretta ([Review-Perplexity.md](Review-Perplexity.md#registro-degli-esiti)).
+**Conseguenze.** Una sessione salvata prima di questa modifica perde lo stato dei due passi di chiusura. ⚠️ I passi S-917, S-918, S-919 e S-922 usano ruleset, script e identità non provati su GitHub. ⚠️ La versione di Spec Kit non è confermata dalla rilettura diretta ([Review-Perplexity.md](Review-Perplexity.md#registro-degli-esiti)).
 
 **Fonti.** [S-080](Sources.md#s-080), [S-171](Sources.md#s-171), [S-174](Sources.md#s-174), [S-175](Sources.md#s-175).
 
@@ -910,7 +911,7 @@ L'opzione 3 resta possibile: S-402 e S-403 sono «Non applicabile» e S-404 scri
 <a id="d-043"></a>
 ## D-043 — Agente Cercatore, strumenti del Pianificatore e approvazione del PO su `develop`
 
-- **Data:** 2026-11-14 — **Stato:** Accepted — **Decisore:** PO ("D-043 approvato e accettato", con due modifiche) — **Modifica:** [D-035](#d-035) (merge in `develop`) e [D-039](#d-039) (approvazioni su `develop`)
+- **Data:** 2026-11-14 — **Stato:** Accepted — **Decisore:** PO ("D-043 approvato e accettato", con due modifiche) — **Sostituisce in parte:** [D-035](#d-035) (merge in `develop`) e [D-039](#d-039) (approvazioni su `develop`)
 
 **Contesto.** La review della PR #4 ha trovato due problemi. (1) R6-agy-03: il Pianificatore deve eseguire `/speckit-specify`, che lancia uno script e crea il ramo `feature/<NNN>-<slug>` ([D-040](#d-040)), ma non aveva lo strumento `execute`. (2) R6-agy-01: `ci.yml` gira dal ramo della PR e `develop` non richiedeva approvazioni; un'identità che può modificare il workflow o i test può rendere verdi i controlli richiesti dai ruleset.
 
