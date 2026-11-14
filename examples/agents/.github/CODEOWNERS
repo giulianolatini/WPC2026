@@ -1,0 +1,7 @@
+# ESEMPIO: sostituisci @release-approver con l'utente GitHub del Product Owner.
+# Unico code owner: la sua approvazione è richiesta per ogni PR verso main
+# (ruleset main-release-approval, require_code_owner_review = true).
+# Non aggiungere altri owner: basta l'approvazione di UNO qualsiasi dei code owner.
+# Il sostituto @release-approver-backup NON va elencato qui: usa il bypass
+# del team release-emergency (spec 001, User Story 5).
+* @release-approver
