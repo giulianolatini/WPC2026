@@ -796,7 +796,28 @@ gh api "repos/{{GH_OWNER}}/{{GH_REPO}}/rules/branches/develop" --jq '.[].type'
 
 **Esito atteso:** il primo comando mostra l'ID usato in `integration_id` (atteso `15368` ⚠️); `main` ha le regole `deletion`, `non_fast_forward`, `pull_request`, `required_status_checks`. Da questo momento ogni PR verso `main` e verso `develop` richiede la tua approvazione. In un'organizzazione il secondo comando mostra `release-emergency`. `develop` ha le stesse quattro regole di `main`.
 
-### S-919 — Pianifica con il Pianificatore
+### S-919 — Configura l'identità dell'agente
+<!-- step: os=all path=all profile=all evidence=no-output -->
+
+L'Organizzatore deve usare `git` e `gh` con un'identità diversa dalla tua: GitHub non accetta l'approvazione dell'autore sulla propria PR, quindi con il tuo utente non potresti approvare le PR dell'agente ([gitflow.md](../../examples/agents/docs/team/gitflow.md#identità-dellagente)).
+
+- [ ] Crea l'identità: una GitHub App installata sul repository, oppure un account di servizio aggiunto come collaboratore. Permessi: *Contents* e *Pull requests* in scrittura. Nessun permesso *Administration*, nessun permesso *Workflows*.
+- [ ] Genera il token dell'identità. Non scriverlo in un file del repository e non incollarlo nella chat.
+- [ ] Apri un terminale nuovo, imposta la variabile `GH_TOKEN` con il token e avvia VS Code da quel terminale: l'agente eredita la variabile.
+- [ ] In quel terminale controlla l'identità:
+
+```bash os=all
+cd "{{TEAM_PROJECT}}"
+gh auth status
+gh auth setup-git
+gh api "repos/{{GH_OWNER}}/{{GH_REPO}}" --jq .permissions
+```
+
+- [ ] Tieni il tuo utente `{{PO_USER}}` nel browser: lo usi per approvare le PR.
+
+**Esito atteso:** `gh auth status` mostra il token di `GH_TOKEN` e non il tuo utente; i permessi mostrano `push: true` e `admin: false`. Il sito non salva l'output di questo passo. ⚠️ Da provare: token di una GitHub App con `gh`, e identità di servizio in un repository di un account personale.
+
+### S-920 — Pianifica con il Pianificatore
 <!-- step: os=all path=all profile=all -->
 
 - [ ] Controlla che il ramo corrente sia `develop` aggiornato (`git status -sb`).
@@ -807,15 +828,21 @@ gh api "repos/{{GH_OWNER}}/{{GH_REPO}}/rules/branches/develop" --jq '.[].type'
 - [ ] Controlla `docs/backlog/`: ogni `epic.md` e `feature.md` apre con l'obiettivo di completamento e ha la tabella **Definition of Done** con tutte le voci standard.
 - [ ] Controlla un Task: i criteri di accettazione hanno la forma «Dato…, quando…, allora…» e il campo **Verifica**.
 
-```bash os=all
+```bash os=macos,debian,opensuse
 cd "{{TEAM_PROJECT}}"
 git branch --show-current
 grep -rn "DoD-F9\|DoD-E8" docs/backlog
 ```
 
-**Esito atteso:** il ramo ha la forma `feature/<NNN>-<slug>`; `grep` trova le ultime voci standard in ogni `feature.md` ed `epic.md` ([D-038](../Decisions.md#d-038)).
+```powershell os=windows
+Set-Location "{{TEAM_PROJECT}}"
+git branch --show-current
+Get-ChildItem -Recurse -File docs/backlog | Select-String -Pattern 'DoD-F9|DoD-E8'
+```
 
-### S-920 — Sviluppa una Feature con l'Organizzatore
+**Esito atteso:** il ramo ha la forma `feature/<NNN>-<slug>`; la ricerca trova le ultime voci standard in ogni `feature.md` ed `epic.md` ([D-038](../Decisions.md#d-038)).
+
+### S-921 — Sviluppa una Feature con l'Organizzatore
 <!-- step: os=all path=all profile=all -->
 
 - [ ] Seleziona l'agente **Organizzatore** e chiedi di sviluppare la Feature.
@@ -834,7 +861,7 @@ gh pr list --state all --limit 5
 
 **Esito atteso:** test verdi; la PR è unita in `develop` solo con le voci da DoD-F1 a DoD-F7 soddisfatte e con evidenza, dopo la tua approvazione.
 
-### S-921 — Verifica i rifiuti di GitHub
+### S-922 — Verifica i rifiuti di GitHub
 <!-- step: os=all path=all profile=all -->
 
 ⚠️ Esegui questo passo solo nel repository di laboratorio.
@@ -848,7 +875,7 @@ git push origin develop
 git reset --hard origin/develop
 ```
 
-- [ ] Con l'identità dell'agente (GitHub App o account di servizio) prova `gh pr merge <numero> --merge --admin` su una PR verso `main` senza la tua approvazione.
+- [ ] Con l'identità dell'agente del passo S-919 prova `gh pr merge <numero> --merge --admin` su una PR verso `main` senza la tua approvazione.
 
 **Esito atteso:** GitHub rifiuta il push diretto con un messaggio che nomina la regola del repository (non un errore *non-fast-forward* di git) e rifiuta il merge con `--admin`; la PR resta aperta ([S-175](../Sources.md#s-175), [esempio](../../examples/speckit-ruleset/README.md)).
 

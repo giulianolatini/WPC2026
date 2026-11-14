@@ -73,7 +73,7 @@ Il file `epic.md` contiene questa tabella.
 |---|---|---|---|
 | DoD-E1 | Tutte le Feature dell'Epic hanno la Definition of Done completa | Elenco delle Feature con stato | Organizzatore, Reviewer |
 | DoD-E2 | Ogni risultato misurabile dell'Epic è verificato | Per ogni risultato: test o comando ed esito | Organizzatore, Reviewer, PO |
-| DoD-E3 | I test d'integrazione del Tester sono verdi sul ramo `release/*` | Comando, numero di test superati e falliti | Organizzatore, Reviewer |
+| DoD-E3 | I test d'integrazione del Tester sono verdi sul ramo `release/*` e i controlli di stato della PR sono verdi sull'ultimo commit | Comando, numero di test superati e falliti; esito di `gh pr checks <numero>` e hash del commit | Organizzatore, Reviewer |
 | DoD-E4 | Regola di qualità di `main`: ogni errore previsto ha un test verde; il prodotto ha un gestore globale degli errori | Nomi dei test di errore e d'integrazione; file e riga del gestore globale | Organizzatore, Reviewer antagonista |
 | DoD-E5 | Manuale utente, manuale per sviluppatori e log di sviluppo sono aggiornati | Percorsi dei file | Reviewer ottimista |
 | DoD-E6 | I due Reviewer hanno esito `APPROVA` sull'ultimo commit e il PO ha approvato la PR `release/*` → `main` | Esito, data e hash delle due review in un commento della PR; review di approvazione del PO | Organizzatore, PO |

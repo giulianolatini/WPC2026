@@ -26,6 +26,7 @@ Il formato segue il template ADR di Nygard, con una sezione <strong>Razionale</s
 <ul>
 <li>Il registro è <em>append-only</em>. Non modifica una decisione <code>Accepted</code>: scrivi una nuova decisione che la sostituisce (<code>Superseded by D-NNN</code>).</li>
 <li>Ogni decisione ha uno stato: <code>Proposed</code> → <code>Accepted</code> | <code>Rejected</code> → <code>Superseded</code>.</li>
+<li>Una decisione nuova può sostituire solo una parte di una decisione precedente. In quel caso la decisione precedente ha lo stato <code>Accepted; in parte sostituita da D-NNN</code> e indica la parte sostituita: il resto resta valido.</li>
 <li><code>Proposed</code> indica una scelta dell'assistente che il PO deve confermare.</li>
 <li>Ogni decisione punta alle fonti in <a href="Sources.html">Sources.md</a>.</li>
 </ul>
@@ -248,7 +249,7 @@ Il formato segue il template ADR di Nygard, con una sezione <strong>Razionale</s
 <td><a href="#d-035">D-035</a></td>
 <td>2026-11-14</td>
 <td>Team di agenti: flusso di lavoro, GitFlow, TDD e backlog</td>
-<td>Accepted</td>
+<td>Accepted; in parte sostituita da D-043</td>
 </tr>
 <tr>
 <td><a href="#d-036">D-036</a></td>
@@ -272,7 +273,7 @@ Il formato segue il template ADR di Nygard, con una sezione <strong>Razionale</s
 <td><a href="#d-039">D-039</a></td>
 <td>2026-11-14</td>
 <td>Protezione di <code>main</code> e <code>develop</code>: due ruleset, CODEOWNERS, identità separata</td>
-<td>Accepted</td>
+<td>Accepted; in parte sostituita da D-043</td>
 </tr>
 <tr>
 <td><a href="#d-040">D-040</a></td>
@@ -821,7 +822,7 @@ Il formato segue il template ADR di Nygard, con una sezione <strong>Razionale</s
 <p><a id="d-035"></a></p>
 <h2 id="d-035--team-di-agenti-flusso-di-lavoro-gitflow-tdd-e-backlog">D-035 — Team di agenti: flusso di lavoro, GitFlow, TDD e backlog</h2>
 <ul>
-<li><strong>Data:</strong> 2026-11-14 — <strong>Stato:</strong> Accepted — <strong>Decisore:</strong> PO (brainstorming del 2026-11-14)</li>
+<li><strong>Data:</strong> 2026-11-14 — <strong>Stato:</strong> Accepted; in parte sostituita da <a href="#d-043">D-043</a> (merge in <code>develop</code>: ora serve l'approvazione del PO, senza merge automatico) — <strong>Decisore:</strong> PO (brainstorming del 2026-11-14)</li>
 </ul>
 <p><strong>Contesto.</strong> La richiesta lascia aperti cinque punti: dove vive il backlog; come avviene il brainstorming 1to1 (un subagent non può fare domande all'utente); chi unisce le Feature in <code>develop</code>; hotfix e riallineamento in GitFlow; chi modifica i test nel ciclo TDD.</p>
 <p><strong>Decisione.</strong></p>
@@ -944,7 +945,7 @@ Il formato segue il template ADR di Nygard, con una sezione <strong>Razionale</s
 <p><a id="d-039"></a></p>
 <h2 id="d-039--protezione-di-main-e-develop-due-ruleset-codeowners-e-identità-separata-per-lagente">D-039 — Protezione di <code>main</code> e <code>develop</code>: due ruleset, CODEOWNERS e identità separata per l'agente</h2>
 <ul>
-<li><strong>Data:</strong> 2026-11-14 — <strong>Stato:</strong> Accepted — <strong>Decisore:</strong> PO ("Configurazione + spec come esempio"; "Identità separata")</li>
+<li><strong>Data:</strong> 2026-11-14 — <strong>Stato:</strong> Accepted; in parte sostituita da <a href="#d-043">D-043</a> (i ruleset sono tre: anche <code>develop</code> richiede l'approvazione di un code owner) — <strong>Decisore:</strong> PO ("Configurazione + spec come esempio"; "Identità separata")</li>
 </ul>
 <p><strong>Contesto.</strong> P-13 ha mostrato che un ruleset non può nominare un utente e che <code>gh pr merge --admin</code> o un bypass possono saltare le regole. Il PO ha prodotto con Spec Kit 1.4.0 e Perplexity un pacchetto: due ruleset, <code>CODEOWNERS</code>, CI, script di applicazione, specifica, piano e test di verifica.</p>
 <p><strong>Opzioni considerate.</strong> (1) Solo la descrizione in <code>gitflow.md</code>. (2) File di configurazione nel template e specifica, piano e test come caso svolto. (3) Tutto il pacchetto nel template. Per l'identità: (a) token del PO; (b) identità separata senza bypass.</p>
@@ -989,15 +990,15 @@ Il formato segue il template ADR di Nygard, con una sezione <strong>Razionale</s
 </ul>
 <p><strong>Contesto.</strong> Il runbook (<a href="#d-026">D-026</a>) ha le fasi F1–F9; F9 è la chiusura (revoca delle chiavi, esportazione delle evidenze). L'installazione e la prova del team di agenti non hanno passi.</p>
 <p><strong>Opzioni considerate.</strong> (1) Nuova fase dopo la chiusura. (2) Nuova fase F9 «Team di agenti» prima della chiusura, che diventa F10. (3) Un secondo runbook.</p>
-<p><strong>Decisione.</strong> Opzione 2. La fase F9 ha i passi S-911…S-921. La chiusura è la fase F10 con i passi S-1001 e S-1002. Gli identificativi S-901 e S-902 non si riusano. Nuovi parametri: <code>TEAM_PROJECT</code>, <code>GH_OWNER</code>, <code>GH_REPO</code>, <code>PO_USER</code>. Il default di <code>SPECKIT_VERSION</code> diventa <code>1.4.0</code>.</p>
+<p><strong>Decisione.</strong> Opzione 2. La fase F9 ha i passi S-911…S-922. La chiusura è la fase F10 con i passi S-1001 e S-1002. Gli identificativi S-901 e S-902 non si riusano. Nuovi parametri: <code>TEAM_PROJECT</code>, <code>GH_OWNER</code>, <code>GH_REPO</code>, <code>PO_USER</code>. Il default di <code>SPECKIT_VERSION</code> diventa <code>1.4.0</code>.</p>
 <p><strong>Razionale.</strong> La revoca delle chiavi deve restare l'ultima azione. Un identificativo riusato collegherebbe le evidenze di una sessione salvata a un passo diverso.</p>
-<p><strong>Conseguenze.</strong> Una sessione salvata prima di questa modifica perde lo stato dei due passi di chiusura. ⚠️ I passi S-917, S-918 e S-921 usano ruleset e script non provati su GitHub. ⚠️ La versione di Spec Kit non è confermata dalla rilettura diretta (<a href="Review-Perplexity.html#registro-degli-esiti">Review-Perplexity.md</a>).</p>
+<p><strong>Conseguenze.</strong> Una sessione salvata prima di questa modifica perde lo stato dei due passi di chiusura. ⚠️ I passi S-917, S-918, S-919 e S-922 usano ruleset, script e identità non provati su GitHub. ⚠️ La versione di Spec Kit non è confermata dalla rilettura diretta (<a href="Review-Perplexity.html#registro-degli-esiti">Review-Perplexity.md</a>).</p>
 <p><strong>Fonti.</strong> <a href="Sources.html#s-080">S-080</a>, <a href="Sources.html#s-171">S-171</a>, <a href="Sources.html#s-174">S-174</a>, <a href="Sources.html#s-175">S-175</a>.</p>
 <hr />
 <p><a id="d-043"></a></p>
 <h2 id="d-043--agente-cercatore-strumenti-del-pianificatore-e-approvazione-del-po-su-develop">D-043 — Agente Cercatore, strumenti del Pianificatore e approvazione del PO su <code>develop</code></h2>
 <ul>
-<li><strong>Data:</strong> 2026-11-14 — <strong>Stato:</strong> Accepted — <strong>Decisore:</strong> PO ("D-043 approvato e accettato", con due modifiche) — <strong>Modifica:</strong> <a href="#d-035">D-035</a> (merge in <code>develop</code>) e <a href="#d-039">D-039</a> (approvazioni su <code>develop</code>)</li>
+<li><strong>Data:</strong> 2026-11-14 — <strong>Stato:</strong> Accepted — <strong>Decisore:</strong> PO ("D-043 approvato e accettato", con due modifiche) — <strong>Sostituisce in parte:</strong> <a href="#d-035">D-035</a> (merge in <code>develop</code>) e <a href="#d-039">D-039</a> (approvazioni su <code>develop</code>)</li>
 </ul>
 <p><strong>Contesto.</strong> La review della PR #4 ha trovato due problemi. (1) R6-agy-03: il Pianificatore deve eseguire <code>/speckit-specify</code>, che lancia uno script e crea il ramo <code>feature/&lt;NNN&gt;-&lt;slug&gt;</code> (<a href="#d-040">D-040</a>), ma non aveva lo strumento <code>execute</code>. (2) R6-agy-01: <code>ci.yml</code> gira dal ramo della PR e <code>develop</code> non richiedeva approvazioni; un'identità che può modificare il workflow o i test può rendere verdi i controlli richiesti dai ruleset.</p>
 <p><strong>Opzioni considerate.</strong> Per (1): (a) <code>execute</code> al Pianificatore, senza <code>web</code>; (b) <code>execute</code> e <code>web</code> insieme; (c) spostare <code>/speckit-specify</code> all'Organizzatore. Per (2): (a) nessun permesso <em>Workflows</em> all'identità dell'agente, più controllo del Reviewer antagonista; (b) come (a), più approvazione di un code owner su <code>develop</code> per <code>.github/**</code> e <code>scripts/**</code>; (c) approvazione di un code owner su ogni PR verso <code>develop</code>.</p>

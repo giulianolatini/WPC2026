@@ -320,4 +320,4 @@ Nessuna pratica garantisce che un processo non termini mai: l'evento `AppDomain.
 - [ ] ⚠️ `modelOptions.provider` in `chatLanguageModels.native.json`: VS Code manda il campo a OpenRouter?
 - [ ] ⚠️ Chiamate agli strumenti dei tre modelli OpenRouter (lettura dei file; per il Tester anche scrittura ed esecuzione).
 - [ ] ⚠️ Ruleset, `CODEOWNERS`, `ci.yml` e `Set-Rulesets.ps1` in un repository di laboratorio; valore di `integration_id`.
-- [ ] ⚠️ `gh` con l'identità separata nel terminale dell'agente; rifiuto di `gh pr merge --admin`.
+- [ ] ⚠️ `gh` con l'identità separata nel terminale dell'agente (passo S-919 del runbook); rifiuto di `gh pr merge --admin`.

@@ -39,8 +39,9 @@ if (-not $WithoutEmergencyTeam) {
     $teamId = [int]"$rawTeamId"
 }
 
-$existing = gh api "repos/$Repository/rulesets" --paginate | ConvertFrom-Json
+$rawExisting = gh api "repos/$Repository/rulesets" --paginate
 if ($LASTEXITCODE -ne 0) { throw "Impossibile leggere i ruleset di $Repository." }
+$existing = @($rawExisting | ConvertFrom-Json)
 
 foreach ($file in Get-ChildItem -Path $RulesetDirectory -Filter '*.json') {
     $ruleset = Get-Content -Raw -Path $file.FullName | ConvertFrom-Json
