@@ -46,6 +46,10 @@ Il formato segue il template ADR di Nygard, con una sezione **Razionale** esplic
 | [D-030](#d-030) | 2026-11-07 | PostgreSQL locale per il percorso uv con profilo esteso | Accepted |
 | [D-031](#d-031) | 2026-11-07 | Diagrammi Mermaid disegnati nel sito offline | Accepted |
 | [D-032](#d-032) | 2026-11-07 | Nerd Fonts in WOFF2: sette famiglie e release fissata | Accepted |
+| [D-033](#d-033) | 2026-11-14 | Team di agenti: custom agents di VS Code, template in `examples/agents/` | Accepted |
+| [D-034](#d-034) | 2026-11-14 | Team di agenti: modelli per figura (misto per ruolo) | Accepted |
+| [D-035](#d-035) | 2026-11-14 | Team di agenti: flusso di lavoro, GitFlow, TDD e backlog | Accepted |
+| [D-036](#d-036) | 2026-11-14 | Regole di scrittura originali ispirate ad ASD-STE100 | Accepted |
 
 ---
 
@@ -663,3 +667,95 @@ L'opzione 3 resta possibile: S-402 e S-403 sono «Non applicabile» e S-404 scri
 **Conseguenze.** Un aggiornamento dei font cambia la versione in `tools/fonts.json`, aggiorna gli sha256 e rigenera i WOFF2 con `--fonts`.
 
 **Fonti.** [S-152](Sources.md#s-152), [S-153](Sources.md#s-153), [S-156](Sources.md#s-156).
+
+---
+
+<a id="d-033"></a>
+## D-033 — Team di agenti: custom agents di VS Code, template in `examples/agents/`
+
+- **Data:** 2026-11-14 — **Stato:** Accepted — **Decisore:** PO (brainstorming del 2026-11-14)
+
+**Contesto.** Il PO chiede un secondo passo: un team di sviluppo orchestrato (9 figure) che usa i modelli BYOK configurati in [02](02-Configurazione-Copilot.md) per uno sviluppo *spec-driven*. La richiesta nomina «ClaudeCode, Codex e OpenRouter tramite chiamate API di GitHub Copilot». Il progetto software usa GitFlow; questo repository usa GitHub Flow.
+
+**Opzioni considerate.** Forma: (1) *custom agents* di VS Code con subagent; (2) harness Claude e Codex; (3) Copilot CLI; (4) orchestratore esterno. Harness: (a) Copilot con Local di riserva; (b) solo Copilot; (c) solo Local. Posizione: (i) template in questo repository; (ii) nuovo repository.
+
+**Decisione.** Opzioni 1, a, i. Ogni figura è un file `.agent.md` in `examples/agents/.github/agents/`, scritto per l'harness Copilot (`target: github-copilot`). Il documento [05](05-Team-Agenti.md) descrive le differenze per l'harness Local.
+
+**Razionale.** I *custom agents* fissano modello, strumenti e istruzioni per figura e restano dentro Copilot Chat, che il talk descrive. L'harness Local termina a febbraio 2027. Un template lascia questo repository in GitHub Flow.
+
+**Conseguenze.** Nell'harness Copilot il BYOK è sperimentale: punto ⚠️ da provare. Senza il campo `agents` (solo Local) la limitazione dei subagent sta nelle istruzioni e in `user-invocable: false`.
+
+**Fonti.** [S-007](Sources.md#s-007), [S-068](Sources.md#s-068), [S-072](Sources.md#s-072), [S-165](Sources.md#s-165).
+
+---
+
+<a id="d-034"></a>
+## D-034 — Team di agenti: modelli per figura (misto per ruolo)
+
+- **Data:** 2026-11-14 — **Stato:** Accepted — **Decisore:** PO (brainstorming del 2026-11-14)
+
+**Contesto.** Il PO chiede modelli costosi per analisi e pianificazione e modelli economici per l'implementazione: Pianificatore alto con effort `high` o superiore; Organizzatore intermedio; Avversario medio con ragionamento limitato; figure operative e Reviewer medio/bassi; due modelli diversi per i Reviewer.
+
+**Opzioni considerate.** (1) Misto per ruolo tra Anthropic, OpenAI e OpenRouter. (2) OpenRouter solo con `openai/gpt-oss-120b` senza conservazione dei dati. (3) Massimo risparmio: tutte le figure operative su modelli aperti via OpenRouter.
+
+**Decisione.** Opzione 1:
+
+| Figura | Modello | Effort |
+|---|---|---|
+| Pianificatore | `claude-fable-5-2` | `high` |
+| Organizzatore | `claude-sonnet-5-5` | default |
+| Avversario | `gpt-6.1-sol` | `low` |
+| Sviluppatore, Operativo | `gpt-5.4-mini` | default |
+| Tester, Scrittore | `claude-haiku-5-5` | default |
+| Reviewer ottimista | `deepseek/deepseek-v4.1-flash` (OpenRouter) | default |
+| Reviewer antagonista | `qwen/qwen3-coder` (OpenRouter) | default |
+
+**Razionale.** Il costo segue il ragionamento richiesto. Due provider diversi per Pianificatore e Avversario, e due modelli diversi per i Reviewer, danno punti di vista indipendenti. OpenAI non ha modelli «Codex» correnti: le figure di codice usano i modelli generali indicati per il coding.
+
+**Conseguenze.** ⚠️ Da verificare con P-12: ID e prezzi dei modelli OpenAI e OpenRouter. I diff delle PR vanno a provider scelti da OpenRouter: servono i *guardrail* per codice riservato ([05 §9](05-Team-Agenti.md#9-sicurezza)). Un cambio di modello modifica solo il campo `model` del file della figura.
+
+**Fonti.** [S-040](Sources.md#s-040), [S-102](Sources.md#s-102), [S-166](Sources.md#s-166), [S-072](Sources.md#s-072).
+
+---
+
+<a id="d-035"></a>
+## D-035 — Team di agenti: flusso di lavoro, GitFlow, TDD e backlog
+
+- **Data:** 2026-11-14 — **Stato:** Accepted — **Decisore:** PO (brainstorming del 2026-11-14)
+
+**Contesto.** La richiesta lascia aperti cinque punti: dove vive il backlog; come avviene il brainstorming 1to1 (un subagent non può fare domande all'utente); chi unisce le Feature in `develop`; hotfix e riallineamento in GitFlow; chi modifica i test nel ciclo TDD.
+
+**Decisione.**
+
+- **Backlog:** specifiche e piano con GitHub Spec Kit; Epic, Feature e Task in file Markdown in `docs/backlog/`.
+- **Brainstorming:** il PO apre direttamente l'agente Pianificatore, che chiama l'Avversario come subagent.
+- **Merge in `develop`:** l'Organizzatore, quando i due Reviewer approvano e i test sono verdi. Il merge in `main` resta del PO, con approvazione esplicita.
+- **GitFlow completo:** rami `hotfix/*` da `main` e *back-merge* di Release e hotfix in `develop`.
+- **TDD:** il Tester scrive prima i test (*red*); chi implementa li fa passare (*green*) e fa il *refactor*; solo il Tester modifica i test.
+
+**Opzioni scartate.** Backlog in GitHub Issues o senza Spec Kit; Organizzatore come tramite nel brainstorming; merge in `develop` sempre del PO; GitFlow senza hotfix; test modificabili da chi implementa.
+
+**Razionale.** I file Markdown sono versionati con il codice e leggibili da ogni figura. Il brainstorming diretto è l'unico vero 1to1 possibile. Il merge automatico in `develop` riduce le attese del PO, che controlla il passaggio a `main`. La separazione tra chi scrive i test e chi scrive il codice protegge il significato dei test.
+
+**Conseguenze.** L'Organizzatore ha gli strumenti `execute` (git, gh) e `agent`. Il ruleset di GitHub deve imporre l'approvazione del PO su `main`. ⚠️ Da verificare con P-13: nomi dei rami di Spec Kit rispetto a `feature/*`.
+
+**Fonti.** [S-165](Sources.md#s-165), [S-167](Sources.md#s-167), [S-168](Sources.md#s-168), [S-169](Sources.md#s-169), [S-080](Sources.md#s-080).
+
+---
+
+<a id="d-036"></a>
+## D-036 — Regole di scrittura originali ispirate ad ASD-STE100
+
+- **Data:** 2026-11-14 — **Stato:** Accepted — **Decisore:** PO (brainstorming del 2026-11-14)
+
+**Contesto.** Il Pianificatore deve dare allo Scrittore regole e un dizionario basati su ASD-STE100. Il PO può consultare lo standard ma non condividerlo; il repository è pubblico.
+
+**Opzioni considerate.** (1) Regole originali in italiano e dizionario dei termini del progetto, nel repository, con riferimenti solo all'indice dello standard. (2) File locale escluso da git, più vicino allo standard. (3) Solo dizionario di progetto.
+
+**Decisione.** Opzione 1: `examples/agents/docs/team/writing-rules.md` contiene 16 regole originali e un dizionario iniziale. Le istruzioni del Pianificatore vietano di copiare testo dello standard.
+
+**Razionale.** Lo Scrittore ha bisogno delle regole nel repository per applicarle. Un testo originale rispetta il vincolo di riservatezza.
+
+**Conseguenze.** Il Pianificatore estende il dizionario a ogni progetto. Le regole non sostituiscono lo standard e non lo riproducono.
+
+**Fonti.** [S-092](Sources.md#s-092).
