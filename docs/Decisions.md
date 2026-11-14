@@ -56,6 +56,7 @@ Il formato segue il template ADR di Nygard, con una sezione **Razionale** esplic
 | [D-040](#d-040) | 2026-11-14 | Rami di Feature con il nome creato da Spec Kit | Accepted |
 | [D-041](#d-041) | 2026-11-14 | Due documenti nuovi: BYOK in GitHub Copilot e introduzione a LiteLLM | Accepted |
 | [D-042](#d-042) | 2026-11-14 | Runbook: fase F9 per il team di agenti; la chiusura diventa F10 | Accepted |
+| [D-043](#d-043) | 2026-11-14 | Strumenti del Pianificatore e permessi dell'identità dell'agente dopo la review | Proposed |
 
 ---
 
@@ -900,3 +901,25 @@ L'opzione 3 resta possibile: S-402 e S-403 sono «Non applicabile» e S-404 scri
 **Conseguenze.** Una sessione salvata prima di questa modifica perde lo stato dei due passi di chiusura. ⚠️ I passi S-917, S-918 e S-921 usano ruleset e script non provati su GitHub. ⚠️ La versione di Spec Kit non è confermata dalla rilettura diretta ([Review-Perplexity.md](Review-Perplexity.md#registro-degli-esiti)).
 
 **Fonti.** [S-080](Sources.md#s-080), [S-171](Sources.md#s-171), [S-174](Sources.md#s-174), [S-175](Sources.md#s-175).
+
+---
+
+<a id="d-043"></a>
+## D-043 — Strumenti del Pianificatore e permessi dell'identità dell'agente dopo la review
+
+- **Data:** 2026-11-14 — **Stato:** Proposed — **Decisore:** assistente; il PO deve confermare
+
+**Contesto.** La review della PR #4 ha trovato due problemi. (1) R6-agy-03: il Pianificatore deve eseguire `/speckit-specify`, che lancia uno script e crea il ramo `feature/<NNN>-<slug>` ([D-040](#d-040)), ma non aveva lo strumento `execute`. (2) R6-agy-01: `ci.yml` gira dal ramo della PR e `develop` non richiede approvazioni; un'identità che può modificare il workflow o i test può rendere verdi i controlli richiesti dai ruleset ([D-039](#d-039)).
+
+**Opzioni considerate.** Per (1): (a) `execute` al Pianificatore, senza `web`; (b) `execute` e `web` insieme; (c) spostare `/speckit-specify` all'Organizzatore. Per (2): (a) nessun permesso *Workflows* all'identità dell'agente, più controllo del Reviewer antagonista; (b) come (a), più approvazione di un code owner su `develop` per `.github/**` e `scripts/**`; (c) approvazione del PO su ogni PR verso `develop`.
+
+**Decisione proposta.** (1a) e (2a):
+
+- il Pianificatore ha `read`, `search`, `edit`, `execute`, `agent`, `todo`; usa il terminale solo per gli script di Spec Kit e per il ramo della pianificazione; nessuna figura ha `web`;
+- l'identità dell'agente non ha il permesso *Workflows*; l'Organizzatore non modifica `.github/` e `scripts/Set-Rulesets.ps1`; il Reviewer antagonista assegna severità `alta` a ogni modifica in `.github/` e a ogni test cancellato o reso sempre verde.
+
+**Razionale.** La specifica è lavoro del modello più capace: resta al Pianificatore. Un agente con `web` ed `execute` insieme può eseguire istruzioni lette da una pagina. Senza *Workflows* GitHub rifiuta il push che modifica un workflow: è un controllo di GitHub, non un'istruzione. Le opzioni (2b) e (2c) cambiano la scelta del PO sul merge in `develop` ([D-035](#d-035)).
+
+**Conseguenze.** Il Pianificatore non fa ricerche sul web: le chiede al PO. ⚠️ Resta il rischio di test modificati in una PR verso `develop`: lo copre solo la review. ⚠️ Il rifiuto del push senza il permesso *Workflows* va provato. Se il PO sceglie (2b) o (2c) cambiano `main-develop.json`, `CODEOWNERS` e il ruolo dell'Organizzatore nel merge.
+
+**Fonti.** [S-072](Sources.md#s-072), [S-172](Sources.md#s-172), [S-173](Sources.md#s-173), [S-177](Sources.md#s-177), review R6-agy-01 e R6-agy-03 della PR #4.

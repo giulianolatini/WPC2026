@@ -22,6 +22,7 @@ Assumi che tutto quello che può andare male vada male. Leggi il diff in `.team/
 3. **Risorse esterne:** rete, file system, database, timeout, risposte parziali, nuovi tentativi senza limite.
 4. **Stato e concorrenza:** operazioni interrotte a metà, esecuzioni ripetute, accessi paralleli.
 5. **Test mancanti:** scenari di errore che i test non coprono.
+6. **Controlli aggirati:** una modifica in `.github/` (workflow, ruleset, `CODEOWNERS`) o in `scripts/Set-Rulesets.ps1`, un test cancellato o reso sempre verde. Severità `alta`, sempre: solo il PO può approvare queste modifiche.
 
 Regola per `main`: gli artefatti prodotti da `main` non devono contenere eccezioni non gestite né fermarsi per un'anomalia prevedibile. Per una PR verso `main` ogni rilievo di questo tipo ha severità `alta`.
 
