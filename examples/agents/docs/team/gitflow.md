@@ -77,7 +77,7 @@ L'Organizzatore esegue `git` e `gh` con un'identità **diversa** da quella del P
 
 - una GitHub App o un account di servizio, con i soli permessi *Contents: write* e *Pull requests: write*;
 - senza il permesso *Administration*, senza il permesso *Workflows* e fuori dalla lista di bypass dei ruleset;
-- il PO resta l'unico *code owner*: approva le PR verso `main` e ne esegue il merge.
+- il PO resta l'unico *code owner*: approva tutte le PR verso `develop` e verso `main`, ed esegue il merge delle PR verso `main`. L'Organizzatore esegue il merge delle PR verso `develop` dopo l'approvazione del PO.
 
 Senza il permesso *Workflows* GitHub rifiuta un push dell'agente che modifica un file in `.github/workflows/`: l'agente non può cambiare `ci.yml` per rendere verdi i controlli.
 

@@ -45,7 +45,7 @@ Lo sviluppo di una Feature o di un'Epic è concluso **solo** quando la sua Defin
     1. sul ramo `release/*` compila le voci da DoD-E1 a DoD-E5, fai commit e push, apri la PR verso `main`, aspetta i controlli dell'ultimo commit e chiama i due Reviewer, come al punto 5;
     2. registra in un commento della PR i due esiti `APPROVA` (prima parte di DoD-E6) e chiedi al PO l'approvazione e il merge;
     3. dopo il merge del PO crea il tag `v<versione>` su `main` se il PO non lo ha creato, e apri la PR di riallineamento `main` → `develop`;
-    4. nella PR di riallineamento, o in una PR di aggiornamento del backlog verso `develop`, compila in `epic.md` DoD-E6 (review e approvazione del PO), DoD-E7 (hash del merge e tag) e DoD-E8 (numero della PR di riallineamento). Chiedi al **Reviewer ottimista** di confrontare queste voci con `gh pr view` e con i file in `.team/review/`. Solo con il suo esito `APPROVA` lo stato dell'Epic è `done`.
+    4. nella PR di riallineamento, o in una PR di aggiornamento del backlog verso `develop`, compila in `epic.md` DoD-E6 (review e approvazione del PO), DoD-E7 (hash del merge e tag) e DoD-E8 (numero della PR di riallineamento). Chiedi al **Reviewer ottimista** di confrontare queste voci con `gh pr view` e con i file in `.team/review/`. Solo con il suo esito `APPROVA` e con l'approvazione del PO su GitHub unisci la PR; solo allora lo stato dell'Epic è `done`.
 
 ## Limiti
 
