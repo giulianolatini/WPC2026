@@ -35,13 +35,15 @@ Il talk non dichiara un vincitore: presenta i **criteri di scelta** ([docs/Decis
 │   ├── 02-Configurazione-Copilot.md  # Copilot: uso, architettura, BYOK nativo, LiteLLM, Spec Kit
 │   ├── 03-Security-Best-Practices.md # best practice Microsoft e LiteLLM, baseline sicura
 │   ├── 04-Security-Review-OWASP-ISO27001.md # review degli esempi: OWASP LLM/Agentic, ISO 27001
+│   ├── 05-Team-Agenti.md         # team di agenti orchestrato per lo sviluppo spec-driven
 │   ├── Decisions.md              # registro cronologico delle decisioni (ADR con razionale)
 │   ├── Sources.md                # fonti documentali (titolo + URL, ancore S-NNN)
 │   ├── Review-Perplexity.md      # prompt di verifica con un secondo LLM
 │   └── runbook/RUNBOOK.md        # procedura passo per passo (sorgente del sito offline)
 ├── examples/
 │   ├── litellm/                  # config.yaml, Compose minimo/esteso, .env.example, unit di servizio
-│   └── vscode/                   # chatLanguageModels.json (nativo, LiteLLM), settings.secure.jsonc
+│   ├── vscode/                   # chatLanguageModels.json (nativo, LiteLLM), settings.secure.jsonc
+│   └── agents/                   # template: 9 custom agents, GitFlow, backlog, regole di scrittura
 ├── site/                         # sito offline GENERATO: non modificare a mano
 │   ├── index.html                # runbook interattivo: sessioni, parametri, evidenze
 │   ├── docs/                     # documenti di docs/ in HTML
@@ -59,7 +61,8 @@ Il talk non dichiara un vincitore: presenta i **criteri di scelta** ([docs/Decis
 2. Segui [docs/02-Configurazione-Copilot.md](docs/02-Configurazione-Copilot.md): prima il percorso nativo (§3), poi LiteLLM (§4).
 3. Usa i file in [examples/](examples/) come base.
 4. Per eseguire la procedura e registrare le evidenze, apri [site/index.html](site/index.html) nel browser (anche offline). La sorgente è [docs/runbook/RUNBOOK.md](docs/runbook/RUNBOOK.md).
-5. Prima di usarli in un team, leggi [docs/03-Security-Best-Practices.md](docs/03-Security-Best-Practices.md) e i rischi in [docs/04-Security-Review-OWASP-ISO27001.md](docs/04-Security-Review-OWASP-ISO27001.md).
+5. Per sviluppare un progetto con un team di agenti, leggi [docs/05-Team-Agenti.md](docs/05-Team-Agenti.md) e copia il template [examples/agents/](examples/agents/README.md).
+6. Prima di usarli in un team, leggi [docs/03-Security-Best-Practices.md](docs/03-Security-Best-Practices.md) e i rischi in [docs/04-Security-Review-OWASP-ISO27001.md](docs/04-Security-Review-OWASP-ISO27001.md).
 
 Dopo una modifica a `docs/` o al runbook, rigenera il sito con `tools/update-site.sh` (Windows: `tools/update-site.ps1`). Con `--check` lo script controlla che il sito sia aggiornato.
 
