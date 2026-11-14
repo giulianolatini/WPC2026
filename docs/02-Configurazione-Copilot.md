@@ -164,6 +164,8 @@ Il campo `name` deve corrispondere al nome della cartella (minuscole, numeri, tr
 
 ### 2.4 Impostazioni per BYOK
 
+> Il concetto di BYOK è descritto in dettaglio in [06-BYOK-GitHub-Copilot.md](06-BYOK-GitHub-Copilot.md).
+
 | Impostazione | Funzione |
 |--------------|----------|
 | `chat.utilityModel` | Modello per titoli, sommari, settings search, Git review. Valore in formato `vendor/id` ⚠️ ([S-075](Sources.md#s-075)) |
@@ -386,6 +388,8 @@ Il suffisso dell'ID sceglie il provider di inferenza: `:fastest` (default), `:ch
 ## 4. GitHub Copilot con LiteLLM come gateway
 
 ### 4.1 Quando usare un gateway
+
+> LiteLLM e le sue feature sono presentati in [07-LiteLLM-Introduzione.md](07-LiteLLM-Introduzione.md).
 
 LiteLLM proxy espone un solo endpoint locale. Traduce le richieste nei formati dei provider ([S-022](Sources.md#s-022)). La scelta tra nativo e gateway dipende dal contesto ([D-017](Decisions.md#d-017)).
 
