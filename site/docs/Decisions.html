@@ -292,6 +292,12 @@ Il formato segue il template ADR di Nygard, con una sezione <strong>Razionale</s
 <td>Runbook: fase F9 per il team di agenti; la chiusura diventa F10</td>
 <td>Accepted</td>
 </tr>
+<tr>
+<td><a href="#d-043">D-043</a></td>
+<td>2026-11-14</td>
+<td>Strumenti del Pianificatore e permessi dell'identità dell'agente dopo la review</td>
+<td>Proposed</td>
+</tr>
 </tbody>
 </table>
 <hr />
@@ -797,7 +803,7 @@ Il formato segue il template ADR di Nygard, con una sezione <strong>Razionale</s
 </tbody>
 </table>
 <p><strong>Razionale.</strong> Il costo segue il ragionamento richiesto. Due provider diversi per Pianificatore e Avversario, e due modelli diversi per i Reviewer, danno punti di vista indipendenti. OpenAI non ha modelli «Codex» correnti: le figure di codice usano i modelli generali indicati per il coding.</p>
-<p><strong>Conseguenze.</strong> ⚠️ Da verificare con P-12: ID e prezzi dei modelli OpenAI e OpenRouter. I diff delle PR vanno a provider scelti da OpenRouter: servono i <em>guardrail</em> per codice riservato (<a href="05-Team-Agenti.html#10-sicurezza">05 §9</a>). Un cambio di modello modifica solo il campo <code>model</code> del file della figura.</p>
+<p><strong>Conseguenze.</strong> ⚠️ Da verificare con P-12: ID e prezzi dei modelli OpenAI e OpenRouter. I diff delle PR vanno a provider scelti da OpenRouter: servono i <em>guardrail</em> per codice riservato (<a href="05-Team-Agenti.html#10-sicurezza">05 §10</a>). Un cambio di modello modifica solo il campo <code>model</code> del file della figura.</p>
 <p><strong>Fonti.</strong> <a href="Sources.html#s-040">S-040</a>, <a href="Sources.html#s-102">S-102</a>, <a href="Sources.html#s-166">S-166</a>, <a href="Sources.html#s-072">S-072</a>.</p>
 <hr />
 <p><a id="d-035"></a></p>
@@ -973,7 +979,23 @@ Il formato segue il template ADR di Nygard, con una sezione <strong>Razionale</s
 <p><strong>Decisione.</strong> Opzione 2. La fase F9 ha i passi S-911…S-921. La chiusura è la fase F10 con i passi S-1001 e S-1002. Gli identificativi S-901 e S-902 non si riusano. Nuovi parametri: <code>TEAM_PROJECT</code>, <code>GH_OWNER</code>, <code>GH_REPO</code>, <code>PO_USER</code>. Il default di <code>SPECKIT_VERSION</code> diventa <code>1.4.0</code>.</p>
 <p><strong>Razionale.</strong> La revoca delle chiavi deve restare l'ultima azione. Un identificativo riusato collegherebbe le evidenze di una sessione salvata a un passo diverso.</p>
 <p><strong>Conseguenze.</strong> Una sessione salvata prima di questa modifica perde lo stato dei due passi di chiusura. ⚠️ I passi S-917, S-918 e S-921 usano ruleset e script non provati su GitHub. ⚠️ La versione di Spec Kit non è confermata dalla rilettura diretta (<a href="Review-Perplexity.html#registro-degli-esiti">Review-Perplexity.md</a>).</p>
-<p><strong>Fonti.</strong> <a href="Sources.html#s-080">S-080</a>, <a href="Sources.html#s-171">S-171</a>, <a href="Sources.html#s-174">S-174</a>, <a href="Sources.html#s-175">S-175</a>.</p></article>
+<p><strong>Fonti.</strong> <a href="Sources.html#s-080">S-080</a>, <a href="Sources.html#s-171">S-171</a>, <a href="Sources.html#s-174">S-174</a>, <a href="Sources.html#s-175">S-175</a>.</p>
+<hr />
+<p><a id="d-043"></a></p>
+<h2 id="d-043--strumenti-del-pianificatore-e-permessi-dellidentità-dellagente-dopo-la-review">D-043 — Strumenti del Pianificatore e permessi dell'identità dell'agente dopo la review</h2>
+<ul>
+<li><strong>Data:</strong> 2026-11-14 — <strong>Stato:</strong> Proposed — <strong>Decisore:</strong> assistente; il PO deve confermare</li>
+</ul>
+<p><strong>Contesto.</strong> La review della PR #4 ha trovato due problemi. (1) R6-agy-03: il Pianificatore deve eseguire <code>/speckit-specify</code>, che lancia uno script e crea il ramo <code>feature/&lt;NNN&gt;-&lt;slug&gt;</code> (<a href="#d-040">D-040</a>), ma non aveva lo strumento <code>execute</code>. (2) R6-agy-01: <code>ci.yml</code> gira dal ramo della PR e <code>develop</code> non richiede approvazioni; un'identità che può modificare il workflow o i test può rendere verdi i controlli richiesti dai ruleset (<a href="#d-039">D-039</a>).</p>
+<p><strong>Opzioni considerate.</strong> Per (1): (a) <code>execute</code> al Pianificatore, senza <code>web</code>; (b) <code>execute</code> e <code>web</code> insieme; (c) spostare <code>/speckit-specify</code> all'Organizzatore. Per (2): (a) nessun permesso <em>Workflows</em> all'identità dell'agente, più controllo del Reviewer antagonista; (b) come (a), più approvazione di un code owner su <code>develop</code> per <code>.github/**</code> e <code>scripts/**</code>; (c) approvazione del PO su ogni PR verso <code>develop</code>.</p>
+<p><strong>Decisione proposta.</strong> (1a) e (2a):</p>
+<ul>
+<li>il Pianificatore ha <code>read</code>, <code>search</code>, <code>edit</code>, <code>execute</code>, <code>agent</code>, <code>todo</code>; usa il terminale solo per gli script di Spec Kit e per il ramo della pianificazione; nessuna figura ha <code>web</code>;</li>
+<li>l'identità dell'agente non ha il permesso <em>Workflows</em>; l'Organizzatore non modifica <code>.github/</code> e <code>scripts/Set-Rulesets.ps1</code>; il Reviewer antagonista assegna severità <code>alta</code> a ogni modifica in <code>.github/</code> e a ogni test cancellato o reso sempre verde.</li>
+</ul>
+<p><strong>Razionale.</strong> La specifica è lavoro del modello più capace: resta al Pianificatore. Un agente con <code>web</code> ed <code>execute</code> insieme può eseguire istruzioni lette da una pagina. Senza <em>Workflows</em> GitHub rifiuta il push che modifica un workflow: è un controllo di GitHub, non un'istruzione. Le opzioni (2b) e (2c) cambiano la scelta del PO sul merge in <code>develop</code> (<a href="#d-035">D-035</a>).</p>
+<p><strong>Conseguenze.</strong> Il Pianificatore non fa ricerche sul web: le chiede al PO. ⚠️ Resta il rischio di test modificati in una PR verso <code>develop</code>: lo copre solo la review. ⚠️ Il rifiuto del push senza il permesso <em>Workflows</em> va provato. Se il PO sceglie (2b) o (2c) cambiano <code>main-develop.json</code>, <code>CODEOWNERS</code> e il ruolo dell'Organizzatore nel merge.</p>
+<p><strong>Fonti.</strong> <a href="Sources.html#s-072">S-072</a>, <a href="Sources.html#s-172">S-172</a>, <a href="Sources.html#s-173">S-173</a>, <a href="Sources.html#s-177">S-177</a>, review R6-agy-01 e R6-agy-03 della PR #4.</p></article>
 <script type="application/json" id="fonts-data">[
   {
     "id": "blexmono",
