@@ -667,7 +667,7 @@ specify version
 ### S-912 — Crea il repository di prova con i rami GitFlow
 <!-- step: os=all path=all profile=all -->
 
-- [ ] Crea su GitHub il repository `{{GH_OWNER}}/{{GH_REPO}}` con un primo commit su `main`. Per i ruleset usa un'organizzazione.
+- [ ] Crea su GitHub il repository `{{GH_OWNER}}/{{GH_REPO}}` con un primo commit su `main`. Un'organizzazione permette il team di emergenza; con un account personale usa l'opzione `-WithoutEmergencyTeam` (passo S-918). Con il piano Free il repository deve essere pubblico.
 - [ ] Clona il repository e crea i rami:
 
 ```bash os=all
@@ -710,6 +710,7 @@ Copy-Item -Recurse -Force "{{REPO_DIR}}\examples\agents\*" "{{TEAM_PROJECT}}\"
 Copy-Item -Recurse -Force "{{REPO_DIR}}\examples\agents\.github" "{{TEAM_PROJECT}}\"
 Copy-Item -Recurse -Force "{{REPO_DIR}}\examples\agents\.specify" "{{TEAM_PROJECT}}\"
 Copy-Item -Recurse -Force "{{REPO_DIR}}\examples\agents\.vscode" "{{TEAM_PROJECT}}\"
+Copy-Item -Force "{{REPO_DIR}}\examples\agents\.mcp.json" "{{TEAM_PROJECT}}\"
 Copy-Item -Force "{{REPO_DIR}}\examples\agents\.gitignore" "{{TEAM_PROJECT}}\"
 Set-Location "{{TEAM_PROJECT}}"
 Select-String -Path .specify\extensions\git\git-config.yml -Pattern 'branch_prefix'
@@ -719,14 +720,14 @@ Get-ChildItem .github\agents
 - [ ] Apri `.github/CODEOWNERS` e sostituisci `@release-approver` con `@{{PO_USER}}`.
 - [ ] Copia `docs/team/templates/decisions.md` in `docs/backlog/decisions.md` e scrivi nella ADR-001 la versione di Spec Kit ([D-044](../Decisions.md#d-044)).
 
-**Esito atteso:** `branch_prefix: "feature"`; 10 file `.agent.md`; `.vscode/mcp.json` esiste; `CODEOWNERS` contiene solo `* @{{PO_USER}}`; `docs/backlog/decisions.md` ha la ADR-001.
+**Esito atteso:** `branch_prefix: "feature"`; 10 file `.agent.md`; `.mcp.json` e `.vscode/mcp.json` esistono; `CODEOWNERS` contiene solo `* @{{PO_USER}}`; `docs/backlog/decisions.md` ha la ADR-001.
 
 ### S-915 — Configura VS Code per il team
 <!-- step: os=all path=all profile=all -->
 
 - [ ] Aggiungi nel Language Models editor i modelli del team ([05 §4](../05-Team-Agenti.md#4-modelli-e-costi)): Anthropic, OpenAI, OpenRouter.
 - [ ] Attiva `chat.agentHost.byokModels.enabled` e `github.copilot.chat.cli.customAgents.enabled` ([05 §5](../05-Team-Agenti.md#5-vincoli-tecnici-di-vs-code)). Riavvia VS Code.
-- [ ] Leggi `.vscode/mcp.json`, poi avvia il server MCP `microsoft-learn` per il Cercatore. In Copilot CLI: `/plugin install microsoftdocs/mcp` ([S-188](../Sources.md#s-188)).
+- [ ] Leggi `.mcp.json` (harness Copilot) e `.vscode/mcp.json` (harness Local). Attiva `chat.mcp.workspaceRootConfig.enabled`, poi avvia il server MCP `microsoft-learn` per il Cercatore. In Copilot CLI: `/plugin install microsoftdocs/mcp` ([S-188](../Sources.md#s-188)).
 - [ ] Per ogni file in `.github/agents/` controlla il campo `model`: accetta l'ID che il completamento propone.
 - [ ] Scegli per la sessione un modello BYOK, non **Auto**.
 
@@ -790,9 +791,10 @@ gh api "orgs/{{GH_OWNER}}/teams/release-emergency" --jq .slug
 pwsh -File ./scripts/Set-Rulesets.ps1 -Repository "{{GH_OWNER}}/{{GH_REPO}}" -WhatIf
 pwsh -File ./scripts/Set-Rulesets.ps1 -Repository "{{GH_OWNER}}/{{GH_REPO}}"
 gh api "repos/{{GH_OWNER}}/{{GH_REPO}}/rules/branches/main" --jq '.[].type'
+gh api "repos/{{GH_OWNER}}/{{GH_REPO}}/rules/branches/develop" --jq '.[].type'
 ```
 
-**Esito atteso:** il primo comando mostra l'ID usato in `integration_id` (atteso `15368` ⚠️); `main` ha le regole `deletion`, `non_fast_forward`, `pull_request`, `required_status_checks`. Da questo momento ogni PR verso `main` e verso `develop` richiede la tua approvazione. Il secondo comando mostra `release-emergency`.
+**Esito atteso:** il primo comando mostra l'ID usato in `integration_id` (atteso `15368` ⚠️); `main` ha le regole `deletion`, `non_fast_forward`, `pull_request`, `required_status_checks`. Da questo momento ogni PR verso `main` e verso `develop` richiede la tua approvazione. In un'organizzazione il secondo comando mostra `release-emergency`. `develop` ha le stesse quattro regole di `main`.
 
 ### S-919 — Pianifica con il Pianificatore
 <!-- step: os=all path=all profile=all -->

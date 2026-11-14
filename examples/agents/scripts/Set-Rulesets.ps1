@@ -6,6 +6,8 @@
 
 .DESCRIPTION
     - Risolve l'ID del team di emergenza e lo inserisce in bypass_actors (actor_id 0 nel file).
+    - Con -WithoutEmergencyTeam (account personale, nessun team) toglie l'attore di bypass:
+      nessuno può aggirare i ruleset.
     - Se un ruleset con lo stesso nome esiste lo aggiorna (PUT), altrimenti lo crea (POST).
     - Richiede un token con Repository Administration: write (un maintainer, MAI
       la GitHub App contoso-copilot-agent).
@@ -75,7 +77,8 @@ foreach ($file in Get-ChildItem -Path $RulesetDirectory -Filter '*.json') {
     }
 }
 
-# Verifica: regole attive effettive sui due rami.
+# Verifica: regole attive effettive sui due rami. Con -WhatIf nessun ruleset è stato applicato: niente verifica.
+if ($WhatIfPreference) { return }
 foreach ($branch in 'main', 'develop') {
     $rawTypes = gh api "repos/$Repository/rules/branches/$branch" --jq '.[].type'
     if ($LASTEXITCODE -ne 0) { throw "Impossibile leggere le regole del ramo '$branch'." }
