@@ -27,6 +27,7 @@ I modelli dei tre file sono in [templates/](templates/): [epic.md](templates/epi
 
 `E<nn>` Epic, `E<nn>-F<nn>` Feature, `E<nn>-F<nn>-T<nn>` Task. Un identificativo non cambia e non si riusa.
 Il ramo di una Feature è il ramo che Spec Kit crea: `feature/<NNN>-<slug>`. Il file `feature.md` registra il ramo e la cartella `specs/<NNN>-<slug>/`.
+Il Pianificatore pianifica una Feature alla volta, sul ramo di quella Feature. La pianificazione arriva in `develop` con la PR della Feature.
 
 ## Due controlli diversi
 
