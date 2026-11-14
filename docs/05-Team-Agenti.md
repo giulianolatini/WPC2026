@@ -132,7 +132,7 @@ La documentazione descrive molti limiti dei subagent **solo** per l'harness Loca
 | `chat.agentHost.byokModels.enabled` | `true` | `false` (sperimentale); riavvia l'Agent Host | [S-071](Sources.md#s-071), P-11 |
 | `github.copilot.chat.cli.customAgents.enabled` | `true` | `false` | P-11 ⚠️ |
 
-**Server MCP per il Cercatore.** Il file `.agent.md` nomina gli strumenti di un server MCP con `<nome del server>/*`; gli strumenti sono disponibili solo se il server è nella sessione ([S-072](Sources.md#s-072)). Il template contiene `.vscode/mcp.json` con il server `microsoft-learn` (`https://learn.microsoft.com/api/mcp`). In Copilot CLI il server si installa con `/plugin install microsoftdocs/mcp` ([S-188](Sources.md#s-188)). ⚠️ Da provare: il nome del server e la sua presenza nelle sessioni dell'harness Copilot.
+**Server MCP per il Cercatore.** Il file `.agent.md` nomina gli strumenti di un server MCP con `<nome del server>/*`; gli strumenti sono disponibili solo se il server è nella sessione ([S-072](Sources.md#s-072)). Il template dichiara il server `microsoft-learn` (`https://learn.microsoft.com/api/mcp`) in due file, perché i due formati non sono intercambiabili ([02 §2.3](02-Configurazione-Copilot.md#23-elementi-configurabili-e-posizione-nel-filesystem)): `.mcp.json` nella radice, chiave `mcpServers`, per l'harness Copilot (impostazione sperimentale `chat.mcp.workspaceRootConfig.enabled`); `.vscode/mcp.json`, chiave `servers`, per l'harness Local. In Copilot CLI il server si installa con `/plugin install microsoftdocs/mcp` ([S-188](Sources.md#s-188)). ⚠️ Da provare: il nome del server e la sua presenza nelle sessioni dell'harness Copilot.
 
 **Reasoning effort con un modello BYOK.** Il campo `reasoning-effort` del file `.agent.md` ha effetto solo se il modello dichiara `supportsReasoningEffort` (e, se serve, `reasoningEffortFormat`) in `chatLanguageModels.json` ([S-071](Sources.md#s-071), [06 §5](06-BYOK-GitHub-Copilot.md#5-il-file-chatlanguagemodelsjson)).
 
@@ -167,13 +167,14 @@ Copy-Item -Recurse -Force examples\agents\* C:\percorso\del\progetto\
 Copy-Item -Recurse -Force examples\agents\.github C:\percorso\del\progetto\
 Copy-Item -Recurse -Force examples\agents\.specify C:\percorso\del\progetto\
 Copy-Item -Recurse -Force examples\agents\.vscode C:\percorso\del\progetto\
+Copy-Item -Force examples\agents\.mcp.json C:\percorso\del\progetto\
 Copy-Item -Force examples\agents\.gitignore C:\percorso\del\progetto\
 ```
 
 - [ ] Se il progetto ha già un `.gitignore`, aggiungi la riga `.team/` invece di copiare il file.
 - [ ] Sostituisci `@release-approver` in `.github/CODEOWNERS` con l'utente GitHub del PO.
 - [ ] Attiva le due impostazioni dell'harness Copilot (§5).
-- [ ] Leggi `.vscode/mcp.json` e avvia il server MCP `microsoft-learn` per il Cercatore ([03 §3](03-Security-Best-Practices.md#3-github-copilot-in-vs-code)).
+- [ ] Leggi `.mcp.json` e `.vscode/mcp.json`, attiva `chat.mcp.workspaceRootConfig.enabled` e avvia il server MCP `microsoft-learn` per il Cercatore ([03 §3](03-Security-Best-Practices.md#3-github-copilot-in-vs-code)).
 - [ ] Copia `docs/team/templates/decisions.md` in `docs/backlog/decisions.md` e scrivi nella ADR-001 la versione di Spec Kit (`specify version`).
 - [ ] Apri il progetto in VS Code. Per ogni file in `.github/agents/` controlla il campo `model`: cancella l'ID e accetta l'ID che il completamento propone per il tuo modello BYOK ⚠️.
 - [ ] Applica la baseline di sicurezza ([03 §7](03-Security-Best-Practices.md#7-baseline-di-configurazione)).
@@ -299,8 +300,8 @@ Nessuna pratica garantisce che un processo non termini mai: l'evento `AppDomain.
 - **Segreti.** Le istruzioni di ogni figura vietano di leggere `.env`, chiavi e token. Mantieni attiva la sandbox dell'agente ([03 §7](03-Security-Best-Practices.md#7-baseline-di-configurazione)).
 - **Codice verso i provider.** Con il BYOK il codice del progetto va ai provider dei modelli. Tre figure usano OpenRouter (Tester e i due Reviewer): configura i *guardrail* dell'account (provider permessi, nessuna conservazione dei dati) prima di usare il team su codice riservato ([S-115](Sources.md#s-115), [S-151](Sources.md#s-151)). `allow_fallbacks` vale solo nella singola richiesta (P-12).
 - **Merge.** L'Organizzatore unisce solo in `develop`, e solo dopo l'approvazione del PO. I ruleset e l'identità separata impediscono ogni merge in `develop` e in `main` senza l'approvazione del PO (§9.1).
-- **Prompt injection.** Un file del repository o una pagina web possono contenere istruzioni per l'agente. Solo il Cercatore ha lo strumento `web`, e non ha `edit` né `execute`: un'istruzione letta in una pagina non diventa direttamente un comando o una modifica. Il rischio indiretto resta: un esempio di codice del Cercatore arriva a figure che modificano file ed eseguono test. Chi riceve la risposta la tratta come un dato: confronta l'esempio con il task, non installa pacchetti e non esegue script indicati da una fonte. Le ricerche non devono contenere codice o nomi riservati ([D-043](Decisions.md#d-043), [04](04-Security-Review-OWASP-ISO27001.md)).
-- **Server MCP.** `.vscode/mcp.json` del template aggiunge il server remoto `microsoft-learn`. Leggi il file prima di concedere la fiducia alla cartella ([03 §3](03-Security-Best-Practices.md#3-github-copilot-in-vs-code)).
+- **Prompt injection.** Un file del repository o una pagina web possono contenere istruzioni per l'agente. Solo il Cercatore ha lo strumento `web`, e non ha `edit` né `execute`: un'istruzione letta in una pagina non diventa direttamente un comando o una modifica. Il rischio indiretto resta: un esempio di codice del Cercatore arriva a figure che modificano file ed eseguono test. Chi riceve la risposta la tratta come un dato: confronta l'esempio con il task, non installa pacchetti e non esegue script indicati da una fonte. Tieni attive la sandbox dell'agente e l'approvazione manuale dei comandi ([03 §3](03-Security-Best-Practices.md#3-github-copilot-in-vs-code)); leggi il diff prima di approvare la PR. Le ricerche non devono contenere codice o nomi riservati ([D-043](Decisions.md#d-043), [04](04-Security-Review-OWASP-ISO27001.md)).
+- **Server MCP.** `.mcp.json` e `.vscode/mcp.json` del template aggiungono il server remoto `microsoft-learn`. Leggi i due file prima di concedere la fiducia alla cartella ([03 §3](03-Security-Best-Practices.md#3-github-copilot-in-vs-code)).
 
 ## 11. Punti da provare
 
