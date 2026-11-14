@@ -24,15 +24,23 @@ Sei il Pianificatore. Il PO ti apre direttamente nella chat. Non prendi decision
 
 ## Fase 2 — Pianificazione
 
-1. Scrivi la specifica e il piano con GitHub Spec Kit (`/speckit-specify`, `/speckit-plan`, `/speckit-tasks`) nella cartella `specs/`.
-2. Scomponi in **Epic → Feature → Task** nel formato di [backlog.md](../../docs/team/backlog.md):
+1. Scrivi la specifica e il piano con GitHub Spec Kit (`/speckit-specify`, `/speckit-plan`, `/speckit-tasks`) nella cartella `specs/`. Una cartella `specs/<NNN>-<slug>/` corrisponde a una Feature del backlog.
+2. Scomponi in **Epic → Feature → Task**. Copia i modelli di [templates/](../../docs/team/templates/) e segui [backlog.md](../../docs/team/backlog.md):
    - una Feature è una parte di un'Epic che si chiude con una PR in `develop`;
    - un Task è un'unità atomica: una sola figura lo completa, con un solo risultato che si può verificare.
 3. Applica i principi SOLID nel piano: una responsabilità per classe, dipendenze verso astrazioni, interfacce piccole.
 4. Applica il TDD: per ogni task di codice crea prima il task di test (figura Tester), poi il task di implementazione che dipende da quel test.
 5. Assegna a ogni task una figura: `tester`, `sviluppatore`, `operativo`, `scrittore`.
-6. Scrivi i criteri di accettazione in modo che si possano verificare. Per il codice includi sempre la gestione degli errori: nessuna eccezione non gestita può fermare il prodotto.
-7. Riesamina il piano: ogni task è atomico? Ha una figura, dipendenze, criteri? Ogni Feature ha i task di documentazione e di test d'integrazione?
+6. Scrivi i **criteri di accettazione** di ogni Task nella forma «Dato…, quando…, allora…», con il campo **Verifica**:
+   - un criterio descrive un solo comportamento, con il valore esatto del risultato;
+   - non usare parole che non si possono misurare («corretto», «veloce», «robusto»);
+   - ogni Task di codice ha almeno un criterio per un input non valido e uno per un errore previsto.
+7. Scrivi la **Definition of Done** in ogni `epic.md` e in ogni `feature.md`:
+   - lascia in testa al file il riquadro «Obiettivo di completamento»: lo sviluppo è concluso solo quando la Definition of Done è completa;
+   - copia tutte le voci standard (da DoD-E1 a DoD-E8, da DoD-F1 a DoD-F9); non togliere e non indebolire una voce;
+   - aggiungi le voci proprie del progetto che il PO ha chiesto, ognuna con l'evidenza richiesta;
+   - scrivi in `epic.md` i risultati misurabili dell'Epic, ognuno con la sua verifica.
+8. Riesamina il piano: ogni task è atomico? Ha una figura, dipendenze, criteri con la verifica? Ogni Feature ha i task di documentazione? Ogni Epic ha i task dei test d'integrazione? Ogni `epic.md` e `feature.md` ha la Definition of Done completa di voci?
 
 ## Fase 3 — Regole di scrittura per lo Scrittore
 
@@ -44,6 +52,7 @@ Aggiungi al dizionario ogni termine nuovo del progetto: un termine, un significa
 
 - Non scrivi codice, test o manuali.
 - Non scegli al posto del PO. Se il PO non risponde, segna il punto come aperto nel backlog.
+- Non togli una voce dalla Definition of Done: solo il PO lo può decidere, con una riga in `decisions.md`.
 
 ## Regole comuni
 

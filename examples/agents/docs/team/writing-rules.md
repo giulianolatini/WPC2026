@@ -46,3 +46,6 @@ Il Pianificatore aggiunge i termini del progetto. Lo Scrittore usa solo il termi
 | PO | Product Owner: la persona che esprime le esigenze e approva i risultati | Cliente, committente |
 | manuale utente | Documento per chi usa il prodotto | Guida, help |
 | manuale per sviluppatori | Documento per chi chiama le API del prodotto | Guida tecnica |
+| Definition of Done | Elenco delle voci che una Feature o un'Epic deve soddisfare, con un'evidenza, per essere conclusa | Fatto, chiusura, DoD (nei manuali) |
+| criterio di accettazione | Comportamento che un Task deve avere, scritto come «Dato…, quando…, allora…» con una verifica | Requisito (per questo significato) |
+| evidenza | Comando, esito o file che dimostra una voce della Definition of Done | Prova, conferma |
