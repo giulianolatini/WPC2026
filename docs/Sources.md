@@ -176,6 +176,16 @@ Gli altri documenti puntano alla fonte con un link del tipo `Sources.md#s-001`.
 | <a id="s-163"></a>S-163 | [PostgreSQL — The pg_hba.conf File (`scram-sha-256`)](https://www.postgresql.org/docs/current/auth-pg-hba-conf.html) | PRIMARY | 2026-11-07 |
 | <a id="s-164"></a>S-164 | [Mermaid — documentazione e API `mermaid.run`, `securityLevel`](https://mermaid.js.org/config/usage.html) | PRIMARY | 2026-11-07 (pacchetto npm `mermaid@12.3.0`, MIT) |
 
+## Team di agenti
+
+| ID | Titolo | Tipo | Verifica |
+|----|--------|------|----------|
+| <a id="s-165"></a>S-165 | [VS Code — Subagents (contesto isolato, modelli, nesting, coordinatore e worker)](https://code.visualstudio.com/docs/copilot/agents/subagents) | PRIMARY | 2026-11-14 |
+| <a id="s-166"></a>S-166 | [OpenRouter — Best AI Models for Coding (classifica per uso, prezzi)](https://openrouter.ai/collections/programming) | VENDOR-DOC | 2026-11-14 ⚠️ (letto solo l'estratto della ricerca; prezzi variabili) |
+| <a id="s-167"></a>S-167 | [V. Driessen — A successful Git branching model (GitFlow)](https://nvie.com/posts/a-successful-git-branching-model/) | PRIMARY | ⚠️ non consultata |
+| <a id="s-168"></a>S-168 | [NUnit — Documentation](https://docs.nunit.org/) | PRIMARY | ⚠️ non consultata |
+| <a id="s-169"></a>S-169 | [Pester — Documentation](https://pester.dev/docs/quick-start) | PRIMARY | ⚠️ non consultata |
+
 ## Metodo (decisioni e scrittura)
 
 | ID | Titolo | Tipo | Verifica |
