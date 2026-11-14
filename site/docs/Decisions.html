@@ -920,12 +920,13 @@ Il formato segue il template ADR di Nygard, con una sezione <strong>Razionale</s
 <ul>
 <li><code>backlog.md</code> definisce le voci standard: da DoD-F1 a DoD-F9 per una Feature, da DoD-E1 a DoD-E8 per un'Epic, ognuna con l'evidenza richiesta e chi la verifica;</li>
 <li>i modelli <code>templates/epic.md</code> e <code>templates/feature.md</code> aprono con l'obiettivo di completamento e contengono la tabella;</li>
-<li>l'Organizzatore compila le evidenze; i due Reviewer non approvano con una voce <code>non soddisfatta</code> o <code>senza evidenza</code>; il merge e lo stato <code>done</code> richiedono la Definition of Done completa;</li>
+<li>l'Organizzatore compila le evidenze; i due Reviewer controllano le voci che esistono prima delle review e non approvano con una voce <code>non soddisfatta</code> o <code>senza evidenza</code>;</li>
+<li>due soglie, perché alcune voci esistono solo dopo il merge: il merge in <code>develop</code> richiede le voci da DoD-F1 a DoD-F7 (in <code>main</code>: da DoD-E1 a DoD-E6); lo stato <code>done</code> richiede tutte le voci;</li>
 <li>solo il PO può togliere una voce;</li>
 <li>i criteri di accettazione dei Task hanno la forma «Dato…, quando…, allora…», un campo <strong>Verifica</strong> e almeno un criterio per gli errori.</li>
 </ul>
 <p><strong>Razionale.</strong> La Scrum Guide definisce la Definition of Done come descrizione formale dello stato richiesto e dice che un lavoro che non la rispetta non si rilascia. Una tabella con evidenze rende il controllo oggettivo anche per un modello economico. Due livelli separati evitano di confondere «il Task funziona» con «la Feature è finita».</p>
-<p><strong>Conseguenze.</strong> Più lavoro per l'Organizzatore prima delle review. Dopo il merge serve una PR per registrare DoD-F8 e DoD-F9. I Reviewer non eseguono comandi: controllano le evidenze contro i file. La Scrum Guide applica la Definition of Done all'Increment: l'uso per Feature ed Epic è un adattamento di questo template.</p>
+<p><strong>Conseguenze.</strong> Più lavoro per l'Organizzatore prima delle review. Dopo il merge serve una PR per registrare le voci da DoD-F6 a DoD-F9, con l'approvazione del Reviewer ottimista. I Reviewer non eseguono comandi: controllano le evidenze contro i file. La Scrum Guide applica la Definition of Done all'Increment: l'uso per Feature ed Epic è un adattamento di questo template.</p>
 <p><strong>Fonti.</strong> <a href="Sources.html#s-170">S-170</a>.</p>
 <hr />
 <p><a id="d-039"></a></p>

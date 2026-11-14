@@ -444,7 +444,7 @@ Copy-Item -Force examples\agents\.gitignore C:\percorso\del\progetto\
 <ul>
 <li class="task"><input type="checkbox" disabled> Seleziona l'agente <strong>Pianificatore</strong> e descrivi l'esigenza.</li>
 <li class="task"><input type="checkbox" disabled> Rispondi alle domande. Per le scelte importanti il Pianificatore presenta il what-if dell'Avversario.</li>
-<li class="task"><input type="checkbox" disabled> Di' al Pianificatore quando le scelte sono complete. Il Pianificatore scrive <code>specs/</code>, <code>docs/backlog/</code> e aggiorna <code>docs/team/writing-rules.md</code>.</li>
+<li class="task"><input type="checkbox" disabled> Di' al Pianificatore quando le scelte sono complete. Il Pianificatore pianifica una Feature alla volta: crea il ramo <code>feature/&lt;NNN&gt;-&lt;slug&gt;</code> da <code>develop</code>, scrive <code>specs/</code>, <code>docs/backlog/</code> e aggiorna <code>docs/team/writing-rules.md</code> su quel ramo. La pianificazione arriva in <code>develop</code> con la PR della Feature.</li>
 <li class="task"><input type="checkbox" disabled> Leggi il backlog. Controlla i criteri di accettazione dei Task e la Definition of Done di ogni <code>epic.md</code> e <code>feature.md</code>. Approva o chiedi modifiche.</li>
 </ul>
 <h3 id="72-sviluppo-di-una-feature">7.2 Sviluppo di una Feature</h3>
@@ -598,7 +598,7 @@ Copy-Item -Force examples\agents\.gitignore C:\percorso\del\progetto\
 <li>il Pianificatore scrive un criterio di accettazione per ogni input non valido e ogni errore previsto;</li>
 <li>il Tester scrive un test per ognuno di questi criteri (voce DoD-F4) e i test d'integrazione della Release (voce DoD-E3);</li>
 <li>chi implementa valida gli input e cattura solo le eccezioni da cui il codice può riprendersi (<a href="Sources.html#s-178">S-178</a>); un gestore globale registra l'errore prima della terminazione (<a href="Sources.html#s-179">S-179</a>);</li>
-<li>il Reviewer antagonista assegna severità <code>alta</code> a ogni eccezione non gestita in una PR verso <code>main</code> (voce DoD-E4).</li>
+<li>il Reviewer antagonista controlla le evidenze della voce DoD-E4 e assegna severità <code>alta</code> a ogni eccezione non gestita in una PR verso <code>main</code>; il suo esito entra nella voce DoD-E6.</li>
 </ol>
 <h2 id="10-sicurezza">10. Sicurezza</h2>
 <ul>
