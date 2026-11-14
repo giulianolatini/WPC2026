@@ -311,6 +311,12 @@ Il formato segue il template ADR di Nygard, con una sezione <strong>Razionale</s
 <td>Configurazione per il piano GitHub Free e limiti rispetto a Pro e Team</td>
 <td>Accepted</td>
 </tr>
+<tr>
+<td><a href="#d-046">D-046</a></td>
+<td>2026-11-14</td>
+<td>PowerShell 7 su macOS con Homebrew e su Linux con il gestore dei pacchetti</td>
+<td>Accepted</td>
+</tr>
 </tbody>
 </table>
 <hr />
@@ -1042,7 +1048,19 @@ Il formato segue il template ADR di Nygard, con una sezione <strong>Razionale</s
 <p><strong>Decisione.</strong> Opzione 2: <code>Set-Rulesets.ps1</code> ha l'opzione <code>-WithoutEmergencyTeam</code>, che toglie l'attore di bypass; <code>gitflow.md</code> e il documento 05 §9.2 hanno la tabella dei casi e i limiti del piano Free. Con il piano Free la configurazione funziona solo in un repository pubblico.</p>
 <p><strong>Razionale.</strong> Un repository pubblico con piano Free ha ruleset e code owner. Un repository privato con piano Free non ha protezioni applicate da GitHub: dirlo evita una falsa sicurezza.</p>
 <p><strong>Conseguenze.</strong> Con un account personale non c'è un sostituto di emergenza: solo il PO può cambiare un ruleset. ⚠️ Da provare: l'opzione <code>-WithoutEmergencyTeam</code> e il bypass di un team in un'organizzazione Free.</p>
-<p><strong>Fonti.</strong> <a href="Sources.html#s-171">S-171</a>, <a href="Sources.html#s-172">S-172</a>, <a href="Sources.html#s-189">S-189</a>.</p></article>
+<p><strong>Fonti.</strong> <a href="Sources.html#s-171">S-171</a>, <a href="Sources.html#s-172">S-172</a>, <a href="Sources.html#s-189">S-189</a>.</p>
+<hr />
+<p><a id="d-046"></a></p>
+<h2 id="d-046--powershell-7-su-macos-con-homebrew-e-su-linux-con-il-gestore-dei-pacchetti">D-046 — PowerShell 7 su macOS con Homebrew e su Linux con il gestore dei pacchetti</h2>
+<ul>
+<li><strong>Data:</strong> 2026-11-14 — <strong>Stato:</strong> Accepted — <strong>Decisore:</strong> PO ("aggiungi in documentazione l'installazione di pwsh per MacOS via brew e su Linux con il packet manager")</li>
+</ul>
+<p><strong>Contesto.</strong> La documentazione installava PowerShell 7 solo su Windows. Il team di agenti lo richiede su ogni sistema (script, Pester, <code>Set-Rulesets.ps1</code>).</p>
+<p><strong>Opzioni considerate.</strong> macOS: (1) Homebrew; (2) pacchetto PKG firmato, metodo preferito da Microsoft. Debian e Ubuntu: <code>apt</code> dal repository Microsoft. openSUSE: nessun pacchetto ufficiale; (a) <em>global tool</em> di .NET; (b) Snap; (c) archivio binario.</p>
+<p><strong>Decisione.</strong> macOS: <code>brew install powershell</code>, con l'avviso che la formula è della comunità Homebrew e che Microsoft preferisce il PKG. Debian e Ubuntu: <code>apt</code> da <code>packages.microsoft.com</code>. openSUSE: <code>dotnet tool install --global PowerShell</code>.</p>
+<p><strong>Razionale.</strong> Homebrew è già il gestore dei pacchetti che il runbook usa su macOS per VS Code, Docker e <code>uv</code>. Il repository Microsoft è il metodo preferito per Debian e Ubuntu. Su openSUSE il team ha già .NET SDK: il <em>global tool</em> non aggiunge un altro gestore.</p>
+<p><strong>Conseguenze.</strong> La formula Homebrew compila dal sorgente e non è supportata da Microsoft. ⚠️ Il comando per openSUSE va provato. Su Ubuntu il repository Microsoft può entrare in conflitto con i pacchetti .NET della distribuzione.</p>
+<p><strong>Fonti.</strong> <a href="Sources.html#s-190">S-190</a>, <a href="Sources.html#s-191">S-191</a>, <a href="Sources.html#s-192">S-192</a>, <a href="Sources.html#s-193">S-193</a>, <a href="Sources.html#s-194">S-194</a>.</p></article>
 <script type="application/json" id="fonts-data">[
   {
     "id": "blexmono",

@@ -220,7 +220,7 @@ sudo zypper install code
 <p>Scegli il percorso:</p>
 <ul>
 <li><strong>Percorso A — Docker:</strong> installa Docker (3.1). <code>uv</code> non è necessario.</li>
-<li><strong>Percorso B — servizio locale:</strong> installa <code>uv</code> (3.3) e, su Windows, PowerShell 7 (3.2). Docker non è necessario.</li>
+<li><strong>Percorso B — servizio locale:</strong> installa <code>uv</code> (3.3) e, su Windows, PowerShell 7 (3.2). PowerShell 7 serve su ogni sistema solo per il team di agenti. Docker non è necessario.</li>
 </ul>
 <h3 id="31-docker">3.1 Docker</h3>
 <p><strong>Windows</strong></p>
@@ -305,15 +305,36 @@ newgrp docker
 <pre class="code"><code class="language-bash">docker version
 docker compose version
 </code></pre>
-<h3 id="32-powershell-7-solo-windows">3.2 PowerShell 7 (solo Windows)</h3>
-<p>Il servizio Windows (§6.4) e la generazione delle chiavi (§4) usano PowerShell 7 (<code>pwsh.exe</code>). Windows include solo Windows PowerShell 5.1.</p>
-<ul>
-<li class="task"><input type="checkbox" disabled> Installa PowerShell 7:</li>
-</ul>
+<h3 id="32-powershell-7">3.2 PowerShell 7</h3>
+<p>PowerShell 7 (<code>pwsh</code>) serve su <strong>Windows</strong> per il servizio (§6.4) e per la generazione delle chiavi (§4): Windows include solo Windows PowerShell 5.1.
+Serve su <strong>tutti i sistemi</strong> per il team di agenti: script <code>.ps1</code>, test Pester e <code>Set-Rulesets.ps1</code> (<a href="05-Team-Agenti.html">05</a>). Versione minima per il team: 7.4.</p>
+<p><strong>Windows</strong></p>
 <pre class="code"><code class="language-powershell">winget install --id Microsoft.PowerShell -e
 </code></pre>
+<p><strong>macOS (Homebrew)</strong></p>
+<pre class="code"><code class="language-bash">brew install powershell
+</code></pre>
+<blockquote>
+<p>⚠️ La formula Homebrew è mantenuta dalla comunità Homebrew e compila PowerShell dal codice sorgente: Microsoft non la supporta. Il metodo che Microsoft indica come preferito è il pacchetto PKG firmato, dalla pagina delle release (<a href="Sources.html#s-190">S-190</a>, <a href="Sources.html#s-191">S-191</a>). Se hai installato il vecchio <em>cask</em>, toglilo prima: <code>brew uninstall --cask powershell</code>.</p>
+</blockquote>
+<p><strong>Debian e Ubuntu (apt, repository Microsoft)</strong></p>
+<pre class="code"><code class="language-bash">sudo apt-get update
+sudo apt-get install -y wget
+source /etc/os-release
+wget -q &quot;https://packages.microsoft.com/config/$ID/$VERSION_ID/packages-microsoft-prod.deb&quot;
+sudo dpkg -i packages-microsoft-prod.deb
+rm packages-microsoft-prod.deb
+sudo apt-get update
+sudo apt-get install -y powershell
+</code></pre>
+<p>Il repository <code>packages.microsoft.com</code> è il metodo preferito da Microsoft per Ubuntu LTS (22.04, 24.04, 26.04) e Debian (12, 13) (<a href="Sources.html#s-192">S-192</a>, <a href="Sources.html#s-193">S-193</a>). Su Ubuntu il repository Microsoft contiene anche pacchetti .NET con versioni diverse da quelle di Ubuntu: scegli una sola origine per .NET.</p>
+<p><strong>openSUSE</strong></p>
+<p>Microsoft non pubblica un pacchetto <code>zypper</code> di PowerShell e non supporta openSUSE: la distribuzione è supportata dalla comunità (<a href="Sources.html#s-194">S-194</a>). Con .NET SDK già installato usa il <em>global tool</em>:</p>
+<pre class="code"><code class="language-bash">dotnet tool install --global PowerShell
+</code></pre>
+<p>Il comando aggiunge <code>~/.dotnet/tools</code> al <code>PATH</code>: apri un terminale nuovo (<a href="Sources.html#s-191">S-191</a>). ⚠️ Da provare su openSUSE. In alternativa segui la pagina PowerShell del wiki di openSUSE.</p>
 <ul>
-<li class="task"><input type="checkbox" disabled> Verifica: <code>pwsh -Version</code>.</li>
+<li class="task"><input type="checkbox" disabled> Verifica su ogni sistema: <code>pwsh -Version</code>.</li>
 </ul>
 <h3 id="33-uv">3.3 uv</h3>
 <table>
