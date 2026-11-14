@@ -8,6 +8,7 @@ Questo documento descrive l'installazione degli strumenti della demo su Windows,
 | Docker | `winget` (Docker Desktop) | `brew` (Docker Desktop) | `apt` (Docker Engine) | `zypper` |
 | uv | `winget` | `brew` | installer ufficiale ([D-009](Decisions.md#d-009)) | installer ufficiale ([D-009](Decisions.md#d-009)) |
 | LiteLLM proxy | Docker o `uv tool` | Docker o `uv tool` | Docker o `uv tool` | Docker o `uv tool` |
+| PowerShell 7 | `winget` | `brew` ([D-046](Decisions.md#d-046)) | `apt` (repository Microsoft) | *global tool* di .NET ([D-046](Decisions.md#d-046)) |
 
 > **Nota su YaST.** Su openSUSE usiamo `zypper`. Leap 16 non ha più YaST: l'alternativa grafica è Myrlyn. Su Tumbleweed YaST Software è ancora disponibile, ma non riceve più sviluppo ([D-014](Decisions.md#d-014), [S-067](Sources.md#s-067)).
 
@@ -249,7 +250,7 @@ docker compose version
 ### 3.2 PowerShell 7
 
 PowerShell 7 (`pwsh`) serve su **Windows** per il servizio (§6.4) e per la generazione delle chiavi (§4): Windows include solo Windows PowerShell 5.1.
-Serve su **tutti i sistemi** per il team di agenti: script `.ps1`, test Pester e `Set-Rulesets.ps1` ([05](05-Team-Agenti.md)). Versione minima per il team: 7.4.
+Serve su **tutti i sistemi** per il team di agenti: script `.ps1`, test Pester e `Set-Rulesets.ps1` ([05](05-Team-Agenti.md)). Versione minima per il team: 7.4. La scelta dei metodi è nella decisione [D-046](Decisions.md#d-046).
 
 **Windows**
 
@@ -282,13 +283,20 @@ Il repository `packages.microsoft.com` è il metodo preferito da Microsoft per U
 
 **openSUSE**
 
-Microsoft non pubblica un pacchetto `zypper` di PowerShell e non supporta openSUSE: la distribuzione è supportata dalla comunità ([S-194](Sources.md#s-194)). Con .NET SDK già installato usa il *global tool*:
+Microsoft non pubblica un pacchetto `zypper` di PowerShell e non supporta openSUSE: la distribuzione è supportata dalla comunità ([S-194](Sources.md#s-194)). Usa il *global tool* di .NET.
+
+- [ ] Installa prima .NET SDK con `zypper`, dal repository Microsoft ([S-195](Sources.md#s-195)). Il team di agenti lo richiede comunque ([05 §6](05-Team-Agenti.md#6-installazione-del-team-in-un-repository)).
+- [ ] Installa PowerShell e rendi `pwsh` disponibile nel terminale corrente:
 
 ```bash
 dotnet tool install --global PowerShell
+export PATH="$HOME/.dotnet/tools:$PATH"
+pwsh -Version
 ```
 
-Il comando aggiunge `~/.dotnet/tools` al `PATH`: apri un terminale nuovo ([S-191](Sources.md#s-191)). ⚠️ Da provare su openSUSE. In alternativa segui la pagina PowerShell del wiki di openSUSE.
+- [ ] Rendi il percorso permanente: aggiungi la riga `export PATH="$HOME/.dotnet/tools:$PATH"` al file `~/.bashrc` (o al file di configurazione della tua shell). L'installer di .NET aggiunge `~/.dotnet/tools` al `PATH`, ma non sempre, e mai nel terminale già aperto ([S-191](Sources.md#s-191)).
+
+⚠️ Da provare su openSUSE. In alternativa segui la pagina PowerShell del wiki di openSUSE.
 
 - [ ] Verifica su ogni sistema: `pwsh -Version`.
 

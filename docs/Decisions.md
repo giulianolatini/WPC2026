@@ -990,6 +990,6 @@ L'opzione 3 resta possibile: S-402 e S-403 sono «Non applicabile» e S-404 scri
 
 **Razionale.** Homebrew è già il gestore dei pacchetti che il runbook usa su macOS per VS Code, Docker e `uv`. Il repository Microsoft è il metodo preferito per Debian e Ubuntu. Su openSUSE il team ha già .NET SDK: il *global tool* non aggiunge un altro gestore.
 
-**Conseguenze.** La formula Homebrew compila dal sorgente e non è supportata da Microsoft. ⚠️ Il comando per openSUSE va provato. Su Ubuntu il repository Microsoft può entrare in conflitto con i pacchetti .NET della distribuzione.
+**Conseguenze.** La formula Homebrew compila dal sorgente e non è supportata da Microsoft. Su openSUSE serve prima .NET SDK, e `~/.dotnet/tools` deve essere nel `PATH`. ⚠️ Il comando per openSUSE va provato. Su Ubuntu il repository Microsoft può entrare in conflitto con i pacchetti .NET della distribuzione.
 
-**Fonti.** [S-190](Sources.md#s-190), [S-191](Sources.md#s-191), [S-192](Sources.md#s-192), [S-193](Sources.md#s-193), [S-194](Sources.md#s-194).
+**Fonti.** [S-190](Sources.md#s-190), [S-191](Sources.md#s-191), [S-192](Sources.md#s-192), [S-193](Sources.md#s-193), [S-194](Sources.md#s-194), [S-195](Sources.md#s-195).
