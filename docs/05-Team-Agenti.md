@@ -166,7 +166,7 @@ Copy-Item -Force examples\agents\.gitignore C:\percorso\del\progetto\
 - [ ] Apri il progetto in VS Code. Per ogni file in `.github/agents/` controlla il campo `model`: cancella l'ID e accetta l'ID che il completamento propone per il tuo modello BYOK ⚠️.
 - [ ] Applica la baseline di sicurezza ([03 §7](03-Security-Best-Practices.md#7-baseline-di-configurazione)).
 - [ ] Apri la PR verso `develop` e uniscila. Porta `ci.yml` e `CODEOWNERS` anche su `main`.
-- [ ] Dopo la prima esecuzione verde di `ci.yml`, applica i ruleset (§9). ⚠️ `ci.yml` richiede una soluzione .NET nella radice del repository.
+- [ ] Dopo la prima esecuzione verde di `ci.yml`, applica i ruleset (§9). ⚠️ `ci.yml` richiede una soluzione .NET nella radice del repository e un test Pester in `tests/`: il passo S-916 del [runbook](runbook/RUNBOOK.md) crea una soluzione minima.
 
 **Esito atteso:** il selettore degli agenti mostra **Organizzatore** e **Pianificatore**. Le altre figure non compaiono nel selettore.
 
