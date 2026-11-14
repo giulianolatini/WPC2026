@@ -102,7 +102,12 @@ Describe 'Ruleset main/develop con contoso-copilot-agent' -Tag 'Live', 'AdminByp
 
     Context 'Permessi sul ruleset' {
         It 'V5 - l''app non vede bypass_actors (nessun accesso in scrittura al ruleset)' {
-            $json = & gh api "repos/$script:Repo/rulesets/$env:RULESET_ID" | ConvertFrom-Json
+            $raw      = & gh api "repos/$script:Repo/rulesets/$env:RULESET_ID"
+            $exitCode = $LASTEXITCODE
+            $exitCode | Should -Be 0 -Because "la lettura del ruleset deve riuscire: un errore dell'API non prova nulla. Output: $raw"
+            $json = $raw | ConvertFrom-Json
+            "$($json.id)" | Should -Be $env:RULESET_ID
+            $json.name    | Should -Be 'main-release-approval'
             $json.PSObject.Properties.Name | Should -Not -Contain 'bypass_actors'
         }
     }
