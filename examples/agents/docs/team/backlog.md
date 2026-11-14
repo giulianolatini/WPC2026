@@ -3,6 +3,8 @@
 Il Pianificatore scrive il backlog. L'Organizzatore aggiorna lo stato e le evidenze. Le altre figure leggono solo il task ricevuto.
 
 > **Regola di completamento.** Lo sviluppo di una Feature o di un'Epic è concluso **solo** quando la sua *Definition of Done* è completa: ogni voce è soddisfatta e ha un'evidenza. Una voce non soddisfatta, o senza evidenza, significa «non concluso». Non esiste lo stato «concluso, tranne…».
+>
+> **Due soglie.** Alcune voci esistono solo dopo il merge. Il **merge** in `develop` richiede le voci da DoD-F1 a DoD-F7; il merge in `main` richiede le voci da DoD-E1 a DoD-E6. Lo stato **`done`** richiede tutte le voci: da DoD-F1 a DoD-F9, da DoD-E1 a DoD-E8.
 
 ## Struttura delle cartelle
 

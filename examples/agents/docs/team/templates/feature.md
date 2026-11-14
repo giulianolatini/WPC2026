@@ -9,7 +9,7 @@ pr: <numero della PR verso develop>
 
 # E01-F01 — <titolo della Feature>
 
-> **Obiettivo di completamento.** Lo sviluppo di questa Feature è concluso solo quando la Definition of Done qui sotto è completa: ogni voce è soddisfatta e ha un'evidenza. Fino a quel momento lo stato non è `done` e la PR non si unisce.
+> **Obiettivo di completamento.** Lo sviluppo di questa Feature è concluso solo quando la Definition of Done qui sotto è completa: ogni voce è soddisfatta e ha un'evidenza. Due soglie: la PR si unisce in `develop` solo con le voci da DoD-F1 a DoD-F7 soddisfatte; lo stato diventa `done` solo con tutte le voci, da DoD-F1 a DoD-F9.
 
 ## Obiettivo
 
