@@ -7,6 +7,8 @@
 
 .NOTES
     Esegue merge REALI. Lanciare solo da .github/workflows/verify-ruleset-admin.yml.
+    I rifiuti V1-V3 sono validi solo se anche lo stato delle PR di test e V4 sono superati:
+    se uno di questi test fallisce, l'intera esecuzione non è valida.
     Escluso dalla CI ordinaria con: Invoke-Pester -ExcludeTagFilter Live
     Variabili richieste: GH_TOKEN, RULESET_REPO, PR_MAIN, PR_DEVELOP_RED,
     PR_DEVELOP_GREEN, RULESET_ID.
@@ -46,6 +48,14 @@ Describe 'Ruleset main/develop con contoso-copilot-agent' -Tag 'Live', 'AdminByp
             param([Parameter(Mandatory)][string] $Number)
             (& gh pr view $Number --repo $script:Repo --json state --jq '.state').Trim()
         }
+
+        # Stato della PR di test: serve per attribuire il rifiuto alla regola giusta.
+        function Get-PrFacts {
+            param([Parameter(Mandatory)][string] $Number)
+            $raw = & gh pr view $Number --repo $script:Repo --json state,baseRefName,mergeable,reviewDecision,statusCheckRollup
+            if ($LASTEXITCODE -ne 0) { throw "Impossibile leggere la PR $Number." }
+            $raw | ConvertFrom-Json
+        }
     }
 
     AfterAll {
@@ -70,10 +80,33 @@ Describe 'Ruleset main/develop con contoso-copilot-agent' -Tag 'Live', 'AdminByp
         }
     }
 
-    Context 'Controllo positivo (rende validi i rifiuti successivi)' {
-        It 'V4 - merge di una PR conforme verso develop riesce' {
-            $r = Invoke-Gh -Case 'V4' -Arguments @('pr', 'merge', $env:PR_DEVELOP_GREEN, '--repo', $script:Repo, '--merge')
-            $r.ExitCode | Should -Be 0 -Because "il token deve poter fare merge di PR conformi, altrimenti V1-V3 non sono validi. Output: $($r.Output)"
+    # Ordine: prima lo stato delle PR, poi i rifiuti, poi V4. V4 fa avanzare develop: eseguito prima
+    # renderebbe non aggiornata la PR di V3, che sarebbe rifiutata per un motivo diverso dal check fallito.
+    Context 'Stato delle PR di test (attribuisce il rifiuto alla regola giusta)' {
+        It 'PR_MAIN: aperta, verso main, senza conflitti, check verdi, senza approvazione' {
+            $f = Get-PrFacts -Number $env:PR_MAIN
+            $f.state          | Should -Be 'OPEN'
+            $f.baseRefName    | Should -Be 'main'
+            $f.mergeable      | Should -Not -Be 'CONFLICTING'
+            $f.reviewDecision | Should -Not -Be 'APPROVED'
+            @($f.statusCheckRollup | Where-Object { $_.conclusion -ne 'SUCCESS' }).Count |
+                Should -Be 0 -Because 'con i check verdi l''unico requisito mancante è l''approvazione del code owner'
+        }
+
+        It 'PR_DEVELOP_RED: aperta, verso develop, senza conflitti, test-dotnet fallito' {
+            $f = Get-PrFacts -Number $env:PR_DEVELOP_RED
+            $f.state       | Should -Be 'OPEN'
+            $f.baseRefName | Should -Be 'develop'
+            $f.mergeable   | Should -Not -Be 'CONFLICTING'
+            ($f.statusCheckRollup | Where-Object { $_.name -eq 'test-dotnet' }).conclusion | Should -Be 'FAILURE'
+        }
+
+        It 'PR_DEVELOP_GREEN: aperta, verso develop, senza conflitti, check verdi' {
+            $f = Get-PrFacts -Number $env:PR_DEVELOP_GREEN
+            $f.state       | Should -Be 'OPEN'
+            $f.baseRefName | Should -Be 'develop'
+            $f.mergeable   | Should -Not -Be 'CONFLICTING'
+            @($f.statusCheckRollup | Where-Object { $_.conclusion -ne 'SUCCESS' }).Count | Should -Be 0
         }
     }
 
@@ -97,6 +130,13 @@ Describe 'Ruleset main/develop con contoso-copilot-agent' -Tag 'Live', 'AdminByp
             $r.Output   | Should -Not -Match $script:AuthErrorPattern -Because 'un errore di autenticazione rende il test non valido'
             $r.ExitCode | Should -Not -Be 0
             Get-PrState -Number $env:PR_DEVELOP_RED | Should -Be 'OPEN'
+        }
+    }
+
+    Context 'Controllo positivo (rende validi i rifiuti precedenti)' {
+        It 'V4 - merge di una PR conforme verso develop riesce' {
+            $r = Invoke-Gh -Case 'V4' -Arguments @('pr', 'merge', $env:PR_DEVELOP_GREEN, '--repo', $script:Repo, '--merge')
+            $r.ExitCode | Should -Be 0 -Because "il token deve poter fare merge di PR conformi, altrimenti V1-V3 non sono validi e l'intera esecuzione va ripetuta. Output: $($r.Output)"
         }
     }
 

@@ -27,6 +27,16 @@ Il passo `/speckit-tasks` non è stato eseguito: `tasks.md` non esiste.
 4. **Un controllo negativo ha bisogno di un controllo positivo.** Il test V4 prova che il token funziona: senza V4 un rifiuto può essere un errore di autenticazione.
 5. **L'agente ha un'identità separata.** La GitHub App non ha il permesso *Administration* e non è nella lista di bypass: `gh pr merge --admin` deve fallire.
 
+## Modifiche dopo la review
+
+La suite `AdminBypass.Tests.ps1` è diversa dal pacchetto originale in tre punti (review R6-codex-04 e R6-codex-05):
+
+- un contesto nuovo controlla lo stato delle tre PR di test prima dei rifiuti;
+- V4 (controllo positivo) è l'ultimo test di merge, perché fa avanzare `develop`;
+- V5 controlla il codice di uscita di `gh api`, l'ID e il nome del ruleset.
+
+Il piano e il contratto descrivono la matrice V1–V6: l'ordine di esecuzione è quello della suite.
+
 ## Attenzione
 
 - I test con il tag `Live` eseguono merge **reali**. Eseguili solo in un repository di laboratorio.
