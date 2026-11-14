@@ -43,6 +43,18 @@ model_list:
         provider:
           data_collection: deny
           allow_fallbacks: false
+  # Reviewer antagonista: Qwen3.5 397B con fallback controllato (tool call error rate 7-14/11/2026: novita 1,85%, venice 2,02%, gmicloud 1,04%)
+  - model_name: openrouter-qwen35-review
+    litellm_params:
+      model: openrouter/qwen/qwen3.5-397b-a17b
+      api_key: os.environ/OPENROUTER_API_KEY
+      extra_body:
+        provider:
+          order: [novita, venice, gmicloud]
+          allow_fallbacks: false
+          require_parameters: true
+          data_collection: deny
+          ignore: [parasail, deepinfra, atlas-cloud, alibaba]
 
   # --- Hugging Face Inference Providers: huggingface/<provider>/<org>/<model> (docs/Sources.md#s-027, #s-047)
   # AZ-06: provider di inferenza fissato (groq), non scelto in automatico
