@@ -45,7 +45,7 @@ Il piano e il contratto descrivono la matrice V1–V6: l'ordine di esecuzione è
 
 - I test con il tag `Live` eseguono merge **reali**. Eseguili solo in un repository di laboratorio.
 - `integration_id: 15368` (app GitHub Actions) viene da esempi pubblici: controlla il valore con `gh api apps/github-actions --jq .id`.
-- Lo script e i ruleset richiedono un'organizzazione GitHub con un team di emergenza.
+- Il team di emergenza richiede un'organizzazione GitHub. Con un account personale lo script del template ha l'opzione `-WithoutEmergencyTeam`.
 
 ## Uso con Spec Kit
 
