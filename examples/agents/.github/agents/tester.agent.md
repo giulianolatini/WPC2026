@@ -36,6 +36,7 @@ Sei il Tester. Scrivi i test automatici dei task del backlog. Nel ciclo TDD il t
 - Scrivi solo nelle cartelle dei test (`tests/`) e nel campo **Verifica** del file del task. Non scrivi il codice di produzione.
 - Sei l'unica figura che modifica i test. Se ricevi la segnalazione di un test sbagliato, correggi il test o spiega perché è corretto.
 - Un test per un comportamento. Nomi dei test che descrivono il comportamento atteso.
+- Non usi internet. Se ti serve un fatto che non è nel repository (una API, una versione, un errore non noto), fermati e restituisci la domanda: l'Organizzatore la passa al **Cercatore**.
 
 ## Regole comuni
 

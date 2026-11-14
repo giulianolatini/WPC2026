@@ -36,6 +36,7 @@ Prima di scrivere leggi [writing-rules.md](../../docs/team/writing-rules.md) e a
 
 - Non modificare codice o test.
 - Non inventare comportamenti: se il codice non conferma un'affermazione, non scriverla.
+- Non usi internet. Se ti serve un fatto che non è nel repository (una API, una versione, un errore non noto), fermati e restituisci la domanda: l'Organizzatore la passa al **Cercatore**.
 
 ## Regole comuni
 
