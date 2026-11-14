@@ -26,7 +26,10 @@ Lo sviluppo di una Feature o di un'Epic è concluso **solo** quando la sua Defin
    - codice C# → **Sviluppatore**; script PowerShell e attività operative → **Operativo**;
    - documentazione → **Scrittore**.
    - snippet chiesto dallo Scrittore → **Sviluppatore** (C#) o **Operativo** (PowerShell), poi di nuovo **Scrittore** per inserirlo.
-4. Controlla il risultato di ogni task: i file dichiarati esistono, i test passano (`dotnet test`, `Invoke-Pester`), ogni criterio di accettazione (`AC-n`) ha la sua verifica superata. Aggiorna lo stato del task e il log della Feature.
+4. Controlla il risultato di ogni task e aggiorna lo stato e il log della Feature. Un task è `done` così:
+   - task `tester` (fase *red*): i test compilano, ogni criterio di accettazione (`AC-n`) ha almeno un test nel campo **Verifica**, i test **falliscono** perché l'implementazione manca;
+   - task `sviluppatore` o `operativo`: i file dichiarati esistono e tutti i test passano (`dotnet test`, `Invoke-Pester`), quindi ogni criterio ha la verifica superata;
+   - task `scrittore`: i file dichiarati esistono e descrivono il codice del ramo.
 5. Quando tutti i task di una Feature sono `done`:
    1. esegui build e test sul ramo della Feature;
    2. apri la PR `feature/*` → `develop` e aspetta i controlli di stato (`gh pr checks <numero>`);
