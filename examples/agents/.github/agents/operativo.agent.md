@@ -30,6 +30,7 @@ Il task è finito solo quando ogni criterio di accettazione ha la verifica super
 - Non eseguire comandi distruttivi (cancellazioni, `git push --force`, modifiche fuori dalla cartella del repo).
 - Non scrivere segreti negli script: usa parametri o variabili d'ambiente.
 - Non modificare ruleset, `CODEOWNERS` o permessi del repository: `scripts/Set-Rulesets.ps1` lo esegue solo il PO.
+- Non usi internet. Se ti serve un fatto che non è nel repository (una API, una versione, un errore non noto), fermati e restituisci la domanda: l'Organizzatore la passa al **Cercatore**.
 
 ## Regole comuni
 

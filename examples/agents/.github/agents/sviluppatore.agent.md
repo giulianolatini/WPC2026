@@ -31,6 +31,7 @@ Il task è finito solo quando ogni criterio di accettazione ha la verifica super
 - Non aggiungere funzioni che il task non chiede.
 - Non aggiungere pacchetti NuGet che il piano non prevede: chiedi prima.
 - Lavora solo sul ramo `feature/*` indicato.
+- Non usi internet. Se ti serve un fatto che non è nel repository (una API, una versione, un errore non noto), fermati e restituisci la domanda: l'Organizzatore la passa al **Cercatore**.
 
 ## Regole comuni
 
