@@ -203,6 +203,8 @@ Gli altri documenti puntano alla fonte con un link del tipo `Sources.md#s-001`.
 | <a id="s-179"></a>S-179 | [Microsoft Learn — System.AppDomain.UnhandledException event](https://learn.microsoft.com/en-us/dotnet/fundamentals/runtime-libraries/system-appdomain-unhandledexception) | PRIMARY | 2026-11-14 (trovata da P-13) |
 | <a id="s-180"></a>S-180 | [Pester — Migrating from Pester v5 to v6](https://pester.dev/docs/migrations/v5-to-v6) | PRIMARY | 2026-11-14 (trovata da P-13) |
 | <a id="s-181"></a>S-181 | [NUnit — Framework release notes](https://docs.nunit.org/articles/nunit/release-notes/framework.html) | PRIMARY | 2026-11-14 (trovata da P-13) |
+| <a id="s-188"></a>S-188 | [MicrosoftDocs — Microsoft Learn MCP Server (endpoint, plugin `microsoftdocs/mcp`)](https://github.com/MicrosoftDocs/mcp) | PRIMARY | 2026-11-14 ⚠️ (letto solo l'estratto della ricerca) |
+| <a id="s-189"></a>S-189 | [GitHub Docs — About GitHub's plans](https://docs.github.com/en/get-started/learning-about-github/githubs-plans) | PRIMARY | 2026-11-14 ⚠️ (letto solo l'estratto della ricerca) |
 
 ## Metodo (decisioni e scrittura)
 

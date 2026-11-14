@@ -263,5 +263,6 @@ Risposte a P-01…P-10 ricevute il 2026-11-07; risposte a P-11, P-12 e P-13 rice
 - [ ] Controllo del costo dei subagent con modelli BYOK; sessione su Auto (P-11).
 - [ ] `modelOptions.provider` di `chatLanguageModels.native.json` verso OpenRouter (P-12).
 - [ ] Ruleset, `CODEOWNERS`, `ci.yml`, `Set-Rulesets.ps1` e rifiuto di `gh pr merge --admin` in un repository di laboratorio (P-13).
-- [ ] Conferma del PO sulla proposta [D-043](Decisions.md#d-043).
+- [ ] Server MCP `microsoft-learn` e strumenti `microsoft-learn/*` del Cercatore nell'harness Copilot ([D-043](Decisions.md#d-043)).
+- [ ] `Set-Rulesets.ps1 -WithoutEmergencyTeam` e i ruleset in un repository pubblico con piano Free ([D-045](Decisions.md#d-045)).
 - [ ] Versione corrente di Spec Kit (`specify version`) e comando `specify extension add git` (P-13).

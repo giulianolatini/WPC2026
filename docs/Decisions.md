@@ -56,7 +56,9 @@ Il formato segue il template ADR di Nygard, con una sezione **Razionale** esplic
 | [D-040](#d-040) | 2026-11-14 | Rami di Feature con il nome creato da Spec Kit | Accepted |
 | [D-041](#d-041) | 2026-11-14 | Due documenti nuovi: BYOK in GitHub Copilot e introduzione a LiteLLM | Accepted |
 | [D-042](#d-042) | 2026-11-14 | Runbook: fase F9 per il team di agenti; la chiusura diventa F10 | Accepted |
-| [D-043](#d-043) | 2026-11-14 | Strumenti del Pianificatore e permessi dell'identità dell'agente dopo la review | Proposed |
+| [D-043](#d-043) | 2026-11-14 | Agente Cercatore, strumenti del Pianificatore e approvazione del PO su `develop` | Accepted |
+| [D-044](#d-044) | 2026-11-14 | Versione di Spec Kit: controllo a ogni pianificazione e aggiornamento con ADR | Accepted |
+| [D-045](#d-045) | 2026-11-14 | Configurazione per il piano GitHub Free e limiti rispetto a Pro e Team | Accepted |
 
 ---
 
@@ -906,21 +908,67 @@ L'opzione 3 resta possibile: S-402 e S-403 sono «Non applicabile» e S-404 scri
 ---
 
 <a id="d-043"></a>
-## D-043 — Strumenti del Pianificatore e permessi dell'identità dell'agente dopo la review
+## D-043 — Agente Cercatore, strumenti del Pianificatore e approvazione del PO su `develop`
 
-- **Data:** 2026-11-14 — **Stato:** Proposed — **Decisore:** assistente; il PO deve confermare
+- **Data:** 2026-11-14 — **Stato:** Accepted — **Decisore:** PO ("D-043 approvato e accettato", con due modifiche) — **Modifica:** [D-035](#d-035) (merge in `develop`) e [D-039](#d-039) (approvazioni su `develop`)
 
-**Contesto.** La review della PR #4 ha trovato due problemi. (1) R6-agy-03: il Pianificatore deve eseguire `/speckit-specify`, che lancia uno script e crea il ramo `feature/<NNN>-<slug>` ([D-040](#d-040)), ma non aveva lo strumento `execute`. (2) R6-agy-01: `ci.yml` gira dal ramo della PR e `develop` non richiede approvazioni; un'identità che può modificare il workflow o i test può rendere verdi i controlli richiesti dai ruleset ([D-039](#d-039)).
+**Contesto.** La review della PR #4 ha trovato due problemi. (1) R6-agy-03: il Pianificatore deve eseguire `/speckit-specify`, che lancia uno script e crea il ramo `feature/<NNN>-<slug>` ([D-040](#d-040)), ma non aveva lo strumento `execute`. (2) R6-agy-01: `ci.yml` gira dal ramo della PR e `develop` non richiedeva approvazioni; un'identità che può modificare il workflow o i test può rendere verdi i controlli richiesti dai ruleset.
 
-**Opzioni considerate.** Per (1): (a) `execute` al Pianificatore, senza `web`; (b) `execute` e `web` insieme; (c) spostare `/speckit-specify` all'Organizzatore. Per (2): (a) nessun permesso *Workflows* all'identità dell'agente, più controllo del Reviewer antagonista; (b) come (a), più approvazione di un code owner su `develop` per `.github/**` e `scripts/**`; (c) approvazione del PO su ogni PR verso `develop`.
+**Opzioni considerate.** Per (1): (a) `execute` al Pianificatore, senza `web`; (b) `execute` e `web` insieme; (c) spostare `/speckit-specify` all'Organizzatore. Per (2): (a) nessun permesso *Workflows* all'identità dell'agente, più controllo del Reviewer antagonista; (b) come (a), più approvazione di un code owner su `develop` per `.github/**` e `scripts/**`; (c) approvazione di un code owner su ogni PR verso `develop`.
 
-**Decisione proposta.** (1a) e (2a):
+**Decisione.** Il PO accetta (1a) e sceglie (2c), con un agente nuovo:
 
-- il Pianificatore ha `read`, `search`, `edit`, `execute`, `agent`, `todo`; usa il terminale solo per gli script di Spec Kit e per il ramo della pianificazione; nessuna figura ha `web`;
-- l'identità dell'agente non ha il permesso *Workflows*; l'Organizzatore non modifica `.github/` e `scripts/Set-Rulesets.ps1`; il Reviewer antagonista assegna severità `alta` a ogni modifica in `.github/` e a ogni test cancellato o reso sempre verde.
+- il Pianificatore ha `read`, `search`, `edit`, `execute`, `agent`, `todo`; usa il terminale solo per Spec Kit e per il ramo della pianificazione;
+- **nuovo agente Cercatore**: fa le ricerche su internet e usa il server MCP Microsoft Learn (plugin `microsoftdocs/mcp`) come fonte primaria per C#, .NET e PowerShell. Strumenti: `read`, `search`, `web`, `microsoft-learn/*`; nessun `edit`, nessun `execute`. Modello `claude-haiku-5-5`. Lo chiamano il Pianificatore e l'Organizzatore; le altre figure chiedono una ricerca tramite l'Organizzatore;
+- l'identità dell'agente non ha il permesso *Workflows*;
+- **ogni PR verso `develop` richiede l'approvazione di un code owner** (ruleset `develop-approval`, senza bypass). Il merge in `develop` non è più automatico: l'Organizzatore unisce la PR dopo l'approvazione del PO. La voce DoD-F7 comprende l'approvazione del PO.
 
-**Razionale.** La specifica è lavoro del modello più capace: resta al Pianificatore. Un agente con `web` ed `execute` insieme può eseguire istruzioni lette da una pagina. Senza *Workflows* GitHub rifiuta il push che modifica un workflow: è un controllo di GitHub, non un'istruzione. Le opzioni (2b) e (2c) cambiano la scelta del PO sul merge in `develop` ([D-035](#d-035)).
+**Razionale.** La specifica resta al modello più capace. Nessun agente ha `web` insieme a `execute` o `edit`: un'istruzione letta in una pagina non diventa un comando. Microsoft Learn è la documentazione ufficiale di C# e PowerShell. Il PO: l'approvazione su `develop` è «più sicura che delegare la modifica dei test per approvare una PR automatica».
 
-**Conseguenze.** Il Pianificatore non fa ricerche sul web: le chiede al PO. ⚠️ Resta il rischio di test modificati in una PR verso `develop`: lo copre solo la review. ⚠️ Il rifiuto del push senza il permesso *Workflows* va provato. Se il PO sceglie (2b) o (2c) cambiano `main-develop.json`, `CODEOWNERS` e il ruolo dell'Organizzatore nel merge.
+**Conseguenze.** Il team ha 10 figure. Il PO approva ogni PR verso `develop`, comprese le PR di aggiornamento del backlog: più attese, più controllo. ⚠️ Da provare: nome del server MCP e strumenti `microsoft-learn/*` nell'harness Copilot; rifiuto del push senza il permesso *Workflows*. L'esempio `examples/speckit-ruleset/` descrive ancora 0 approvazioni su `develop` (FR-009): il README dell'esempio indica la differenza.
 
-**Fonti.** [S-072](Sources.md#s-072), [S-172](Sources.md#s-172), [S-173](Sources.md#s-173), [S-177](Sources.md#s-177), review R6-agy-01 e R6-agy-03 della PR #4.
+**Fonti.** [S-072](Sources.md#s-072), [S-172](Sources.md#s-172), [S-173](Sources.md#s-173), [S-177](Sources.md#s-177), [S-188](Sources.md#s-188), review R6-agy-01 e R6-agy-03 della PR #4.
+
+---
+
+<a id="d-044"></a>
+## D-044 — Versione di Spec Kit: controllo a ogni pianificazione e aggiornamento con ADR
+
+- **Data:** 2026-11-14 — **Stato:** Accepted — **Decisore:** PO
+
+**Contesto.** La versione corrente di Spec Kit non è confermata: P-07 indica 1.3.2, P-13 indica 1.4.0, la rilettura diretta non è conclusiva. Una versione fissata in un documento invecchia.
+
+**Opzioni considerate.** (1) Fissare una versione nei documenti. (2) Controllo all'inizio di ogni pianificazione, con decisione del code owner e registrazione in una ADR.
+
+**Decisione.** Opzione 2, nel template del team:
+
+- all'inizio di una nuova pianificazione il Pianificatore controlla se esiste una versione più recente di Spec Kit (`specify version`, `specify self check`);
+- se esiste, chiede al code owner se aggiornare;
+- la risposta affermativa aggiunge al registro del progetto (`docs/backlog/decisions.md`) una ADR che sostituisce la ADR della versione precedente, con la decisione di aggiornare e la versione di arrivo;
+- la ADR-001 del progetto registra la versione installata;
+- il PO esegue il comando di aggiornamento; il Pianificatore non installa programmi.
+
+**Razionale.** La versione in uso è una decisione del progetto, non del template: il registro ADR mostra quando e perché è cambiata.
+
+**Conseguenze.** `docs/backlog/decisions.md` diventa un registro ADR che cresce solo in coda (modello in `templates/decisions.md`). In questo repository la versione 1.4.0 resta un valore di esempio con ⚠️: runbook e documento 02 dicono di controllarla.
+
+**Fonti.** [S-081](Sources.md#s-081), [S-085](Sources.md#s-085), [S-090](Sources.md#s-090).
+
+---
+
+<a id="d-045"></a>
+## D-045 — Configurazione per il piano GitHub Free e limiti rispetto a Pro e Team
+
+- **Data:** 2026-11-14 — **Stato:** Accepted — **Decisore:** PO ("aggiungi anche la configurazione Github free (se possibile) ed elenca le limitazioni")
+
+**Contesto.** Chi consulta il repository può avere il piano Free. I ruleset del template usano un team di emergenza, che esiste solo in un'organizzazione; nei repository privati del piano Free i ruleset non sono disponibili.
+
+**Opzioni considerate.** (1) Solo un avviso. (2) Variante dei ruleset senza team di emergenza e tabella dei casi per piano.
+
+**Decisione.** Opzione 2: `Set-Rulesets.ps1` ha l'opzione `-WithoutEmergencyTeam`, che toglie l'attore di bypass; `gitflow.md` e il documento 05 §9.2 hanno la tabella dei casi e i limiti del piano Free. Con il piano Free la configurazione funziona solo in un repository pubblico.
+
+**Razionale.** Un repository pubblico con piano Free ha ruleset e code owner. Un repository privato con piano Free non ha protezioni applicate da GitHub: dirlo evita una falsa sicurezza.
+
+**Conseguenze.** Con un account personale non c'è un sostituto di emergenza: solo il PO può cambiare un ruleset. ⚠️ Da provare: l'opzione `-WithoutEmergencyTeam` e il bypass di un team in un'organizzazione Free.
+
+**Fonti.** [S-171](Sources.md#s-171), [S-172](Sources.md#s-172), [S-189](Sources.md#s-189).
