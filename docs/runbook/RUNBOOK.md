@@ -495,7 +495,7 @@ printf 'Authorization: Bearer %s\n' "$LITELLM_MASTER_KEY" | curl -s "http://loca
 Invoke-RestMethod -Uri "http://localhost:{{LITELLM_PORT}}/v1/models" -Headers @{ Authorization = "Bearer $env:LITELLM_MASTER_KEY" } | ConvertTo-Json -Depth 5
 ```
 
-**Esito atteso:** gli alias `claude-opus`, `claude-sonnet`, `codex`, `gemini`, `gemini-pro`, `openrouter-gpt-oss`, `hf-gpt-oss`.
+**Esito atteso:** gli alias `claude-opus`, `claude-sonnet`, `codex`, `gemini`, `gemini-pro`, `openrouter-gpt-oss`, `openrouter-qwen35-review`, `hf-gpt-oss`.
 
 ### S-504 — Invia una richiesta di prova
 <!-- step: os=all path=all profile=all -->
@@ -662,7 +662,7 @@ pwsh --version
 specify version
 ```
 
-**Esito atteso:** .NET SDK 10, PowerShell 7.4 o successivo, Spec Kit `{{SPECKIT_VERSION}}`; `gh` ha un accesso valido ([05 §6](../05-Team-Agenti.md#6-installazione-del-team-in-un-repository)).
+**Esito atteso:** .NET SDK 10, PowerShell 7.4 o successivo (su macOS e Linux installalo: il passo S-102 lo installa solo su Windows), Spec Kit `{{SPECKIT_VERSION}}`; `gh` ha un accesso valido ([05 §6](../05-Team-Agenti.md#6-installazione-del-team-in-un-repository)).
 
 ### S-912 — Crea il repository di prova con i rami GitFlow
 <!-- step: os=all path=all profile=all -->
@@ -730,7 +730,7 @@ Get-ChildItem .github\agents
 ### S-916 — Crea la soluzione minima per la CI
 <!-- step: os=all path=all profile=all -->
 
-`ci.yml` richiede una soluzione .NET nella radice e almeno un test Pester in `tests/`. Salta questo passo se il repository li contiene già.
+`ci.yml` richiede una soluzione .NET nella radice e almeno un test Pester in `tests/`. Salta questo passo se il repository li contiene già. Esegui i comandi in PowerShell 7 (`pwsh`) su ogni sistema; `Invoke-Pester` richiede il modulo Pester 6.
 
 ```powershell os=all
 cd "{{TEAM_PROJECT}}"
@@ -760,6 +760,13 @@ gh pr checks --watch
 ```
 
 - [ ] Unisci la PR in `develop` con un merge commit. Apri una PR `develop` → `main` e uniscila.
+- [ ] Aggiorna il clone locale:
+
+```bash os=all
+cd "{{TEAM_PROJECT}}"
+git switch develop
+git pull --ff-only
+```
 
 **Esito atteso:** i controlli `build`, `test-dotnet` e `test-powershell` hanno un'esecuzione verde su `develop` e su `main`. La soluzione del passo S-916 dà alla CI il codice da compilare e i test da eseguire.
 
@@ -768,19 +775,23 @@ gh pr checks --watch
 
 Esegui questo passo con il tuo utente (permesso *Administration*), **mai** con l'identità dell'agente ([S-174](../Sources.md#s-174)).
 
-```powershell os=all
+- [ ] Crea nell'organizzazione `{{GH_OWNER}}` il team `release-emergency` con il solo sostituto del PO. Lo script si ferma se il team non esiste.
+
+```bash os=all
 cd "{{TEAM_PROJECT}}"
 gh api apps/github-actions --jq .id
-./scripts/Set-Rulesets.ps1 -Repository "{{GH_OWNER}}/{{GH_REPO}}" -WhatIf
-./scripts/Set-Rulesets.ps1 -Repository "{{GH_OWNER}}/{{GH_REPO}}"
+gh api "orgs/{{GH_OWNER}}/teams/release-emergency" --jq .slug
+pwsh -File ./scripts/Set-Rulesets.ps1 -Repository "{{GH_OWNER}}/{{GH_REPO}}" -WhatIf
+pwsh -File ./scripts/Set-Rulesets.ps1 -Repository "{{GH_OWNER}}/{{GH_REPO}}"
 gh api "repos/{{GH_OWNER}}/{{GH_REPO}}/rules/branches/main" --jq '.[].type'
 ```
 
-**Esito atteso:** il primo comando mostra l'ID usato in `integration_id` (atteso `15368` ⚠️); `main` ha le regole `deletion`, `non_fast_forward`, `pull_request`, `required_status_checks`. ⚠️ Lo script richiede il team `release-emergency` nell'organizzazione.
+**Esito atteso:** il primo comando mostra l'ID usato in `integration_id` (atteso `15368` ⚠️); `main` ha le regole `deletion`, `non_fast_forward`, `pull_request`, `required_status_checks`. Il secondo comando mostra `release-emergency`.
 
 ### S-919 — Pianifica con il Pianificatore
 <!-- step: os=all path=all profile=all -->
 
+- [ ] Controlla che il ramo corrente sia `develop` aggiornato (`git status -sb`).
 - [ ] Seleziona l'agente **Pianificatore** e descrivi una Feature piccola.
 - [ ] Rispondi alle domande; leggi il what-if dell'Avversario (al massimo 2 alternative).
 - [ ] Di' al Pianificatore che le scelte sono complete.
@@ -801,7 +812,7 @@ grep -rn "DoD-F9\|DoD-E8" docs/backlog
 - [ ] Seleziona l'agente **Organizzatore** e chiedi di sviluppare la Feature.
 - [ ] Controlla l'ordine: Tester (*red*), Sviluppatore o Operativo (*green*), Scrittore.
 - [ ] Controlla che l'Organizzatore compili la colonna **Evidenza** prima di chiamare i Reviewer.
-- [ ] Controlla la risposta dei due Reviewer: una riga per ogni voce della Definition of Done.
+- [ ] Controlla la risposta dei due Reviewer: una riga per ogni voce controllata, da DoD-F1 a DoD-F6.
 - [ ] Incolla nell'output del passo la tabella **Definition of Done** di `feature.md`.
 
 ```bash os=all
@@ -820,6 +831,7 @@ gh pr list --state all --limit 5
 ```bash os=all
 cd "{{TEAM_PROJECT}}"
 git switch develop
+git pull --ff-only
 git commit --allow-empty -m "test: direct push must be rejected"
 git push origin develop
 git reset --hard origin/develop
@@ -827,7 +839,7 @@ git reset --hard origin/develop
 
 - [ ] Con l'identità dell'agente (GitHub App o account di servizio) prova `gh pr merge <numero> --merge --admin` su una PR verso `main` senza la tua approvazione.
 
-**Esito atteso:** GitHub rifiuta il push diretto e il merge con `--admin`; la PR resta aperta ([S-175](../Sources.md#s-175), [esempio](../../examples/speckit-ruleset/README.md)).
+**Esito atteso:** GitHub rifiuta il push diretto con un messaggio che nomina la regola del repository (non un errore *non-fast-forward* di git) e rifiuta il merge con `--admin`; la PR resta aperta ([S-175](../Sources.md#s-175), [esempio](../../examples/speckit-ruleset/README.md)).
 
 ## F10 — Chiusura
 
