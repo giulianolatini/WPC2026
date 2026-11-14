@@ -53,8 +53,9 @@ Il formato segue il template ADR di Nygard, con una sezione **Razionale** esplic
 | [D-037](#d-037) | 2026-11-14 | Team di agenti: modelli per figura dopo la verifica P-12 | Accepted |
 | [D-038](#d-038) | 2026-11-14 | Definition of Done per Epic e Feature; criteri di accettazione verificabili | Accepted |
 | [D-039](#d-039) | 2026-11-14 | Protezione di `main` e `develop`: due ruleset, CODEOWNERS, identità separata | Accepted |
-| [D-040](#d-040) | 2026-11-14 | Rami di Feature con il nome creato da Spec Kit | Proposed |
+| [D-040](#d-040) | 2026-11-14 | Rami di Feature con il nome creato da Spec Kit | Accepted |
 | [D-041](#d-041) | 2026-11-14 | Due documenti nuovi: BYOK in GitHub Copilot e introduzione a LiteLLM | Accepted |
+| [D-042](#d-042) | 2026-11-14 | Runbook: fase F9 per il team di agenti; la chiusura diventa F10 | Accepted |
 
 ---
 
@@ -848,17 +849,17 @@ L'opzione 3 resta possibile: S-402 e S-403 sono «Non applicabile» e S-404 scri
 <a id="d-040"></a>
 ## D-040 — Rami di Feature con il nome creato da Spec Kit
 
-- **Data:** 2026-11-14 — **Stato:** Proposed — **Decisore:** assistente; il PO deve confermare
+- **Data:** 2026-11-14 — **Stato:** Accepted — **Decisore:** PO ("accetto D-040 allineamoci allo standard Spec Kit"); proposta dell'assistente
 
-**Contesto.** D-035 nominava i rami `feature/<epic>-<feature>-<nome>`. L'estensione `git` di Spec Kit 1.4.0 crea `feature/<NNN>-<slug>` con `branch_prefix: "feature"`: l'ultimo segmento deve iniziare con il numero. I due formati non coincidono. Spec Kit non ha una corrispondenza ufficiale con Epic, Feature e Task.
+**Contesto.** La prima versione di `gitflow.md` nominava i rami `feature/<epic>-<feature>-<nome>`; [D-035](#d-035) lasciava il punto da verificare. L'estensione `git` di Spec Kit 1.4.0 crea `feature/<NNN>-<slug>` con `branch_prefix: "feature"`: l'ultimo segmento deve iniziare con il numero. I due formati non coincidono. Spec Kit non ha una corrispondenza ufficiale con Epic, Feature e Task.
 
 **Opzioni considerate.** (1) Il ramo è quello di Spec Kit; `feature.md` registra ramo e cartella `specs/<NNN>-<slug>/`; gli ID `E<nn>-F<nn>` restano nel backlog. (2) Rami con l'ID del backlog, creati a mano, senza l'estensione `git`. (3) Un template di ramo che contiene i due identificativi.
 
-**Decisione proposta.** Opzione 1. Una cartella `specs/<NNN>-<slug>/` corrisponde a una Feature del backlog.
+**Decisione.** Opzione 1. Una cartella `specs/<NNN>-<slug>/` corrisponde a una Feature del backlog.
 
 **Razionale.** Un solo strumento crea i rami; nessun passo manuale. Il collegamento tra i due identificativi è nel front matter di `feature.md`.
 
-**Conseguenze.** Il nome del ramo non mostra l'Epic. Se il PO sceglie un'altra opzione cambiano `gitflow.md`, `backlog.md`, i modelli e `git-config.yml`.
+**Conseguenze.** Il nome del ramo non mostra l'Epic. `gitflow.md`, `backlog.md`, i modelli e `git-config.yml` usano già questo formato. ⚠️ Il comando `specify extension add git` va provato: la rilettura diretta del README di Spec Kit non lo mostra.
 
 **Fonti.** [S-080](Sources.md#s-080), [P-13](Review-Perplexity.md#registro-degli-esiti).
 
@@ -880,3 +881,22 @@ L'opzione 3 resta possibile: S-402 e S-403 sono «Non applicabile» e S-404 scri
 **Conseguenze.** ⚠️ La documentazione di LiteLLM non è divisa per versione: il documento 07 elenca le feature della documentazione corrente con la 1.108.2 come riferimento. ⚠️ La prova LTS dura un mese: il documento 07 va riletto prima del talk. Alcune feature raccomandate (SSO) sono Enterprise.
 
 **Fonti.** [S-015](Sources.md#s-015), [S-071](Sources.md#s-071), [S-182](Sources.md#s-182), [S-183](Sources.md#s-183), [S-184](Sources.md#s-184), [S-185](Sources.md#s-185), [S-186](Sources.md#s-186), [S-187](Sources.md#s-187), [S-119](Sources.md#s-119).
+
+---
+
+<a id="d-042"></a>
+## D-042 — Runbook: fase F9 per il team di agenti; la chiusura diventa F10
+
+- **Data:** 2026-11-14 — **Stato:** Accepted — **Decisore:** PO ("Il runbook e il deck non contengono ancora la fase del team di agenti")
+
+**Contesto.** Il runbook ([D-026](#d-026)) ha le fasi F1–F9; F9 è la chiusura (revoca delle chiavi, esportazione delle evidenze). L'installazione e la prova del team di agenti non hanno passi.
+
+**Opzioni considerate.** (1) Nuova fase dopo la chiusura. (2) Nuova fase F9 «Team di agenti» prima della chiusura, che diventa F10. (3) Un secondo runbook.
+
+**Decisione.** Opzione 2. La fase F9 ha i passi S-911…S-920. La chiusura è la fase F10 con i passi S-1001 e S-1002. Gli identificativi S-901 e S-902 non si riusano. Nuovi parametri: `TEAM_PROJECT`, `GH_OWNER`, `GH_REPO`, `PO_USER`. Il default di `SPECKIT_VERSION` diventa `1.4.0`.
+
+**Razionale.** La revoca delle chiavi deve restare l'ultima azione. Un identificativo riusato collegherebbe le evidenze di una sessione salvata a un passo diverso.
+
+**Conseguenze.** Una sessione salvata prima di questa modifica perde lo stato dei due passi di chiusura. ⚠️ I passi S-916, S-917 e S-920 usano ruleset e script non provati su GitHub. ⚠️ La versione di Spec Kit non è confermata dalla rilettura diretta ([Review-Perplexity.md](Review-Perplexity.md#registro-degli-esiti)).
+
+**Fonti.** [S-080](Sources.md#s-080), [S-171](Sources.md#s-171), [S-174](Sources.md#s-174), [S-175](Sources.md#s-175).

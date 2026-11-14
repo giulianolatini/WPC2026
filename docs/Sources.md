@@ -129,7 +129,7 @@ Gli altri documenti puntano alla fonte con un link del tipo `Sources.md#s-001`.
 | <a id="s-082"></a>S-082 | [GitHub — Spec Kit integrations CLI reference](https://github.github.io/spec-kit/integrations/cli.html) | PRIMARY | P-07 |
 | <a id="s-083"></a>S-083 | [GitHub — Spec Kit: integrazione GitHub Copilot (layout skills/commands)](https://github.github.io/spec-kit/integrations/copilot.html) | PRIMARY | 2026-11-07 |
 | <a id="s-084"></a>S-084 | [GitHub — Spec Kit Core Commands (`specify check`)](https://github.github.com/spec-kit/reference/core.html) | PRIMARY | 2026-11-07 (`github.github.com` è il dominio Pages di GitHub; verificato) |
-| <a id="s-085"></a>S-085 | [GitHub — Spec Kit Releases (v1.3.2)](https://github.com/github/spec-kit/releases) | PRIMARY | P-07 |
+| <a id="s-085"></a>S-085 | [GitHub — Spec Kit Releases (v1.3.2 per P-07; v1.4.0 per P-13)](https://github.com/github/spec-kit/releases) | PRIMARY | P-07, P-13; 2026-11-14 ⚠️ rilettura diretta non conclusiva |
 
 ## Gateway alternativi
 
@@ -188,21 +188,21 @@ Gli altri documenti puntano alla fonte con un link del tipo `Sources.md#s-001`.
 |----|--------|------|----------|
 | <a id="s-165"></a>S-165 | [VS Code — Subagents (contesto isolato, modelli, nesting, coordinatore e worker)](https://code.visualstudio.com/docs/copilot/agents/subagents) | PRIMARY | 2026-11-14 |
 | <a id="s-166"></a>S-166 | [OpenRouter — Best AI Models for Coding (classifica per uso, prezzi)](https://openrouter.ai/collections/programming) | VENDOR-DOC | 2026-11-14 ⚠️ (letto solo l'estratto della ricerca; prezzi variabili) |
-| <a id="s-167"></a>S-167 | [V. Driessen — A successful Git branching model (GitFlow)](https://nvie.com/posts/a-successful-git-branching-model/) | PRIMARY | P-13 (2026-11-14) |
+| <a id="s-167"></a>S-167 | [V. Driessen — A successful Git branching model (GitFlow)](https://nvie.com/posts/a-successful-git-branching-model/) | PRIMARY | 2026-11-14 (trovata da P-13) |
 | <a id="s-168"></a>S-168 | [NUnit — Documentation](https://docs.nunit.org/) | PRIMARY | P-13 (2026-11-14) |
 | <a id="s-169"></a>S-169 | [Pester — Documentation](https://pester.dev/docs/quick-start) | PRIMARY | P-13 (2026-11-14) |
 | <a id="s-170"></a>S-170 | [Scrum Guide 2020 — Commitment: Definition of Done](https://www.scrumguides.org/scrum-guide.html) | PRIMARY | 2026-11-14 ⚠️ (letto solo l'estratto della ricerca) |
-| <a id="s-171"></a>S-171 | [GitHub Docs — About rulesets](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/about-rulesets) | PRIMARY | P-13 |
-| <a id="s-172"></a>S-172 | [GitHub Docs — Available rules for rulesets](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/available-rules-for-rulesets) | PRIMARY | P-13 |
-| <a id="s-173"></a>S-173 | [GitHub Docs — About code owners](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners) | PRIMARY | P-13 |
-| <a id="s-174"></a>S-174 | [GitHub Docs — REST API endpoints for rules (ruleset di repository)](https://docs.github.com/en/rest/repos/rules) | PRIMARY | P-13 |
-| <a id="s-175"></a>S-175 | [GitHub CLI — `gh pr merge` (opzione `--admin`)](https://cli.github.com/manual/gh_pr_merge) | PRIMARY | P-13 |
-| <a id="s-176"></a>S-176 | [GitHub Docs — Troubleshooting required status checks](https://docs.github.com/en/pull-requests/how-tos/merge-and-close-pull-requests/troubleshooting-required-status-checks) | PRIMARY | P-13 |
-| <a id="s-177"></a>S-177 | [GitHub Docs — Generating an installation access token for a GitHub App](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-an-installation-access-token-for-a-github-app) | PRIMARY | P-13 |
-| <a id="s-178"></a>S-178 | [Microsoft Learn — Best practices for exceptions (.NET)](https://learn.microsoft.com/en-us/dotnet/standard/exceptions/best-practices-for-exceptions) | PRIMARY | P-13 |
-| <a id="s-179"></a>S-179 | [Microsoft Learn — System.AppDomain.UnhandledException event](https://learn.microsoft.com/en-us/dotnet/fundamentals/runtime-libraries/system-appdomain-unhandledexception) | PRIMARY | P-13 |
-| <a id="s-180"></a>S-180 | [Pester — Migrating from Pester v5 to v6](https://pester.dev/docs/migrations/v5-to-v6) | PRIMARY | P-13 |
-| <a id="s-181"></a>S-181 | [NUnit — Framework release notes](https://docs.nunit.org/articles/nunit/release-notes/framework.html) | PRIMARY | P-13 |
+| <a id="s-171"></a>S-171 | [GitHub Docs — About rulesets](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/about-rulesets) | PRIMARY | 2026-11-14 (trovata da P-13) |
+| <a id="s-172"></a>S-172 | [GitHub Docs — Available rules for rulesets](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/available-rules-for-rulesets) | PRIMARY | 2026-11-14 (trovata da P-13) |
+| <a id="s-173"></a>S-173 | [GitHub Docs — About code owners](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners) | PRIMARY | 2026-11-14 (trovata da P-13) |
+| <a id="s-174"></a>S-174 | [GitHub Docs — REST API endpoints for rules (ruleset di repository)](https://docs.github.com/en/rest/repos/rules) | PRIMARY | 2026-11-14 (trovata da P-13) |
+| <a id="s-175"></a>S-175 | [GitHub CLI — `gh pr merge` (opzione `--admin`)](https://cli.github.com/manual/gh_pr_merge) | PRIMARY | 2026-11-14 (trovata da P-13) |
+| <a id="s-176"></a>S-176 | [GitHub Docs — Troubleshooting required status checks](https://docs.github.com/en/pull-requests/how-tos/merge-and-close-pull-requests/troubleshooting-required-status-checks) | PRIMARY | 2026-11-14 (trovata da P-13) |
+| <a id="s-177"></a>S-177 | [GitHub Docs — Generating an installation access token for a GitHub App](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-an-installation-access-token-for-a-github-app) | PRIMARY | 2026-11-14 (trovata da P-13) |
+| <a id="s-178"></a>S-178 | [Microsoft Learn — Best practices for exceptions (.NET)](https://learn.microsoft.com/en-us/dotnet/standard/exceptions/best-practices-for-exceptions) | PRIMARY | 2026-11-14 (trovata da P-13) |
+| <a id="s-179"></a>S-179 | [Microsoft Learn — System.AppDomain.UnhandledException event](https://learn.microsoft.com/en-us/dotnet/fundamentals/runtime-libraries/system-appdomain-unhandledexception) | PRIMARY | 2026-11-14 (trovata da P-13) |
+| <a id="s-180"></a>S-180 | [Pester — Migrating from Pester v5 to v6](https://pester.dev/docs/migrations/v5-to-v6) | PRIMARY | 2026-11-14 (trovata da P-13) |
+| <a id="s-181"></a>S-181 | [NUnit — Framework release notes](https://docs.nunit.org/articles/nunit/release-notes/framework.html) | PRIMARY | 2026-11-14 (trovata da P-13) |
 
 ## Metodo (decisioni e scrittura)
 
