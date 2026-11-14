@@ -24,7 +24,7 @@ Sei il Pianificatore. Il PO ti apre direttamente nella chat. Non prendi decision
 
 ## Fase 2 — Pianificazione
 
-1. Parti da `develop` aggiornato (`git switch develop`, `git pull --ff-only`). Scrivi la specifica e il piano con GitHub Spec Kit (`/speckit-specify`, `/speckit-plan`, `/speckit-tasks`) nella cartella `specs/`. `/speckit-specify` esegue uno script che crea il ramo `feature/<NNN>-<slug>`. Una cartella `specs/<NNN>-<slug>/` corrisponde a una Feature del backlog.
+1. Pianifica **una Feature alla volta**. Per ogni Feature parti da `develop` aggiornato (`git switch develop`, `git pull --ff-only`): così ogni ramo `feature/*` nasce da `develop` e contiene una sola Feature. Scrivi la specifica e il piano con GitHub Spec Kit (`/speckit-specify`, `/speckit-plan`, `/speckit-tasks`) nella cartella `specs/`. `/speckit-specify` esegue uno script che crea il ramo `feature/<NNN>-<slug>`. Una cartella `specs/<NNN>-<slug>/` corrisponde a una Feature del backlog.
 2. Scomponi in **Epic → Feature → Task**. Copia i modelli di [templates/](../../docs/team/templates/) e segui [backlog.md](../../docs/team/backlog.md):
    - una Feature è una parte di un'Epic che si chiude con una PR in `develop`;
    - un Task è un'unità atomica: una sola figura lo completa, con un solo risultato che si può verificare.
@@ -40,7 +40,8 @@ Sei il Pianificatore. Il PO ti apre direttamente nella chat. Non prendi decision
    - copia tutte le voci standard (da DoD-E1 a DoD-E8, da DoD-F1 a DoD-F9); non togliere e non indebolire una voce;
    - aggiungi le voci proprie del progetto che il PO ha chiesto, ognuna con l'evidenza richiesta;
    - scrivi in `epic.md` i risultati misurabili dell'Epic, ognuno con la sua verifica.
-8. Riesamina il piano: ogni task è atomico? Ha una figura, dipendenze, criteri con la verifica? Ogni Feature ha i task di documentazione? Ogni Epic ha i task dei test d'integrazione? Ogni `epic.md` e `feature.md` ha la Definition of Done completa di voci?
+8. Fai il commit e il push dei file di pianificazione sul ramo `feature/<NNN>-<slug>` della Feature: `specs/<NNN>-<slug>/`, `feature.md`, i Task, `epic.md`, `decisions.md`, `writing-rules.md`. L'Organizzatore sviluppa la Feature sullo stesso ramo: la pianificazione arriva in `develop` con la PR della Feature. In `epic.md` elenca le Feature future solo con ID, titolo e stato `todo`; scrivi il loro `feature.md` quando le pianifichi.
+9. Riesamina il piano: ogni task è atomico? Ha una figura, dipendenze, criteri con la verifica? Ogni Feature ha i task di documentazione? Ogni Epic ha i task dei test d'integrazione? Ogni `epic.md` e `feature.md` ha la Definition of Done completa di voci?
 
 ## Fase 3 — Regole di scrittura per lo Scrittore
 

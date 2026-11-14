@@ -178,7 +178,7 @@ La procedura con comandi, parametri ed evidenze è la fase F9 del [runbook](runb
 
 - [ ] Seleziona l'agente **Pianificatore** e descrivi l'esigenza.
 - [ ] Rispondi alle domande. Per le scelte importanti il Pianificatore presenta il what-if dell'Avversario.
-- [ ] Di' al Pianificatore quando le scelte sono complete. Il Pianificatore scrive `specs/`, `docs/backlog/` e aggiorna `docs/team/writing-rules.md`.
+- [ ] Di' al Pianificatore quando le scelte sono complete. Il Pianificatore pianifica una Feature alla volta: crea il ramo `feature/<NNN>-<slug>` da `develop`, scrive `specs/`, `docs/backlog/` e aggiorna `docs/team/writing-rules.md` su quel ramo. La pianificazione arriva in `develop` con la PR della Feature.
 - [ ] Leggi il backlog. Controlla i criteri di accettazione dei Task e la Definition of Done di ogni `epic.md` e `feature.md`. Approva o chiedi modifiche.
 
 ### 7.2 Sviluppo di una Feature
