@@ -295,8 +295,20 @@ Il formato segue il template ADR di Nygard, con una sezione <strong>Razionale</s
 <tr>
 <td><a href="#d-043">D-043</a></td>
 <td>2026-11-14</td>
-<td>Strumenti del Pianificatore e permessi dell'identità dell'agente dopo la review</td>
-<td>Proposed</td>
+<td>Agente Cercatore, strumenti del Pianificatore e approvazione del PO su <code>develop</code></td>
+<td>Accepted</td>
+</tr>
+<tr>
+<td><a href="#d-044">D-044</a></td>
+<td>2026-11-14</td>
+<td>Versione di Spec Kit: controllo a ogni pianificazione e aggiornamento con ADR</td>
+<td>Accepted</td>
+</tr>
+<tr>
+<td><a href="#d-045">D-045</a></td>
+<td>2026-11-14</td>
+<td>Configurazione per il piano GitHub Free e limiti rispetto a Pro e Team</td>
+<td>Accepted</td>
 </tr>
 </tbody>
 </table>
@@ -983,20 +995,53 @@ Il formato segue il template ADR di Nygard, con una sezione <strong>Razionale</s
 <p><strong>Fonti.</strong> <a href="Sources.html#s-080">S-080</a>, <a href="Sources.html#s-171">S-171</a>, <a href="Sources.html#s-174">S-174</a>, <a href="Sources.html#s-175">S-175</a>.</p>
 <hr />
 <p><a id="d-043"></a></p>
-<h2 id="d-043--strumenti-del-pianificatore-e-permessi-dellidentità-dellagente-dopo-la-review">D-043 — Strumenti del Pianificatore e permessi dell'identità dell'agente dopo la review</h2>
+<h2 id="d-043--agente-cercatore-strumenti-del-pianificatore-e-approvazione-del-po-su-develop">D-043 — Agente Cercatore, strumenti del Pianificatore e approvazione del PO su <code>develop</code></h2>
 <ul>
-<li><strong>Data:</strong> 2026-11-14 — <strong>Stato:</strong> Proposed — <strong>Decisore:</strong> assistente; il PO deve confermare</li>
+<li><strong>Data:</strong> 2026-11-14 — <strong>Stato:</strong> Accepted — <strong>Decisore:</strong> PO ("D-043 approvato e accettato", con due modifiche) — <strong>Modifica:</strong> <a href="#d-035">D-035</a> (merge in <code>develop</code>) e <a href="#d-039">D-039</a> (approvazioni su <code>develop</code>)</li>
 </ul>
-<p><strong>Contesto.</strong> La review della PR #4 ha trovato due problemi. (1) R6-agy-03: il Pianificatore deve eseguire <code>/speckit-specify</code>, che lancia uno script e crea il ramo <code>feature/&lt;NNN&gt;-&lt;slug&gt;</code> (<a href="#d-040">D-040</a>), ma non aveva lo strumento <code>execute</code>. (2) R6-agy-01: <code>ci.yml</code> gira dal ramo della PR e <code>develop</code> non richiede approvazioni; un'identità che può modificare il workflow o i test può rendere verdi i controlli richiesti dai ruleset (<a href="#d-039">D-039</a>).</p>
-<p><strong>Opzioni considerate.</strong> Per (1): (a) <code>execute</code> al Pianificatore, senza <code>web</code>; (b) <code>execute</code> e <code>web</code> insieme; (c) spostare <code>/speckit-specify</code> all'Organizzatore. Per (2): (a) nessun permesso <em>Workflows</em> all'identità dell'agente, più controllo del Reviewer antagonista; (b) come (a), più approvazione di un code owner su <code>develop</code> per <code>.github/**</code> e <code>scripts/**</code>; (c) approvazione del PO su ogni PR verso <code>develop</code>.</p>
-<p><strong>Decisione proposta.</strong> (1a) e (2a):</p>
+<p><strong>Contesto.</strong> La review della PR #4 ha trovato due problemi. (1) R6-agy-03: il Pianificatore deve eseguire <code>/speckit-specify</code>, che lancia uno script e crea il ramo <code>feature/&lt;NNN&gt;-&lt;slug&gt;</code> (<a href="#d-040">D-040</a>), ma non aveva lo strumento <code>execute</code>. (2) R6-agy-01: <code>ci.yml</code> gira dal ramo della PR e <code>develop</code> non richiedeva approvazioni; un'identità che può modificare il workflow o i test può rendere verdi i controlli richiesti dai ruleset.</p>
+<p><strong>Opzioni considerate.</strong> Per (1): (a) <code>execute</code> al Pianificatore, senza <code>web</code>; (b) <code>execute</code> e <code>web</code> insieme; (c) spostare <code>/speckit-specify</code> all'Organizzatore. Per (2): (a) nessun permesso <em>Workflows</em> all'identità dell'agente, più controllo del Reviewer antagonista; (b) come (a), più approvazione di un code owner su <code>develop</code> per <code>.github/**</code> e <code>scripts/**</code>; (c) approvazione di un code owner su ogni PR verso <code>develop</code>.</p>
+<p><strong>Decisione.</strong> Il PO accetta (1a) e sceglie (2c), con un agente nuovo:</p>
 <ul>
-<li>il Pianificatore ha <code>read</code>, <code>search</code>, <code>edit</code>, <code>execute</code>, <code>agent</code>, <code>todo</code>; usa il terminale solo per gli script di Spec Kit e per il ramo della pianificazione; nessuna figura ha <code>web</code>;</li>
-<li>l'identità dell'agente non ha il permesso <em>Workflows</em>; l'Organizzatore non modifica <code>.github/</code> e <code>scripts/Set-Rulesets.ps1</code>; il Reviewer antagonista assegna severità <code>alta</code> a ogni modifica in <code>.github/</code> e a ogni test cancellato o reso sempre verde.</li>
+<li>il Pianificatore ha <code>read</code>, <code>search</code>, <code>edit</code>, <code>execute</code>, <code>agent</code>, <code>todo</code>; usa il terminale solo per Spec Kit e per il ramo della pianificazione;</li>
+<li><strong>nuovo agente Cercatore</strong>: fa le ricerche su internet e usa il server MCP Microsoft Learn (plugin <code>microsoftdocs/mcp</code>) come fonte primaria per C#, .NET e PowerShell. Strumenti: <code>read</code>, <code>search</code>, <code>web</code>, <code>microsoft-learn/*</code>; nessun <code>edit</code>, nessun <code>execute</code>. Modello <code>claude-haiku-5-5</code>. Lo chiamano il Pianificatore e l'Organizzatore; le altre figure chiedono una ricerca tramite l'Organizzatore;</li>
+<li>l'identità dell'agente non ha il permesso <em>Workflows</em>;</li>
+<li><strong>ogni PR verso <code>develop</code> richiede l'approvazione di un code owner</strong> (ruleset <code>develop-approval</code>, senza bypass). Il merge in <code>develop</code> non è più automatico: l'Organizzatore unisce la PR dopo l'approvazione del PO. La voce DoD-F7 comprende l'approvazione del PO.</li>
 </ul>
-<p><strong>Razionale.</strong> La specifica è lavoro del modello più capace: resta al Pianificatore. Un agente con <code>web</code> ed <code>execute</code> insieme può eseguire istruzioni lette da una pagina. Senza <em>Workflows</em> GitHub rifiuta il push che modifica un workflow: è un controllo di GitHub, non un'istruzione. Le opzioni (2b) e (2c) cambiano la scelta del PO sul merge in <code>develop</code> (<a href="#d-035">D-035</a>).</p>
-<p><strong>Conseguenze.</strong> Il Pianificatore non fa ricerche sul web: le chiede al PO. ⚠️ Resta il rischio di test modificati in una PR verso <code>develop</code>: lo copre solo la review. ⚠️ Il rifiuto del push senza il permesso <em>Workflows</em> va provato. Se il PO sceglie (2b) o (2c) cambiano <code>main-develop.json</code>, <code>CODEOWNERS</code> e il ruolo dell'Organizzatore nel merge.</p>
-<p><strong>Fonti.</strong> <a href="Sources.html#s-072">S-072</a>, <a href="Sources.html#s-172">S-172</a>, <a href="Sources.html#s-173">S-173</a>, <a href="Sources.html#s-177">S-177</a>, review R6-agy-01 e R6-agy-03 della PR #4.</p></article>
+<p><strong>Razionale.</strong> La specifica resta al modello più capace. Nessun agente ha <code>web</code> insieme a <code>execute</code> o <code>edit</code>: un'istruzione letta in una pagina non diventa un comando. Microsoft Learn è la documentazione ufficiale di C# e PowerShell. Il PO: l'approvazione su <code>develop</code> è «più sicura che delegare la modifica dei test per approvare una PR automatica».</p>
+<p><strong>Conseguenze.</strong> Il team ha 10 figure. Il PO approva ogni PR verso <code>develop</code>, comprese le PR di aggiornamento del backlog: più attese, più controllo. ⚠️ Da provare: nome del server MCP e strumenti <code>microsoft-learn/*</code> nell'harness Copilot; rifiuto del push senza il permesso <em>Workflows</em>. L'esempio <code>examples/speckit-ruleset/</code> descrive ancora 0 approvazioni su <code>develop</code> (FR-009): il README dell'esempio indica la differenza.</p>
+<p><strong>Fonti.</strong> <a href="Sources.html#s-072">S-072</a>, <a href="Sources.html#s-172">S-172</a>, <a href="Sources.html#s-173">S-173</a>, <a href="Sources.html#s-177">S-177</a>, <a href="Sources.html#s-188">S-188</a>, review R6-agy-01 e R6-agy-03 della PR #4.</p>
+<hr />
+<p><a id="d-044"></a></p>
+<h2 id="d-044--versione-di-spec-kit-controllo-a-ogni-pianificazione-e-aggiornamento-con-adr">D-044 — Versione di Spec Kit: controllo a ogni pianificazione e aggiornamento con ADR</h2>
+<ul>
+<li><strong>Data:</strong> 2026-11-14 — <strong>Stato:</strong> Accepted — <strong>Decisore:</strong> PO</li>
+</ul>
+<p><strong>Contesto.</strong> La versione corrente di Spec Kit non è confermata: P-07 indica 1.3.2, P-13 indica 1.4.0, la rilettura diretta non è conclusiva. Una versione fissata in un documento invecchia.</p>
+<p><strong>Opzioni considerate.</strong> (1) Fissare una versione nei documenti. (2) Controllo all'inizio di ogni pianificazione, con decisione del code owner e registrazione in una ADR.</p>
+<p><strong>Decisione.</strong> Opzione 2, nel template del team:</p>
+<ul>
+<li>all'inizio di una nuova pianificazione il Pianificatore controlla se esiste una versione più recente di Spec Kit (<code>specify version</code>, <code>specify self check</code>);</li>
+<li>se esiste, chiede al code owner se aggiornare;</li>
+<li>la risposta affermativa aggiunge al registro del progetto (<code>docs/backlog/decisions.md</code>) una ADR che sostituisce la ADR della versione precedente, con la decisione di aggiornare e la versione di arrivo;</li>
+<li>la ADR-001 del progetto registra la versione installata;</li>
+<li>il PO esegue il comando di aggiornamento; il Pianificatore non installa programmi.</li>
+</ul>
+<p><strong>Razionale.</strong> La versione in uso è una decisione del progetto, non del template: il registro ADR mostra quando e perché è cambiata.</p>
+<p><strong>Conseguenze.</strong> <code>docs/backlog/decisions.md</code> diventa un registro ADR che cresce solo in coda (modello in <code>templates/decisions.md</code>). In questo repository la versione 1.4.0 resta un valore di esempio con ⚠️: runbook e documento 02 dicono di controllarla.</p>
+<p><strong>Fonti.</strong> <a href="Sources.html#s-081">S-081</a>, <a href="Sources.html#s-085">S-085</a>, <a href="Sources.html#s-090">S-090</a>.</p>
+<hr />
+<p><a id="d-045"></a></p>
+<h2 id="d-045--configurazione-per-il-piano-github-free-e-limiti-rispetto-a-pro-e-team">D-045 — Configurazione per il piano GitHub Free e limiti rispetto a Pro e Team</h2>
+<ul>
+<li><strong>Data:</strong> 2026-11-14 — <strong>Stato:</strong> Accepted — <strong>Decisore:</strong> PO ("aggiungi anche la configurazione Github free (se possibile) ed elenca le limitazioni")</li>
+</ul>
+<p><strong>Contesto.</strong> Chi consulta il repository può avere il piano Free. I ruleset del template usano un team di emergenza, che esiste solo in un'organizzazione; nei repository privati del piano Free i ruleset non sono disponibili.</p>
+<p><strong>Opzioni considerate.</strong> (1) Solo un avviso. (2) Variante dei ruleset senza team di emergenza e tabella dei casi per piano.</p>
+<p><strong>Decisione.</strong> Opzione 2: <code>Set-Rulesets.ps1</code> ha l'opzione <code>-WithoutEmergencyTeam</code>, che toglie l'attore di bypass; <code>gitflow.md</code> e il documento 05 §9.2 hanno la tabella dei casi e i limiti del piano Free. Con il piano Free la configurazione funziona solo in un repository pubblico.</p>
+<p><strong>Razionale.</strong> Un repository pubblico con piano Free ha ruleset e code owner. Un repository privato con piano Free non ha protezioni applicate da GitHub: dirlo evita una falsa sicurezza.</p>
+<p><strong>Conseguenze.</strong> Con un account personale non c'è un sostituto di emergenza: solo il PO può cambiare un ruleset. ⚠️ Da provare: l'opzione <code>-WithoutEmergencyTeam</code> e il bypass di un team in un'organizzazione Free.</p>
+<p><strong>Fonti.</strong> <a href="Sources.html#s-171">S-171</a>, <a href="Sources.html#s-172">S-172</a>, <a href="Sources.html#s-189">S-189</a>.</p></article>
 <script type="application/json" id="fonts-data">[
   {
     "id": "blexmono",

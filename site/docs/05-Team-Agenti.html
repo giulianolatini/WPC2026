@@ -79,8 +79,8 @@ I file del team sono in <a href="../../examples/agents/README.md"><code>examples
 </tr>
 <tr>
 <td>Merge in <code>develop</code></td>
-<td>Organizzatore, dopo le due review e i test verdi</td>
-<td><a href="Decisions.html#d-035">D-035</a></td>
+<td>Organizzatore, dopo le due review <strong>e l'approvazione del PO</strong> (code owner): nessun merge automatico</td>
+<td><a href="Decisions.html#d-043">D-043</a></td>
 </tr>
 <tr>
 <td>Branching</td>
@@ -104,8 +104,18 @@ I file del team sono in <a href="../../examples/agents/README.md"><code>examples
 </tr>
 <tr>
 <td>Protezione dei rami</td>
-<td>Due ruleset, <code>CODEOWNERS</code>, identità separata per l'agente</td>
-<td><a href="Decisions.html#d-039">D-039</a></td>
+<td>Tre ruleset, <code>CODEOWNERS</code>, identità separata per l'agente; variante per il piano Free</td>
+<td><a href="Decisions.html#d-039">D-039</a>, <a href="Decisions.html#d-043">D-043</a>, <a href="Decisions.html#d-045">D-045</a></td>
+</tr>
+<tr>
+<td>Ricerche</td>
+<td>Agente Cercatore: web e Microsoft Learn come fonte primaria per C# e PowerShell</td>
+<td><a href="Decisions.html#d-043">D-043</a></td>
+</tr>
+<tr>
+<td>Versione di Spec Kit</td>
+<td>Controllo a ogni pianificazione; aggiornamento solo con una ADR approvata dal PO</td>
+<td><a href="Decisions.html#d-044">D-044</a></td>
 </tr>
 <tr>
 <td>Nome dei rami di Feature</td>
@@ -127,13 +137,13 @@ I file del team sono in <a href="../../examples/agents/README.md"><code>examples
 <tbody>
 <tr>
 <td><strong>Organizzatore</strong></td>
-<td>Parla con il PO, assegna i task, controlla i risultati, compila le evidenze della Definition of Done, apre le PR, unisce le Feature in <code>develop</code></td>
+<td>Parla con il PO, assegna i task, controlla i risultati, compila le evidenze della Definition of Done, apre le PR, unisce le Feature in <code>develop</code> dopo l'approvazione del PO</td>
 <td>Stato del backlog, evidenze, log</td>
 <td>Codice, test, decisioni di prodotto, merge in <code>main</code></td>
 </tr>
 <tr>
 <td><strong>Pianificatore</strong></td>
-<td>Brainstorming 1to1 con il PO; scompone in Epic, Feature, Task con SOLID e TDD; scrive criteri di accettazione e Definition of Done; mantiene le regole di scrittura</td>
+<td>Controllo della versione di Spec Kit; brainstorming 1to1 con il PO; scompone in Epic, Feature, Task con SOLID e TDD; scrive criteri di accettazione e Definition of Done; mantiene le regole di scrittura</td>
 <td><code>specs/</code>, <code>docs/backlog/</code>, <code>docs/team/writing-rules.md</code></td>
 <td>Decisioni al posto del PO</td>
 </tr>
@@ -142,6 +152,12 @@ I file del team sono in <a href="../../examples/agents/README.md"><code>examples
 <td>Contraddice la scelta del PO: what-if con al massimo 2 alternative</td>
 <td>Niente (solo risposta)</td>
 <td>Raccomandazioni, modifiche ai file</td>
+</tr>
+<tr>
+<td><strong>Cercatore</strong></td>
+<td>Ricerche su internet e nella documentazione ufficiale; Microsoft Learn è la fonte primaria per C#, .NET e PowerShell</td>
+<td>Niente (solo risposta con le fonti)</td>
+<td>Modifiche ai file, comandi, decisioni</td>
 </tr>
 <tr>
 <td><strong>Tester</strong></td>
@@ -187,6 +203,8 @@ I file del team sono in <a href="../../examples/agents/README.md"><code>examples
     PO([Product Owner]) --&gt;|esigenze| ORG[Organizzatore&lt;br/&gt;modello intermedio]
     PO &lt;--&gt;|brainstorming 1to1| PIA[Pianificatore&lt;br/&gt;modello alto, effort high]
     PIA --&gt;|what-if| AVV[Avversario&lt;br/&gt;modello medio, effort low]
+    PIA --&gt;|domande| CER[Cercatore&lt;br/&gt;web e Microsoft Learn]
+    ORG --&gt;|domande delle figure| CER
     PIA --&gt;|specifiche, backlog, Definition of Done| BL[(specs/ e docs/backlog/)]
     BL --&gt; ORG
     ORG --&gt;|test red| TES[Tester]
@@ -194,13 +212,16 @@ I file del team sono in <a href="../../examples/agents/README.md"><code>examples
     ORG --&gt;|PowerShell| OPE[Operativo]
     ORG --&gt;|documenti| SCR[Scrittore]
     ORG --&gt;|PR con evidenze| REV{Reviewer ottimista&lt;br/&gt;Reviewer antagonista}
-    REV --&gt;|approvano: DoD completa| DEV[(develop)]
+    REV --&gt;|approvano| APP{Approvazione del PO}
+    APP --&gt;|merge| DEV[(develop)]
     DEV --&gt; REL[(release)]
     REL --&gt;|approvazione del PO| MAIN[(main)]
 ">flowchart TD
     PO([Product Owner]) --&gt;|esigenze| ORG[Organizzatore&lt;br/&gt;modello intermedio]
     PO &lt;--&gt;|brainstorming 1to1| PIA[Pianificatore&lt;br/&gt;modello alto, effort high]
     PIA --&gt;|what-if| AVV[Avversario&lt;br/&gt;modello medio, effort low]
+    PIA --&gt;|domande| CER[Cercatore&lt;br/&gt;web e Microsoft Learn]
+    ORG --&gt;|domande delle figure| CER
     PIA --&gt;|specifiche, backlog, Definition of Done| BL[(specs/ e docs/backlog/)]
     BL --&gt; ORG
     ORG --&gt;|test red| TES[Tester]
@@ -208,13 +229,16 @@ I file del team sono in <a href="../../examples/agents/README.md"><code>examples
     ORG --&gt;|PowerShell| OPE[Operativo]
     ORG --&gt;|documenti| SCR[Scrittore]
     ORG --&gt;|PR con evidenze| REV{Reviewer ottimista&lt;br/&gt;Reviewer antagonista}
-    REV --&gt;|approvano: DoD completa| DEV[(develop)]
+    REV --&gt;|approvano| APP{Approvazione del PO}
+    APP --&gt;|merge| DEV[(develop)]
     DEV --&gt; REL[(release)]
     REL --&gt;|approvazione del PO| MAIN[(main)]
 </pre><details class="mermaid-src"><summary>Sorgente Mermaid</summary><pre class="code"><code class="language-plaintext">flowchart TD
     PO([Product Owner]) --&gt;|esigenze| ORG[Organizzatore&lt;br/&gt;modello intermedio]
     PO &lt;--&gt;|brainstorming 1to1| PIA[Pianificatore&lt;br/&gt;modello alto, effort high]
     PIA --&gt;|what-if| AVV[Avversario&lt;br/&gt;modello medio, effort low]
+    PIA --&gt;|domande| CER[Cercatore&lt;br/&gt;web e Microsoft Learn]
+    ORG --&gt;|domande delle figure| CER
     PIA --&gt;|specifiche, backlog, Definition of Done| BL[(specs/ e docs/backlog/)]
     BL --&gt; ORG
     ORG --&gt;|test red| TES[Tester]
@@ -222,13 +246,15 @@ I file del team sono in <a href="../../examples/agents/README.md"><code>examples
     ORG --&gt;|PowerShell| OPE[Operativo]
     ORG --&gt;|documenti| SCR[Scrittore]
     ORG --&gt;|PR con evidenze| REV{Reviewer ottimista&lt;br/&gt;Reviewer antagonista}
-    REV --&gt;|approvano: DoD completa| DEV[(develop)]
+    REV --&gt;|approvano| APP{Approvazione del PO}
+    APP --&gt;|merge| DEV[(develop)]
     DEV --&gt; REL[(release)]
     REL --&gt;|approvazione del PO| MAIN[(main)]
 </code></pre></details></figure>
 <ul>
 <li>Il PO parla con due agenti: <strong>Organizzatore</strong> e <strong>Pianificatore</strong>. Le altre figure sono subagent nascosti dal selettore degli agenti (<code>user-invocable: false</code>).</li>
-<li>L'Organizzatore chiama Tester, Sviluppatore, Operativo, Scrittore e i due Reviewer. Il Pianificatore chiama solo l'Avversario.</li>
+<li>L'Organizzatore chiama Tester, Sviluppatore, Operativo, Scrittore, i due Reviewer e il Cercatore. Il Pianificatore chiama l'Avversario e il Cercatore.</li>
+<li>Solo il Cercatore usa internet. Il Cercatore non modifica file e non esegue comandi.</li>
 <li>Le figure comunicano con i file del repository: specifiche, backlog, test, codice, log. Chi chiama un subagent scrive un compito completo: il subagent lavora in un contesto separato (<a href="Sources.html#s-165">S-165</a>).</li>
 </ul>
 <p><strong>Copilot come harness.</strong> VS Code e l'harness Copilot eseguono il ciclo dell'agente: leggono il file <code>.agent.md</code>, offrono gli strumenti (<code>read</code>, <code>edit</code>, <code>execute</code>…), applicano i permessi. Il modello scelto riceve il prompt tramite l'API del suo provider, con la chiave del PO (<a href="06-BYOK-GitHub-Copilot.html#1-che-cosè-il-byok">06 §1</a>).</p>
@@ -281,7 +307,7 @@ I file del team sono in <a href="../../examples/agents/README.md"><code>examples
 <td>0,0699 / 1,40</td>
 </tr>
 <tr>
-<td>Scrittore</td>
+<td>Scrittore, Cercatore</td>
 <td>Anthropic</td>
 <td><code>claude-haiku-5-5</code></td>
 <td>default</td>
@@ -309,7 +335,7 @@ I file del team sono in <a href="../../examples/agents/README.md"><code>examples
 <li>L'Avversario usa un provider diverso dal Pianificatore, con effort <code>low</code>: il ragionamento limitato evita più di 2 alternative.</li>
 <li><code>gpt-5.4-mini</code> non è più la scelta: è della generazione precedente e costa più di <code>gpt-6-luna</code>. <code>gpt-5.3-codex</code> è deprecato (<a href="Decisions.html#d-037">D-037</a>).</li>
 <li><code>qwen/qwen3-coder</code> ha un punteggio basso nelle chiamate agli strumenti (46,2% su τ²-Bench): il Reviewer antagonista usa <code>qwen/qwen3.5-397b-a17b</code> (79,1%) con i provider che hanno meno errori di tool call (<a href="Review-Perplexity.html#p-12--modelli-e-prezzi-per-il-team-di-agenti">P-12</a>).</li>
-<li>Anthropic presenta <code>claude-haiku-5-5</code> per classificazione, estrazione e instradamento, non per il coding: per questo resta solo allo Scrittore.</li>
+<li>Anthropic presenta <code>claude-haiku-5-5</code> per classificazione, estrazione e instradamento, non per il coding: per questo resta allo Scrittore e al Cercatore, che leggono e riassumono.</li>
 <li>I file di esempio in <code>examples/vscode/</code> e <code>examples/litellm/</code> contengono il modello del Reviewer antagonista. Aggiungi gli altri modelli del team dal Language Models editor (<a href="06-BYOK-GitHub-Copilot.html#4-provider-e-custom-endpoint">06 §4</a>).</li>
 </ul>
 <h2 id="5-vincoli-tecnici-di-vs-code">5. Vincoli tecnici di VS Code</h2>
@@ -400,6 +426,7 @@ I file del team sono in <a href="../../examples/agents/README.md"><code>examples
 </tr>
 </tbody>
 </table>
+<p><strong>Server MCP per il Cercatore.</strong> Il file <code>.agent.md</code> nomina gli strumenti di un server MCP con <code>&lt;nome del server&gt;/*</code>; gli strumenti sono disponibili solo se il server è nella sessione (<a href="Sources.html#s-072">S-072</a>). Il template contiene <code>.vscode/mcp.json</code> con il server <code>microsoft-learn</code> (<code>https://learn.microsoft.com/api/mcp</code>). In Copilot CLI il server si installa con <code>/plugin install microsoftdocs/mcp</code> (<a href="Sources.html#s-188">S-188</a>). ⚠️ Da provare: il nome del server e la sua presenza nelle sessioni dell'harness Copilot.</p>
 <p><strong>Reasoning effort con un modello BYOK.</strong> Il campo <code>reasoning-effort</code> del file <code>.agent.md</code> ha effetto solo se il modello dichiara <code>supportsReasoningEffort</code> (e, se serve, <code>reasoningEffortFormat</code>) in <code>chatLanguageModels.json</code> (<a href="Sources.html#s-071">S-071</a>, <a href="06-BYOK-GitHub-Copilot.html#5-il-file-chatlanguagemodelsjson">06 §5</a>).</p>
 <p><strong>Differenze per l'harness Local (riserva).</strong> Nei file <code>.agent.md</code>:</p>
 <ul>
@@ -426,12 +453,15 @@ specify extension add git
 <pre class="code"><code class="language-powershell">Copy-Item -Recurse -Force examples\agents\* C:\percorso\del\progetto\
 Copy-Item -Recurse -Force examples\agents\.github C:\percorso\del\progetto\
 Copy-Item -Recurse -Force examples\agents\.specify C:\percorso\del\progetto\
+Copy-Item -Recurse -Force examples\agents\.vscode C:\percorso\del\progetto\
 Copy-Item -Force examples\agents\.gitignore C:\percorso\del\progetto\
 </code></pre>
 <ul>
 <li class="task"><input type="checkbox" disabled> Se il progetto ha già un <code>.gitignore</code>, aggiungi la riga <code>.team/</code> invece di copiare il file.</li>
 <li class="task"><input type="checkbox" disabled> Sostituisci <code>@release-approver</code> in <code>.github/CODEOWNERS</code> con l'utente GitHub del PO.</li>
 <li class="task"><input type="checkbox" disabled> Attiva le due impostazioni dell'harness Copilot (§5).</li>
+<li class="task"><input type="checkbox" disabled> Leggi <code>.vscode/mcp.json</code> e avvia il server MCP <code>microsoft-learn</code> per il Cercatore (<a href="03-Security-Best-Practices.html#3-github-copilot-in-vs-code">03 §3</a>).</li>
+<li class="task"><input type="checkbox" disabled> Copia <code>docs/team/templates/decisions.md</code> in <code>docs/backlog/decisions.md</code> e scrivi nella ADR-001 la versione di Spec Kit (<code>specify version</code>).</li>
 <li class="task"><input type="checkbox" disabled> Apri il progetto in VS Code. Per ogni file in <code>.github/agents/</code> controlla il campo <code>model</code>: cancella l'ID e accetta l'ID che il completamento propone per il tuo modello BYOK ⚠️.</li>
 <li class="task"><input type="checkbox" disabled> Applica la baseline di sicurezza (<a href="03-Security-Best-Practices.html#7-baseline-di-configurazione">03 §7</a>).</li>
 <li class="task"><input type="checkbox" disabled> Apri la PR verso <code>develop</code> e uniscila. Porta <code>ci.yml</code> e <code>CODEOWNERS</code> anche su <code>main</code>.</li>
@@ -443,6 +473,7 @@ Copy-Item -Force examples\agents\.gitignore C:\percorso\del\progetto\
 <h3 id="71-pianificazione">7.1 Pianificazione</h3>
 <ul>
 <li class="task"><input type="checkbox" disabled> Seleziona l'agente <strong>Pianificatore</strong> e descrivi l'esigenza.</li>
+<li class="task"><input type="checkbox" disabled> Il Pianificatore controlla la versione di Spec Kit. Se esiste una versione più recente ti chiede se aggiornare: con il tuo sì scrive una ADR che sostituisce la ADR della versione precedente, e tu esegui il comando di aggiornamento (<a href="Decisions.html#d-044">D-044</a>).</li>
 <li class="task"><input type="checkbox" disabled> Rispondi alle domande. Per le scelte importanti il Pianificatore presenta il what-if dell'Avversario.</li>
 <li class="task"><input type="checkbox" disabled> Di' al Pianificatore quando le scelte sono complete. Il Pianificatore pianifica una Feature alla volta: crea il ramo <code>feature/&lt;NNN&gt;-&lt;slug&gt;</code> da <code>develop</code>, scrive <code>specs/</code>, <code>docs/backlog/</code> e aggiorna <code>docs/team/writing-rules.md</code> su quel ramo. La pianificazione arriva in <code>develop</code> con la PR della Feature.</li>
 <li class="task"><input type="checkbox" disabled> Leggi il backlog. Controlla i criteri di accettazione dei Task e la Definition of Done di ogni <code>epic.md</code> e <code>feature.md</code>. Approva o chiedi modifiche.</li>
@@ -452,7 +483,8 @@ Copy-Item -Force examples\agents\.gitignore C:\percorso\del\progetto\
 <li class="task"><input type="checkbox" disabled> Seleziona l'agente <strong>Organizzatore</strong> e chiedi di sviluppare la Feature (es. <code>E01-F01</code>).</li>
 <li class="task"><input type="checkbox" disabled> Per ogni task l'Organizzatore chiama, in ordine: Tester (<em>red</em>), Sviluppatore o Operativo (<em>green</em> e <em>refactor</em>), Scrittore.</li>
 <li class="task"><input type="checkbox" disabled> L'Organizzatore apre la PR verso <code>develop</code>, compila le evidenze della Definition of Done e chiama i due Reviewer.</li>
-<li class="task"><input type="checkbox" disabled> Se i due Reviewer approvano e le voci da DoD-F1 a DoD-F7 sono soddisfatte, l'Organizzatore unisce la PR, registra DoD-F8 e DoD-F9 e ti presenta il riepilogo con le evidenze.</li>
+<li class="task"><input type="checkbox" disabled> Se i due Reviewer approvano, l'Organizzatore ti presenta la PR con le evidenze. Leggi la PR e approvala su GitHub: senza la tua approvazione GitHub rifiuta il merge.</li>
+<li class="task"><input type="checkbox" disabled> Dopo la tua approvazione l'Organizzatore unisce la PR, registra DoD-F8 e DoD-F9 e ti presenta il riepilogo.</li>
 </ul>
 <h3 id="73-release">7.3 Release</h3>
 <ul>
@@ -565,6 +597,12 @@ Copy-Item -Force examples\agents\.gitignore C:\percorso\del\progetto\
 <td><a href="Sources.html#s-172">S-172</a></td>
 </tr>
 <tr>
+<td>Ruleset <code>develop-approval</code></td>
+<td><code>.github/rulesets/develop-approval.json</code></td>
+<td>1 approvazione di un <em>code owner</em> per <code>develop</code>, nessun bypass</td>
+<td><a href="Sources.html#s-172">S-172</a></td>
+</tr>
+<tr>
 <td><code>CODEOWNERS</code></td>
 <td><code>.github/CODEOWNERS</code></td>
 <td>Solo il PO: un ruleset non può nominare un utente</td>
@@ -587,11 +625,68 @@ Copy-Item -Force examples\agents\.gitignore C:\percorso\del\progetto\
 <ul>
 <li><code>gh pr merge --admin</code> usa i privilegi di amministratore per unire una PR che non rispetta i requisiti (<a href="Sources.html#s-175">S-175</a>). Per questo l'agente non usa il token del PO.</li>
 <li><strong>Identità separata.</strong> L'Organizzatore usa una GitHub App o un account di servizio con i soli permessi <em>Contents: write</em> e <em>Pull requests: write</em>, senza <em>Administration</em>, senza <em>Workflows</em> e fuori dalla lista di bypass (<a href="Sources.html#s-177">S-177</a>). Il PO è l'unico code owner.</li>
-<li><strong>Controlli di stato e workflow.</strong> <code>ci.yml</code> gira dal ramo della PR: chi può modificare il workflow può rendere verdi i controlli. Senza il permesso <em>Workflows</em> l'agente non può modificare <code>.github/workflows/</code>. Resta il rischio di test modificati in una PR verso <code>develop</code>, che non richiede approvazioni: il Reviewer antagonista lo controlla (<a href="Decisions.html#d-043">D-043</a>).</li>
+<li><strong>Controlli di stato e workflow.</strong> <code>ci.yml</code> gira dal ramo della PR: chi può modificare il workflow o i test può rendere verdi i controlli. Due difese: l'identità dell'agente non ha il permesso <em>Workflows</em>, e ogni PR verso <code>develop</code> richiede l'approvazione del PO. Il PO ha rinunciato al merge automatico per questo motivo (<a href="Decisions.html#d-043">D-043</a>).</li>
 <li>Il caso svolto <a href="../../examples/speckit-ruleset/README.md"><code>examples/speckit-ruleset/</code></a> contiene la specifica, il piano e i test che verificano il rifiuto di <code>--admin</code>.</li>
-<li>⚠️ Niente di questo è stato provato su GitHub. Con il piano Free i ruleset funzionano solo nei repository pubblici; per i repository privati servono i piani Pro, Team o Enterprise Cloud (<a href="Sources.html#s-171">S-171</a>). Il bypass di un team richiede un'organizzazione.</li>
+<li>⚠️ Niente di questo è stato provato su GitHub.</li>
 </ul>
-<h3 id="92-regola-di-qualità-di-main">9.2 Regola di qualità di <code>main</code></h3>
+<h3 id="92-piani-github-e-configurazione-free">9.2 Piani GitHub e configurazione Free</h3>
+<p>I ruleset e i <em>code owner</em> dipendono dal piano (<a href="Sources.html#s-171">S-171</a>, <a href="Sources.html#s-189">S-189</a>, <a href="Decisions.html#d-045">D-045</a>).</p>
+<table>
+<thead>
+<tr>
+<th>Caso</th>
+<th>Ruleset</th>
+<th>Code owner</th>
+<th>Team di emergenza</th>
+<th>Configurazione</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Free, account personale, repository <strong>pubblico</strong></td>
+<td>Sì</td>
+<td>Sì</td>
+<td>No</td>
+<td><code>Set-Rulesets.ps1 -WithoutEmergencyTeam</code></td>
+</tr>
+<tr>
+<td>Free, organizzazione, repository <strong>pubblico</strong></td>
+<td>Sì</td>
+<td>Sì</td>
+<td>Sì ⚠️</td>
+<td>Completa</td>
+</tr>
+<tr>
+<td>Free, repository <strong>privato</strong></td>
+<td>No</td>
+<td>No</td>
+<td>—</td>
+<td>Nessuna protezione di GitHub</td>
+</tr>
+<tr>
+<td>Pro, account personale, repository privato</td>
+<td>Sì</td>
+<td>Sì</td>
+<td>No</td>
+<td><code>Set-Rulesets.ps1 -WithoutEmergencyTeam</code></td>
+</tr>
+<tr>
+<td>Team o Enterprise Cloud, repository privato</td>
+<td>Sì</td>
+<td>Sì</td>
+<td>Sì</td>
+<td>Completa</td>
+</tr>
+</tbody>
+</table>
+<p>Limiti del piano Free rispetto a Pro e Team:</p>
+<ul>
+<li>nei repository privati GitHub non applica ruleset, rami protetti, <em>code owner</em> e revisori obbligatori: le regole del team restano solo istruzioni;</li>
+<li>un account personale non ha team: non c'è un sostituto di emergenza, e i revisori per team non sono disponibili (<a href="Sources.html#s-172">S-172</a>);</li>
+<li>2.000 minuti di GitHub Actions al mese per i repository privati, contro 3.000 di Pro e Team.</li>
+</ul>
+<p>Con il piano Free usa un repository <strong>pubblico</strong>: le protezioni funzionano. Il codice è visibile a tutti: non usarlo per codice riservato.</p>
+<h3 id="93-regola-di-qualità-di-main">9.3 Regola di qualità di <code>main</code></h3>
 <p>Obiettivo del PO: gli artefatti prodotti da <code>main</code> non contengono eccezioni non gestite e non si fermano per un'anomalia prevedibile.</p>
 <p>Nessuna pratica garantisce che un processo non termini mai: l'evento <code>AppDomain.UnhandledException</code> notifica l'errore, non lo annulla (<a href="Sources.html#s-179">S-179</a>, P-13). Il team applica quattro controlli:</p>
 <ol>
@@ -605,8 +700,9 @@ Copy-Item -Force examples\agents\.gitignore C:\percorso\del\progetto\
 <li><strong>Privilegio minimo.</strong> Ogni figura ha solo gli strumenti necessari: i Reviewer e l'Avversario leggono soltanto; il Pianificatore usa il terminale solo per Spec Kit e per il ramo della pianificazione; solo l'Organizzatore usa <code>gh</code> per le PR (<a href="03-Security-Best-Practices.html#3-github-copilot-in-vs-code">03 §3</a>).</li>
 <li><strong>Segreti.</strong> Le istruzioni di ogni figura vietano di leggere <code>.env</code>, chiavi e token. Mantieni attiva la sandbox dell'agente (<a href="03-Security-Best-Practices.html#7-baseline-di-configurazione">03 §7</a>).</li>
 <li><strong>Codice verso i provider.</strong> Con il BYOK il codice del progetto va ai provider dei modelli. Tre figure usano OpenRouter (Tester e i due Reviewer): configura i <em>guardrail</em> dell'account (provider permessi, nessuna conservazione dei dati) prima di usare il team su codice riservato (<a href="Sources.html#s-115">S-115</a>, <a href="Sources.html#s-151">S-151</a>). <code>allow_fallbacks</code> vale solo nella singola richiesta (P-12).</li>
-<li><strong>Merge.</strong> L'Organizzatore unisce solo in <code>develop</code>. I ruleset e l'identità separata impediscono il merge in <code>main</code> senza l'approvazione del PO (§9.1).</li>
-<li><strong>Prompt injection.</strong> Un file del repository o una pagina web possono contenere istruzioni per l'agente. Nessuna figura ha lo strumento <code>web</code>: il Pianificatore ha <code>execute</code> per gli script di Spec Kit, e un agente con <code>web</code> ed <code>execute</code> insieme può eseguire istruzioni lette da una pagina (<a href="Decisions.html#d-043">D-043</a>, <a href="04-Security-Review-OWASP-ISO27001.html">04</a>).</li>
+<li><strong>Merge.</strong> L'Organizzatore unisce solo in <code>develop</code>, e solo dopo l'approvazione del PO. I ruleset e l'identità separata impediscono ogni merge in <code>develop</code> e in <code>main</code> senza l'approvazione del PO (§9.1).</li>
+<li><strong>Prompt injection.</strong> Un file del repository o una pagina web possono contenere istruzioni per l'agente. Solo il Cercatore ha lo strumento <code>web</code>, e non ha <code>edit</code> né <code>execute</code>: un'istruzione letta in una pagina non può diventare un comando o una modifica. Chi riceve la sua risposta la tratta come un dato. Le ricerche non devono contenere codice o nomi riservati (<a href="Decisions.html#d-043">D-043</a>, <a href="04-Security-Review-OWASP-ISO27001.html">04</a>).</li>
+<li><strong>Server MCP.</strong> <code>.vscode/mcp.json</code> del template aggiunge il server remoto <code>microsoft-learn</code>. Leggi il file prima di concedere la fiducia alla cartella (<a href="03-Security-Best-Practices.html#3-github-copilot-in-vs-code">03 §3</a>).</li>
 </ul>
 <h2 id="11-punti-da-provare">11. Punti da provare</h2>
 <ul>
@@ -614,6 +710,8 @@ Copy-Item -Force examples\agents\.gitignore C:\percorso\del\progetto\
 <li class="task"><input type="checkbox" disabled> ⚠️ Formato dell'ID nel campo <code>model</code> per un modello BYOK nell'harness Copilot.</li>
 <li class="task"><input type="checkbox" disabled> ⚠️ <code>chat.agentHost.byokModels.enabled</code>: i subagent usano il modello del loro file? Il provider OpenRouter funziona nell'Agent Host?</li>
 <li class="task"><input type="checkbox" disabled> ⚠️ <code>github.copilot.chat.cli.customAgents.enabled</code>: nome e default dell'impostazione nella tua versione di VS Code.</li>
+<li class="task"><input type="checkbox" disabled> ⚠️ Server MCP <code>microsoft-learn</code>: nome del server, strumenti <code>microsoft-learn/*</code> nel Cercatore, presenza nelle sessioni dell'harness Copilot.</li>
+<li class="task"><input type="checkbox" disabled> ⚠️ Bypass di un team in un'organizzazione con piano Free.</li>
 <li class="task"><input type="checkbox" disabled> ⚠️ Controllo del costo dei subagent con modelli BYOK.</li>
 <li class="task"><input type="checkbox" disabled> ⚠️ <code>reasoning-effort</code> con <code>supportsReasoningEffort</code> (<code>high</code> per il Pianificatore, <code>low</code> per l'Avversario).</li>
 <li class="task"><input type="checkbox" disabled> ⚠️ <code>modelOptions.provider</code> in <code>chatLanguageModels.native.json</code>: VS Code manda il campo a OpenRouter?</li>
