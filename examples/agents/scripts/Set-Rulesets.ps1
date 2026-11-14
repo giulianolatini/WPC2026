@@ -39,9 +39,10 @@ foreach ($file in Get-ChildItem -Path $RulesetDirectory -Filter '*.json') {
         if ($actor.actor_type -eq 'Team' -and $actor.actor_id -eq 0) { $actor.actor_id = $teamId }
     }
 
-    $body = New-TemporaryFile
+    # API .NET per il file temporaneo: New-TemporaryFile, Set-Content e Remove-Item non fanno nulla con -WhatIf.
+    $body = [System.IO.Path]::GetTempFileName()
     try {
-        $ruleset | ConvertTo-Json -Depth 10 | Set-Content -Path $body -Encoding utf8
+        [System.IO.File]::WriteAllText($body, ($ruleset | ConvertTo-Json -Depth 10))
         $match = $existing | Where-Object name -EQ $ruleset.name | Select-Object -First 1
 
         if ($match) {
@@ -56,7 +57,7 @@ foreach ($file in Get-ChildItem -Path $RulesetDirectory -Filter '*.json') {
         }
     }
     finally {
-        Remove-Item $body -ErrorAction SilentlyContinue
+        [System.IO.File]::Delete($body)
     }
 }
 
