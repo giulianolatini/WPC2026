@@ -435,7 +435,7 @@ Copy-Item -Force examples\agents\.gitignore C:\percorso\del\progetto\
 <li class="task"><input type="checkbox" disabled> Apri il progetto in VS Code. Per ogni file in <code>.github/agents/</code> controlla il campo <code>model</code>: cancella l'ID e accetta l'ID che il completamento propone per il tuo modello BYOK ⚠️.</li>
 <li class="task"><input type="checkbox" disabled> Applica la baseline di sicurezza (<a href="03-Security-Best-Practices.html#7-baseline-di-configurazione">03 §7</a>).</li>
 <li class="task"><input type="checkbox" disabled> Apri la PR verso <code>develop</code> e uniscila. Porta <code>ci.yml</code> e <code>CODEOWNERS</code> anche su <code>main</code>.</li>
-<li class="task"><input type="checkbox" disabled> Dopo la prima esecuzione verde di <code>ci.yml</code>, applica i ruleset (§9). ⚠️ <code>ci.yml</code> richiede una soluzione .NET nella radice del repository.</li>
+<li class="task"><input type="checkbox" disabled> Dopo la prima esecuzione verde di <code>ci.yml</code>, applica i ruleset (§9). ⚠️ <code>ci.yml</code> richiede una soluzione .NET nella radice del repository e un test Pester in <code>tests/</code>: il passo S-916 del <a href="../index.html">runbook</a> crea una soluzione minima.</li>
 </ul>
 <p><strong>Esito atteso:</strong> il selettore degli agenti mostra <strong>Organizzatore</strong> e <strong>Pianificatore</strong>. Le altre figure non compaiono nel selettore.</p>
 <h2 id="7-uso-del-team">7. Uso del team</h2>
