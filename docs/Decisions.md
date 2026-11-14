@@ -719,7 +719,7 @@ L'opzione 3 resta possibile: S-402 e S-403 sono «Non applicabile» e S-404 scri
 
 **Razionale.** Il costo segue il ragionamento richiesto. Due provider diversi per Pianificatore e Avversario, e due modelli diversi per i Reviewer, danno punti di vista indipendenti. OpenAI non ha modelli «Codex» correnti: le figure di codice usano i modelli generali indicati per il coding.
 
-**Conseguenze.** ⚠️ Da verificare con P-12: ID e prezzi dei modelli OpenAI e OpenRouter. I diff delle PR vanno a provider scelti da OpenRouter: servono i *guardrail* per codice riservato ([05 §9](05-Team-Agenti.md#10-sicurezza)). Un cambio di modello modifica solo il campo `model` del file della figura.
+**Conseguenze.** ⚠️ Da verificare con P-12: ID e prezzi dei modelli OpenAI e OpenRouter. I diff delle PR vanno a provider scelti da OpenRouter: servono i *guardrail* per codice riservato ([05 §10](05-Team-Agenti.md#10-sicurezza)). Un cambio di modello modifica solo il campo `model` del file della figura.
 
 **Fonti.** [S-040](Sources.md#s-040), [S-102](Sources.md#s-102), [S-166](Sources.md#s-166), [S-072](Sources.md#s-072).
 
