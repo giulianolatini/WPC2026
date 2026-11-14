@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="it" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="generator" content="tools/build_site.py — non modificare a mano">
+<title>06-BYOK-GitHub-Copilot — WPC2026</title>
+<link rel="stylesheet" href="../assets/fonts.css">
+<link rel="stylesheet" href="../assets/vendor/highlight/github.min.css" id="hl-light">
+<link rel="stylesheet" href="../assets/vendor/highlight/github-dark.min.css" id="hl-dark" disabled>
+<link rel="stylesheet" href="../assets/styles.css">
+<script src="../assets/vendor/mermaid/mermaid.min.js"></script>
+<script>try{var p=JSON.parse(localStorage.getItem('wpc2026.prefs')||'{}');var t=p.theme;if(t!=='light'&&t!=='dark')t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body>
+<div class="topbar">
+  <h1><a href="../index.html" style="color:inherit;text-decoration:none">WPC2026</a> <span class="ver">06-BYOK-GitHub-Copilot</span></h1>
+  <label>Tema <select id="pref-theme"><option value="auto">automatico</option><option value="light">chiaro</option><option value="dark">scuro</option></select></label>
+  <label>Testo <select id="pref-body"></select></label>
+  <label>Codice <select id="pref-code"></select></label>
+</div>
+<nav class="docnav"><a href="../index.html">← Runbook</a><ul><li><a href="01-Installazione.html">01-Installazione</a></li><li><a href="02-Configurazione-Copilot.html">02-Configurazione-Copilot</a></li><li><a href="03-Security-Best-Practices.html">03-Security-Best-Practices</a></li><li><a href="04-Security-Review-OWASP-ISO27001.html">04-Security-Review-OWASP-ISO27001</a></li><li><a href="05-Team-Agenti.html">05-Team-Agenti</a></li><li><a href="06-BYOK-GitHub-Copilot.html">06-BYOK-GitHub-Copilot</a></li><li><a href="07-LiteLLM-Introduzione.html">07-LiteLLM-Introduzione</a></li><li><a href="Decisions.html">Decisions</a></li><li><a href="Sources.html">Sources</a></li><li><a href="Review-Perplexity.html">Review-Perplexity</a></li></ul></nav><article class="doc"><h1 id="06--byok-in-github-copilot">06 — BYOK in GitHub Copilot</h1>
+<p>Questo documento descrive in dettaglio il concetto di <em>Bring Your Own Key</em> (BYOK) in GitHub Copilot.
+La procedura di configurazione è nel documento <a href="02-Configurazione-Copilot.html">02</a>. L'uso del BYOK con il team di agenti è nel documento <a href="05-Team-Agenti.html">05</a>.</p>
+<h2 id="indice">Indice</h2>
+<ol>
+<li><a href="#1-che-cosè-il-byok">Che cos'è il BYOK</a></li>
+<li><a href="#2-i-due-meccanismi-byok-locale-e-byok-enterprise">I due meccanismi: BYOK locale e BYOK enterprise</a></li>
+<li><a href="#3-cosa-usa-il-modello-byok-e-cosa-no">Cosa usa il modello BYOK e cosa no</a></li>
+<li><a href="#4-provider-e-custom-endpoint">Provider e Custom Endpoint</a></li>
+<li><a href="#5-il-file-chatlanguagemodelsjson">Il file <code>chatLanguageModels.json</code></a></li>
+<li><a href="#6-chiavi-api">Chiavi API</a></li>
+<li><a href="#7-byok-e-harness">BYOK e harness</a></li>
+<li><a href="#8-policy-piani-e-fatturazione">Policy, piani e fatturazione</a></li>
+<li><a href="#9-limiti-e-rischi">Limiti e rischi</a></li>
+<li><a href="#10-il-byok-nel-team-di-agenti">Il BYOK nel team di agenti</a></li>
+<li><a href="#11-lista-di-controllo">Lista di controllo</a></li>
+</ol>
+<h2 id="1-che-cosè-il-byok">1. Che cos'è il BYOK</h2>
+<p>Con il BYOK usi GitHub Copilot con un modello che scegli tu: un modello di un provider esterno o un modello sul tuo computer (<a href="Sources.html#s-015">S-015</a>).
+In VS Code il BYOK collega la chat a un provider con la tua chiave API o il tuo endpoint; l'esperienza della chat e gli strumenti restano quelli di VS Code (<a href="Sources.html#s-071">S-071</a>).</p>
+<p>Due parti lavorano insieme:</p>
+<table>
+<thead>
+<tr>
+<th>Parte</th>
+<th>Chi la fornisce</th>
+<th>Cosa fa</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Harness</strong></td>
+<td>VS Code e GitHub Copilot</td>
+<td>Esegue il ciclo dell'agente: prepara il prompt, offre gli strumenti (lettura, modifica, terminale), applica i permessi, mostra il risultato</td>
+</tr>
+<tr>
+<td><strong>Modello</strong></td>
+<td>Il provider che scegli</td>
+<td>Riceve il prompt tramite la sua API e restituisce il testo o le chiamate agli strumenti</td>
+</tr>
+</tbody>
+</table>
+<p>Senza BYOK il modello passa dal servizio GitHub Copilot. Con il BYOK la richiesta di inferenza va all'API del provider, con la tua chiave.</p>
+<figure class="mermaid-wrap"><pre class="mermaid" data-src="sequenceDiagram
+    participant U as Utente
+    participant H as VS Code e harness Copilot
+    participant P as API del provider (chiave propria)
+    U-&gt;&gt;H: prompt nella chat
+    H-&gt;&gt;P: richiesta con prompt, contesto e definizione degli strumenti
+    P--&gt;&gt;H: risposta o chiamata a uno strumento
+    H-&gt;&gt;H: esegue lo strumento (file, terminale) con i permessi dell&#x27;utente
+    H-&gt;&gt;P: risultato dello strumento
+    P--&gt;&gt;H: risposta finale
+    H--&gt;&gt;U: risposta e modifiche proposte
+">sequenceDiagram
+    participant U as Utente
+    participant H as VS Code e harness Copilot
+    participant P as API del provider (chiave propria)
+    U-&gt;&gt;H: prompt nella chat
+    H-&gt;&gt;P: richiesta con prompt, contesto e definizione degli strumenti
+    P--&gt;&gt;H: risposta o chiamata a uno strumento
+    H-&gt;&gt;H: esegue lo strumento (file, terminale) con i permessi dell'utente
+    H-&gt;&gt;P: risultato dello strumento
+    P--&gt;&gt;H: risposta finale
+    H--&gt;&gt;U: risposta e modifiche proposte
+</pre><details class="mermaid-src"><summary>Sorgente Mermaid</summary><pre class="code"><code class="language-plaintext">sequenceDiagram
+    participant U as Utente
+    participant H as VS Code e harness Copilot
+    participant P as API del provider (chiave propria)
+    U-&gt;&gt;H: prompt nella chat
+    H-&gt;&gt;P: richiesta con prompt, contesto e definizione degli strumenti
+    P--&gt;&gt;H: risposta o chiamata a uno strumento
+    H-&gt;&gt;H: esegue lo strumento (file, terminale) con i permessi dell'utente
+    H-&gt;&gt;P: risultato dello strumento
+    P--&gt;&gt;H: risposta finale
+    H--&gt;&gt;U: risposta e modifiche proposte
+</code></pre></details></figure>
+<h2 id="2-i-due-meccanismi-byok-locale-e-byok-enterprise">2. I due meccanismi: BYOK locale e BYOK enterprise</h2>
+<p>GitHub distingue due meccanismi separati (<a href="Sources.html#s-015">S-015</a>).</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>BYOK locale</th>
+<th>BYOK enterprise (public preview)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Chi configura</td>
+<td>Il singolo utente, nel suo client</td>
+<td>Il proprietario dell'enterprise; l'organizzazione, se la policy <em>Enable custom models</em> lo permette</td>
+</tr>
+<tr>
+<td>Dove sta la chiave</td>
+<td>Sul client: la chiave resta lato client</td>
+<td>Sul server GitHub</td>
+</tr>
+<tr>
+<td>Chi usa il modello</td>
+<td>Solo l'utente che lo ha configurato</td>
+<td>Gli utenti con piano Copilot Business o Enterprise, dal selettore dei modelli</td>
+</tr>
+<tr>
+<td>Percorso della richiesta</td>
+<td>Dal client al provider</td>
+<td>Dalla Copilot API al provider</td>
+</tr>
+<tr>
+<td>Client</td>
+<td>VS Code, JetBrains, Xcode, Copilot CLI, GitHub Copilot app, Copilot SDK</td>
+<td>Copilot Chat, Copilot CLI, IDE</td>
+</tr>
+<tr>
+<td>Requisiti</td>
+<td>Non dipende dalla Copilot API: adatto anche ad ambienti isolati</td>
+<td>Licenza Copilot e accesso a internet</td>
+</tr>
+</tbody>
+</table>
+<p>Questo repository usa il <strong>BYOK locale</strong>. Il BYOK enterprise è un'alternativa al gateway per le organizzazioni (<a href="02-Configurazione-Copilot.html#46-alternative-a-litellm">02 §4.6</a>).</p>
+<h2 id="3-cosa-usa-il-modello-byok-e-cosa-no">3. Cosa usa il modello BYOK e cosa no</h2>
+<table>
+<thead>
+<tr>
+<th>Funzione</th>
+<th>Usa il modello BYOK</th>
+<th>Nota</th>
+<th>Fonte</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Chat e agenti</td>
+<td>Sì</td>
+<td>Il modello deve supportare il <em>tool calling</em> per comparire in modalità agente</td>
+<td><a href="Sources.html#s-071">S-071</a></td>
+</tr>
+<tr>
+<td>Subagent e <em>custom agents</em></td>
+<td>Sì</td>
+<td>Campo <code>model</code> del file <code>.agent.md</code></td>
+<td><a href="Sources.html#s-072">S-072</a></td>
+</tr>
+<tr>
+<td>Compiti di utilità (titoli, sommari, messaggi di commit, descrizioni di PR, <em>intent detection</em>)</td>
+<td>Sì, se configurati</td>
+<td>Impostazioni <code>chat.utilityModel</code> e <code>chat.utilitySmallModel</code></td>
+<td><a href="Sources.html#s-071">S-071</a></td>
+</tr>
+<tr>
+<td>Sessioni dell'harness Copilot</td>
+<td>Sì, sperimentale</td>
+<td>Impostazione <code>chat.agentHost.byokModels.enabled</code></td>
+<td><a href="Sources.html#s-071">S-071</a></td>
+</tr>
+<tr>
+<td>Suggerimenti inline (completamento del codice)</td>
+<td><strong>No</strong></td>
+<td>Restano sul servizio GitHub Copilot</td>
+<td><a href="Sources.html#s-071">S-071</a></td>
+</tr>
+<tr>
+<td>Ricerca semantica e funzioni basate su <em>embedding</em></td>
+<td><strong>No</strong></td>
+<td>—</td>
+<td><a href="Sources.html#s-071">S-071</a></td>
+</tr>
+<tr>
+<td>Voice Mode</td>
+<td><strong>No</strong></td>
+<td>Usa una sua impostazione per la chiave</td>
+<td><a href="Sources.html#s-071">S-071</a></td>
+</tr>
+</tbody>
+</table>
+<p>Conseguenza: il BYOK non rende Copilot indipendente da GitHub per tutte le funzioni. Senza accesso GitHub mancano i suggerimenti inline e i modelli di utilità built-in.</p>
+<h2 id="4-provider-e-custom-endpoint">4. Provider e Custom Endpoint</h2>
+<p>Tre modi per aggiungere un modello (<a href="Sources.html#s-071">S-071</a>):</p>
+<ol>
+<li><strong>Provider built-in.</strong> La documentazione nomina Azure, Anthropic, Gemini, OpenAI «e altri»; OpenRouter è tra i provider built-in (<a href="Sources.html#s-070">S-070</a>). Il provider Ollama built-in è deprecato: usa l'estensione ufficiale.</li>
+<li><strong>Estensioni.</strong> Un'estensione aggiunge un provider, per esempio Hugging Face (<a href="Sources.html#s-048">S-048</a>).</li>
+<li><strong>Custom Endpoint.</strong> Un endpoint compatibile, per esempio un gateway LiteLLM (<a href="07-LiteLLM-Introduzione.html">07</a>).</li>
+</ol>
+<p>Il Custom Endpoint accetta tre tipi di API nel campo <code>apiType</code>:</p>
+<table>
+<thead>
+<tr>
+<th><code>apiType</code></th>
+<th>Formato</th>
+<th>Uso tipico</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>chat-completions</code> (default)</td>
+<td>OpenAI Chat Completions</td>
+<td>Endpoint compatibili OpenAI, OpenRouter, gateway</td>
+</tr>
+<tr>
+<td><code>responses</code></td>
+<td>OpenAI Responses</td>
+<td>Modelli OpenAI recenti</td>
+</tr>
+<tr>
+<td><code>messages</code></td>
+<td>Anthropic Messages</td>
+<td>Modelli Claude con <em>thinking</em> e strumenti (<a href="Decisions.html#d-019">D-019</a>)</td>
+</tr>
+</tbody>
+</table>
+<p><code>apiType</code> si imposta sul provider o sul modello: il valore del modello ha la precedenza.</p>
+<h2 id="5-il-file-chatlanguagemodelsjson">5. Il file <code>chatLanguageModels.json</code></h2>
+<p>Il Language Models editor scrive la configurazione in <code>chatLanguageModels.json</code>. Esempi: <a href="../../examples/vscode/chatLanguageModels.native.json"><code>examples/vscode/</code></a>.</p>
+<p><strong>Campi del provider:</strong> <code>vendor</code>, <code>name</code>, <code>models</code>; opzionali <code>apiKey</code>, <code>apiType</code>, <code>url</code>.</p>
+<p><strong>Campi del modello</strong> (<a href="Sources.html#s-071">S-071</a>):</p>
+<table>
+<thead>
+<tr>
+<th>Campo</th>
+<th>Significato</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>id</code></td>
+<td>Identificativo inviato all'API</td>
+</tr>
+<tr>
+<td><code>name</code></td>
+<td>Nome nel selettore dei modelli</td>
+</tr>
+<tr>
+<td><code>url</code></td>
+<td>URL completo dell'endpoint</td>
+</tr>
+<tr>
+<td><code>toolCalling</code>, <code>vision</code></td>
+<td>Capacità del modello</td>
+</tr>
+<tr>
+<td><code>maxInputTokens</code>, <code>maxOutputTokens</code></td>
+<td>Limiti; la somma non supera la finestra di contesto</td>
+</tr>
+<tr>
+<td><code>supportsReasoningEffort</code>, <code>reasoningEffortFormat</code></td>
+<td>Abilitano il controllo dell'<em>effort</em> di ragionamento e ne indicano il formato</td>
+</tr>
+<tr>
+<td><code>modelOptions</code></td>
+<td>Parametri della richiesta, per esempio <code>temperature</code></td>
+</tr>
+<tr>
+<td><code>requestHeaders</code></td>
+<td>Header HTTP aggiuntivi; gli header riservati sono ignorati</td>
+</tr>
+<tr>
+<td><code>statefulResponses</code></td>
+<td>Con <code>false</code> il client manda tutta la conversazione a ogni richiesta (server senza stato)</td>
+</tr>
+</tbody>
+</table>
+<pre class="code"><code class="language-jsonc">// Esempio: modello di un gateway locale con controllo dell'effort. La chiave arriva da un input, non dal file.
+{
+  &quot;vendor&quot;: &quot;customendpoint&quot;,
+  &quot;name&quot;: &quot;Gateway locale&quot;,
+  &quot;apiKey&quot;: &quot;${input:gatewayKey}&quot;,
+  &quot;models&quot;: [
+    {
+      &quot;id&quot;: &quot;claude-sonnet&quot;,
+      &quot;name&quot;: &quot;Gateway · Claude Sonnet&quot;,
+      &quot;url&quot;: &quot;http://localhost:4000/v1/messages&quot;,
+      &quot;apiType&quot;: &quot;messages&quot;,
+      &quot;toolCalling&quot;: true,
+      &quot;vision&quot;: true,
+      &quot;maxInputTokens&quot;: 180000,
+      &quot;maxOutputTokens&quot;: 16000,
+      &quot;supportsReasoningEffort&quot;: true
+    }
+  ]
+}
+</code></pre>
+<p>⚠️ L'esempio mostra i campi: i valori dei limiti e il comportamento di <code>supportsReasoningEffort</code> vanno provati con il tuo modello.</p>
+<h2 id="6-chiavi-api">6. Chiavi API</h2>
+<ul>
+<li>Nel BYOK locale le chiavi sono gestite solo dal client e non sono condivise con altri utenti (<a href="Sources.html#s-015">S-015</a>).</li>
+<li>Non scrivere la chiave in chiaro nel file: usa una variabile di input, per esempio <code>"apiKey": "${input:myApiKey}"</code> (<a href="Sources.html#s-071">S-071</a>).</li>
+<li>Ogni postazione ha le chiavi di ogni provider. Un gateway riduce le chiavi sul client a una sola (<a href="02-Configurazione-Copilot.html#41-quando-usare-un-gateway">02 §4.1</a>).</li>
+<li>Non mettere chiavi nel repository, nei file <code>.agent.md</code> o nelle evidenze (<a href="03-Security-Best-Practices.html">03</a>).</li>
+</ul>
+<h2 id="7-byok-e-harness">7. BYOK e harness</h2>
+<table>
+<thead>
+<tr>
+<th>Harness</th>
+<th>BYOK</th>
+<th>Accesso GitHub</th>
+<th>Stato</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Local</td>
+<td>Sì</td>
+<td>Non richiesto: il BYOK funziona senza accesso GitHub e senza piano Copilot</td>
+<td>Deprecato; rimozione a febbraio 2027 (<a href="Sources.html#s-068">S-068</a>)</td>
+</tr>
+<tr>
+<td>Copilot</td>
+<td>Sì, con <code>chat.agentHost.byokModels.enabled</code></td>
+<td>Vedi la documentazione degli account della finestra Agents</td>
+<td>BYOK sperimentale (<a href="Sources.html#s-071">S-071</a>)</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>Senza accesso GitHub imposta <code>chat.utilityModel</code> e <code>chat.utilitySmallModel</code> su un modello BYOK: i modelli di utilità built-in non sono disponibili.</li>
+<li>Un modello locale (per esempio con Ollama) lavora senza rete. Le funzioni che dipendono dal servizio GitHub Copilot non lavorano senza rete.</li>
+<li>I <em>custom agents</em> nell'harness Copilot richiedono un'altra impostazione (<a href="05-Team-Agenti.html#5-vincoli-tecnici-di-vs-code">05 §5</a>).</li>
+</ul>
+<h2 id="8-policy-piani-e-fatturazione">8. Policy, piani e fatturazione</h2>
+<ul>
+<li><strong>Piani individuali.</strong> Gli utenti con un piano individuale aggiungono i modelli BYOK senza una policy (<a href="Sources.html#s-071">S-071</a>).</li>
+<li><strong>Copilot Business ed Enterprise.</strong> La policy <em>Bring Your Own Language Model Key in VS Code</em> controlla il BYOK locale negli IDE. Le fonti non sono coerenti sul default: vedi <a href="02-Configurazione-Copilot.html#25-policy-per-copilot-business-ed-enterprise">02 §2.5</a> e <a href="Decisions.html#d-013">D-013</a>.</li>
+<li><strong>Fatturazione.</strong> Il BYOK locale non consuma crediti Copilot: il provider fattura le chiamate (<a href="Sources.html#s-018">S-018</a>). ⚠️ La pagina di VS Code sui modelli non descrive la fatturazione delle richieste BYOK.</li>
+<li><strong>Costi.</strong> Con il BYOK paghi ogni token: scegli il modello in base al compito (<a href="05-Team-Agenti.html#4-modelli-e-costi">05 §4</a>).</li>
+</ul>
+<h2 id="9-limiti-e-rischi">9. Limiti e rischi</h2>
+<table>
+<thead>
+<tr>
+<th>Limite o rischio</th>
+<th>Effetto</th>
+<th>Azione</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Un modello senza <em>tool calling</em> non compare in modalità agente</td>
+<td>L'agente non lo può usare</td>
+<td>Controlla <code>toolCalling</code> e la scheda del modello</td>
+</tr>
+<tr>
+<td>Il modello non compare subito</td>
+<td>—</td>
+<td>Riavvia VS Code (<a href="Sources.html#s-071">S-071</a>)</td>
+</tr>
+<tr>
+<td>Custom Endpoint in WSL, SSH, Dev Container</td>
+<td>Il modello può non essere selezionabile</td>
+<td>Issue aperta (<a href="Sources.html#s-077">S-077</a>)</td>
+</tr>
+<tr>
+<td>Il codice va al provider scelto</td>
+<td>Valgono le condizioni del provider su conservazione e uso dei dati</td>
+<td>Leggi le condizioni; con OpenRouter imposta provider permessi e nessuna conservazione (<a href="Sources.html#s-115">S-115</a>)</td>
+</tr>
+<tr>
+<td>Filtri e protezioni del servizio GitHub Copilot</td>
+<td>⚠️ La documentazione letta non dice quali filtri restano attivi con il BYOK</td>
+<td>Non contare su filtri del servizio; applica la baseline (<a href="03-Security-Best-Practices.html#7-baseline-di-configurazione">03 §7</a>)</td>
+</tr>
+<tr>
+<td><em>Content exclusion</em></td>
+<td>⚠️ Comportamento con il BYOK da verificare (<a href="03-Security-Best-Practices.html">03</a>)</td>
+<td>Non usare la content exclusion come unica protezione</td>
+</tr>
+<tr>
+<td>Qualità diversa tra modelli</td>
+<td>Un modello economico può sbagliare le chiamate agli strumenti</td>
+<td>Prova il modello sul compito reale (<a href="05-Team-Agenti.html#11-punti-da-provare">05 §11</a>)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="10-il-byok-nel-team-di-agenti">10. Il BYOK nel team di agenti</h2>
+<p>Il team del documento <a href="05-Team-Agenti.html">05</a> usa il BYOK per dare a ogni figura un modello diverso:</p>
+<ol>
+<li>il PO configura i modelli di Anthropic, OpenAI e OpenRouter nel Language Models editor;</li>
+<li>ogni file <code>.agent.md</code> indica il suo modello nel campo <code>model</code>;</li>
+<li>l'harness Copilot esegue l'agente e manda le richieste al provider del modello;</li>
+<li>il costo segue il compito: modello alto per il Pianificatore, modelli economici per le figure operative (<a href="Decisions.html#d-037">D-037</a>).</li>
+</ol>
+<p>Con un gateway LiteLLM il punto 1 cambia: VS Code conosce un solo endpoint e una sola chiave, e i nomi dei modelli sono alias del gateway (<a href="07-LiteLLM-Introduzione.html">07</a>).</p>
+<h2 id="11-lista-di-controllo">11. Lista di controllo</h2>
+<ul>
+<li class="task"><input type="checkbox" disabled> Il piano o la policy permette il BYOK locale.</li>
+<li class="task"><input type="checkbox" disabled> Ogni modello ha <code>toolCalling: true</code> se un agente lo usa.</li>
+<li class="task"><input type="checkbox" disabled> Nessuna chiave è scritta in chiaro in un file.</li>
+<li class="task"><input type="checkbox" disabled> I modelli di utilità sono configurati, se lavori senza accesso GitHub.</li>
+<li class="task"><input type="checkbox" disabled> <code>chat.agentHost.byokModels.enabled</code> è attivo, se usi l'harness Copilot.</li>
+<li class="task"><input type="checkbox" disabled> Hai letto le condizioni sui dati di ogni provider.</li>
+<li class="task"><input type="checkbox" disabled> Sai quali funzioni restano sul servizio GitHub Copilot (suggerimenti inline, ricerca semantica).</li>
+</ul></article>
+<script type="application/json" id="fonts-data">[
+  {
+    "id": "blexmono",
+    "label": "BlexMono Nerd Font (IBM Plex Mono)",
+    "mono": true,
+    "body": false
+  },
+  {
+    "id": "firacode",
+    "label": "FiraCode Nerd Font",
+    "mono": true,
+    "body": false
+  },
+  {
+    "id": "googlesanscode",
+    "label": "GoogleSansCode Nerd Font",
+    "mono": true,
+    "body": false
+  },
+  {
+    "id": "monoid",
+    "label": "Monoid Nerd Font",
+    "mono": true,
+    "body": false
+  },
+  {
+    "id": "opendyslexic",
+    "label": "OpenDyslexic Nerd Font",
+    "mono": true,
+    "body": true
+  },
+  {
+    "id": "saucecodepro",
+    "label": "SauceCodePro Nerd Font (Source Code Pro)",
+    "mono": true,
+    "body": false
+  },
+  {
+    "id": "ubuntusans",
+    "label": "UbuntuSans Nerd Font",
+    "mono": true,
+    "body": true
+  }
+]</script>
+<script src="../assets/vendor/highlight/highlight.min.js"></script>
+<script src="../assets/vendor/highlight/languages/bash.min.js"></script>
+<script src="../assets/vendor/highlight/languages/powershell.min.js"></script>
+<script src="../assets/vendor/highlight/languages/yaml.min.js"></script>
+<script src="../assets/vendor/highlight/languages/json.min.js"></script>
+<script src="../assets/vendor/highlight/languages/ini.min.js"></script>
+<script src="../assets/vendor/highlight/languages/dockerfile.min.js"></script>
+<script src="../assets/vendor/highlight/languages/plaintext.min.js"></script>
+<script src="../assets/common.js"></script>
+<script src="../assets/doc.js"></script>
+</body>
+</html>

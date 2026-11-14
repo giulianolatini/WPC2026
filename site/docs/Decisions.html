@@ -19,7 +19,7 @@
   <label>Testo <select id="pref-body"></select></label>
   <label>Codice <select id="pref-code"></select></label>
 </div>
-<nav class="docnav"><a href="../index.html">← Runbook</a><ul><li><a href="01-Installazione.html">01-Installazione</a></li><li><a href="02-Configurazione-Copilot.html">02-Configurazione-Copilot</a></li><li><a href="03-Security-Best-Practices.html">03-Security-Best-Practices</a></li><li><a href="04-Security-Review-OWASP-ISO27001.html">04-Security-Review-OWASP-ISO27001</a></li><li><a href="05-Team-Agenti.html">05-Team-Agenti</a></li><li><a href="Decisions.html">Decisions</a></li><li><a href="Sources.html">Sources</a></li><li><a href="Review-Perplexity.html">Review-Perplexity</a></li></ul></nav><article class="doc"><h1 id="decisions--registro-delle-decisioni">Decisions — Registro delle decisioni</h1>
+<nav class="docnav"><a href="../index.html">← Runbook</a><ul><li><a href="01-Installazione.html">01-Installazione</a></li><li><a href="02-Configurazione-Copilot.html">02-Configurazione-Copilot</a></li><li><a href="03-Security-Best-Practices.html">03-Security-Best-Practices</a></li><li><a href="04-Security-Review-OWASP-ISO27001.html">04-Security-Review-OWASP-ISO27001</a></li><li><a href="05-Team-Agenti.html">05-Team-Agenti</a></li><li><a href="06-BYOK-GitHub-Copilot.html">06-BYOK-GitHub-Copilot</a></li><li><a href="07-LiteLLM-Introduzione.html">07-LiteLLM-Introduzione</a></li><li><a href="Decisions.html">Decisions</a></li><li><a href="Sources.html">Sources</a></li><li><a href="Review-Perplexity.html">Review-Perplexity</a></li></ul></nav><article class="doc"><h1 id="decisions--registro-delle-decisioni">Decisions — Registro delle decisioni</h1>
 <p>Questo file è il registro cronologico delle decisioni del progetto WPC2026.
 Il formato segue il template ADR di Nygard, con una sezione <strong>Razionale</strong> esplicita (<a href="Sources.html#s-090">S-090</a>, <a href="Sources.html#s-091">S-091</a>).</p>
 <p><strong>Regole del registro</strong></p>
@@ -242,7 +242,7 @@ Il formato segue il template ADR di Nygard, con una sezione <strong>Razionale</s
 <td><a href="#d-034">D-034</a></td>
 <td>2026-11-14</td>
 <td>Team di agenti: modelli per figura (misto per ruolo)</td>
-<td>Accepted</td>
+<td>Superseded by D-037</td>
 </tr>
 <tr>
 <td><a href="#d-035">D-035</a></td>
@@ -254,6 +254,36 @@ Il formato segue il template ADR di Nygard, con una sezione <strong>Razionale</s
 <td><a href="#d-036">D-036</a></td>
 <td>2026-11-14</td>
 <td>Regole di scrittura originali ispirate ad ASD-STE100</td>
+<td>Accepted</td>
+</tr>
+<tr>
+<td><a href="#d-037">D-037</a></td>
+<td>2026-11-14</td>
+<td>Team di agenti: modelli per figura dopo la verifica P-12</td>
+<td>Accepted</td>
+</tr>
+<tr>
+<td><a href="#d-038">D-038</a></td>
+<td>2026-11-14</td>
+<td>Definition of Done per Epic e Feature; criteri di accettazione verificabili</td>
+<td>Accepted</td>
+</tr>
+<tr>
+<td><a href="#d-039">D-039</a></td>
+<td>2026-11-14</td>
+<td>Protezione di <code>main</code> e <code>develop</code>: due ruleset, CODEOWNERS, identità separata</td>
+<td>Accepted</td>
+</tr>
+<tr>
+<td><a href="#d-040">D-040</a></td>
+<td>2026-11-14</td>
+<td>Rami di Feature con il nome creato da Spec Kit</td>
+<td>Proposed</td>
+</tr>
+<tr>
+<td><a href="#d-041">D-041</a></td>
+<td>2026-11-14</td>
+<td>Due documenti nuovi: BYOK in GitHub Copilot e introduzione a LiteLLM</td>
 <td>Accepted</td>
 </tr>
 </tbody>
@@ -709,7 +739,7 @@ Il formato segue il template ADR di Nygard, con una sezione <strong>Razionale</s
 <p><a id="d-034"></a></p>
 <h2 id="d-034--team-di-agenti-modelli-per-figura-misto-per-ruolo">D-034 — Team di agenti: modelli per figura (misto per ruolo)</h2>
 <ul>
-<li><strong>Data:</strong> 2026-11-14 — <strong>Stato:</strong> Accepted — <strong>Decisore:</strong> PO (brainstorming del 2026-11-14)</li>
+<li><strong>Data:</strong> 2026-11-14 — <strong>Stato:</strong> Superseded by <a href="#d-037">D-037</a> — <strong>Decisore:</strong> PO (brainstorming del 2026-11-14)</li>
 </ul>
 <p><strong>Contesto.</strong> Il PO chiede modelli costosi per analisi e pianificazione e modelli economici per l'implementazione: Pianificatore alto con effort <code>high</code> o superiore; Organizzatore intermedio; Avversario medio con ragionamento limitato; figure operative e Reviewer medio/bassi; due modelli diversi per i Reviewer.</p>
 <p><strong>Opzioni considerate.</strong> (1) Misto per ruolo tra Anthropic, OpenAI e OpenRouter. (2) OpenRouter solo con <code>openai/gpt-oss-120b</code> senza conservazione dei dati. (3) Massimo risparmio: tutte le figure operative su modelli aperti via OpenRouter.</p>
@@ -761,7 +791,7 @@ Il formato segue il template ADR di Nygard, con una sezione <strong>Razionale</s
 </tbody>
 </table>
 <p><strong>Razionale.</strong> Il costo segue il ragionamento richiesto. Due provider diversi per Pianificatore e Avversario, e due modelli diversi per i Reviewer, danno punti di vista indipendenti. OpenAI non ha modelli «Codex» correnti: le figure di codice usano i modelli generali indicati per il coding.</p>
-<p><strong>Conseguenze.</strong> ⚠️ Da verificare con P-12: ID e prezzi dei modelli OpenAI e OpenRouter. I diff delle PR vanno a provider scelti da OpenRouter: servono i <em>guardrail</em> per codice riservato (<a href="05-Team-Agenti.html#9-sicurezza">05 §9</a>). Un cambio di modello modifica solo il campo <code>model</code> del file della figura.</p>
+<p><strong>Conseguenze.</strong> ⚠️ Da verificare con P-12: ID e prezzi dei modelli OpenAI e OpenRouter. I diff delle PR vanno a provider scelti da OpenRouter: servono i <em>guardrail</em> per codice riservato (<a href="05-Team-Agenti.html#10-sicurezza">05 §9</a>). Un cambio di modello modifica solo il campo <code>model</code> del file della figura.</p>
 <p><strong>Fonti.</strong> <a href="Sources.html#s-040">S-040</a>, <a href="Sources.html#s-102">S-102</a>, <a href="Sources.html#s-166">S-166</a>, <a href="Sources.html#s-072">S-072</a>.</p>
 <hr />
 <p><a id="d-035"></a></p>
@@ -793,7 +823,139 @@ Il formato segue il template ADR di Nygard, con una sezione <strong>Razionale</s
 <p><strong>Decisione.</strong> Opzione 1: <code>examples/agents/docs/team/writing-rules.md</code> contiene 16 regole originali e un dizionario iniziale. Le istruzioni del Pianificatore vietano di copiare testo dello standard.</p>
 <p><strong>Razionale.</strong> Lo Scrittore ha bisogno delle regole nel repository per applicarle. Un testo originale rispetta il vincolo di riservatezza.</p>
 <p><strong>Conseguenze.</strong> Il Pianificatore estende il dizionario a ogni progetto. Le regole non sostituiscono lo standard e non lo riproducono.</p>
-<p><strong>Fonti.</strong> <a href="Sources.html#s-092">S-092</a>.</p></article>
+<p><strong>Fonti.</strong> <a href="Sources.html#s-092">S-092</a>.</p>
+<hr />
+<p><a id="d-037"></a></p>
+<h2 id="d-037--team-di-agenti-modelli-per-figura-dopo-la-verifica-p-12">D-037 — Team di agenti: modelli per figura dopo la verifica P-12</h2>
+<ul>
+<li><strong>Data:</strong> 2026-11-14 — <strong>Stato:</strong> Accepted — <strong>Decisore:</strong> PO ("Luna per il codice, GLM per i test"; "Resta DeepSeek V4.1 Flash") — <strong>Sostituisce:</strong> <a href="#d-034">D-034</a></li>
+</ul>
+<p><strong>Contesto.</strong> La verifica P-12 ha confermato i prezzi Anthropic e ha trovato tre problemi nei modelli di D-034: <code>gpt-5.4-mini</code> è della generazione precedente e costa 0,75 / 4,50 USD per 1M token; <code>qwen/qwen3-coder</code> ha il 46,2% su τ²-Bench per le chiamate agli strumenti; Anthropic presenta <code>claude-haiku-5-5</code> per classificazione, estrazione e instradamento, non per il coding. <code>gpt-5.3-codex</code> è deprecato.</p>
+<p><strong>Opzioni considerate.</strong> (1) Mantenere D-034. (2) <code>gpt-6-luna</code> per Sviluppatore e Operativo, <code>z-ai/glm-5.3</code> per il Tester, <code>qwen/qwen3.5-397b-a17b</code> per il Reviewer antagonista. (3) <code>google/gemini-3.5-flash-lite</code> per il Reviewer antagonista (più stabile, 78,3%).</p>
+<p><strong>Decisione.</strong> Opzione 2:</p>
+<table>
+<thead>
+<tr>
+<th>Figura</th>
+<th>Modello</th>
+<th>Effort</th>
+<th>Prezzo input / output (USD per 1M token)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Pianificatore</td>
+<td><code>claude-fable-5-2</code></td>
+<td><code>high</code></td>
+<td>8 / 40</td>
+</tr>
+<tr>
+<td>Organizzatore</td>
+<td><code>claude-sonnet-5-5</code></td>
+<td>default</td>
+<td>2 / 10</td>
+</tr>
+<tr>
+<td>Avversario</td>
+<td><code>gpt-6.1-sol</code></td>
+<td><code>low</code></td>
+<td>2 / 10</td>
+</tr>
+<tr>
+<td>Sviluppatore, Operativo</td>
+<td><code>gpt-6-luna</code></td>
+<td>default</td>
+<td>0,10 / 0,50</td>
+</tr>
+<tr>
+<td>Tester</td>
+<td><code>z-ai/glm-5.3</code> (OpenRouter)</td>
+<td>default</td>
+<td>0,0699 / 1,40</td>
+</tr>
+<tr>
+<td>Scrittore</td>
+<td><code>claude-haiku-5-5</code></td>
+<td>default</td>
+<td>0,10 / 0,50 fino a 100K token di prompt</td>
+</tr>
+<tr>
+<td>Reviewer ottimista</td>
+<td><code>deepseek/deepseek-v4.1-flash</code> (OpenRouter)</td>
+<td>default</td>
+<td>0,0507 / 0,2028</td>
+</tr>
+<tr>
+<td>Reviewer antagonista</td>
+<td><code>qwen/qwen3.5-397b-a17b</code> (OpenRouter), provider <code>novita</code> → <code>venice</code> → <code>gmicloud</code></td>
+<td>default</td>
+<td>0,39 / 2,34</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Razionale.</strong> <code>gpt-6-luna</code> costa meno di <code>gpt-5.4-mini</code> ed è della generazione corrente. <code>z-ai/glm-5.3</code> è presentato per l'ingegneria del software e ha il 77,3% su τ²-Bench. <code>qwen/qwen3.5-397b-a17b</code> ha il 79,1%; i tre provider scelti hanno il tasso di errore più basso nelle chiamate agli strumenti (settimana 7–14 novembre 2026). I due Reviewer restano su modelli diversi.</p>
+<p><strong>Conseguenze.</strong> Tre figure usano OpenRouter: i guardrail dell'account sono necessari per il codice riservato. ⚠️ I punteggi e i tassi di errore vengono da P-12 e non sono stati riletti dall'assistente. ⚠️ <code>modelOptions.provider</code> in <code>chatLanguageModels.native.json</code> va provato. I prezzi cambiano.</p>
+<p><strong>Fonti.</strong> <a href="Sources.html#s-040">S-040</a>, <a href="Sources.html#s-102">S-102</a>, <a href="Sources.html#s-151">S-151</a>, <a href="Sources.html#s-115">S-115</a>, <a href="Review-Perplexity.html#registro-degli-esiti">P-12</a>.</p>
+<hr />
+<p><a id="d-038"></a></p>
+<h2 id="d-038--definition-of-done-per-epic-e-feature-criteri-di-accettazione-verificabili">D-038 — Definition of Done per Epic e Feature; criteri di accettazione verificabili</h2>
+<ul>
+<li><strong>Data:</strong> 2026-11-14 — <strong>Stato:</strong> Accepted — <strong>Decisore:</strong> PO ("lo sviluppo é concluso solo quando la Definition of Done è completata")</li>
+</ul>
+<p><strong>Contesto.</strong> Il template chiudeva Feature ed Epic con una sezione «Chiusura» di due righe e con criteri di accettazione generici. Il PO segnala che i criteri di accettazione così definiti sono poco chiari e che gli sviluppatori li sottovalutano. Il PO chiede una Definition of Done evidente e aderente alla sua definizione formale, come obiettivo nei file <code>epic.md</code> e <code>feature.md</code> e come vincolo nelle review.</p>
+<p><strong>Opzioni considerate.</strong> (1) Rafforzare solo i criteri di accettazione. (2) Definition of Done come tabella con evidenze in <code>epic.md</code> e <code>feature.md</code>, controllata dai Reviewer, più criteri di accettazione in forma «Dato / quando / allora». (3) Definition of Done unica per tutto il progetto in un solo file.</p>
+<p><strong>Decisione.</strong> Opzione 2:</p>
+<ul>
+<li><code>backlog.md</code> definisce le voci standard: da DoD-F1 a DoD-F9 per una Feature, da DoD-E1 a DoD-E8 per un'Epic, ognuna con l'evidenza richiesta e chi la verifica;</li>
+<li>i modelli <code>templates/epic.md</code> e <code>templates/feature.md</code> aprono con l'obiettivo di completamento e contengono la tabella;</li>
+<li>l'Organizzatore compila le evidenze; i due Reviewer non approvano con una voce <code>non soddisfatta</code> o <code>senza evidenza</code>; il merge e lo stato <code>done</code> richiedono la Definition of Done completa;</li>
+<li>solo il PO può togliere una voce;</li>
+<li>i criteri di accettazione dei Task hanno la forma «Dato…, quando…, allora…», un campo <strong>Verifica</strong> e almeno un criterio per gli errori.</li>
+</ul>
+<p><strong>Razionale.</strong> La Scrum Guide definisce la Definition of Done come descrizione formale dello stato richiesto e dice che un lavoro che non la rispetta non si rilascia. Una tabella con evidenze rende il controllo oggettivo anche per un modello economico. Due livelli separati evitano di confondere «il Task funziona» con «la Feature è finita».</p>
+<p><strong>Conseguenze.</strong> Più lavoro per l'Organizzatore prima delle review. Dopo il merge serve una PR per registrare DoD-F8 e DoD-F9. I Reviewer non eseguono comandi: controllano le evidenze contro i file. La Scrum Guide applica la Definition of Done all'Increment: l'uso per Feature ed Epic è un adattamento di questo template.</p>
+<p><strong>Fonti.</strong> <a href="Sources.html#s-170">S-170</a>.</p>
+<hr />
+<p><a id="d-039"></a></p>
+<h2 id="d-039--protezione-di-main-e-develop-due-ruleset-codeowners-e-identità-separata-per-lagente">D-039 — Protezione di <code>main</code> e <code>develop</code>: due ruleset, CODEOWNERS e identità separata per l'agente</h2>
+<ul>
+<li><strong>Data:</strong> 2026-11-14 — <strong>Stato:</strong> Accepted — <strong>Decisore:</strong> PO ("Configurazione + spec come esempio"; "Identità separata")</li>
+</ul>
+<p><strong>Contesto.</strong> P-13 ha mostrato che un ruleset non può nominare un utente e che <code>gh pr merge --admin</code> o un bypass possono saltare le regole. Il PO ha prodotto con Spec Kit 1.4.0 e Perplexity un pacchetto: due ruleset, <code>CODEOWNERS</code>, CI, script di applicazione, specifica, piano e test di verifica.</p>
+<p><strong>Opzioni considerate.</strong> (1) Solo la descrizione in <code>gitflow.md</code>. (2) File di configurazione nel template e specifica, piano e test come caso svolto. (3) Tutto il pacchetto nel template. Per l'identità: (a) token del PO; (b) identità separata senza bypass.</p>
+<p><strong>Decisione.</strong> Opzione 2 con (b):</p>
+<ul>
+<li>nel template <code>examples/agents/</code>: <code>.github/rulesets/main-develop.json</code>, <code>.github/rulesets/main-release-approval.json</code>, <code>.github/CODEOWNERS</code>, <code>.github/workflows/ci.yml</code>, <code>scripts/Set-Rulesets.ps1</code>, <code>.specify/extensions/git/git-config.yml</code>;</li>
+<li>in <code>examples/speckit-ruleset/</code>: <code>spec.md</code>, <code>plan.md</code>, contratto, checklist, test Pester <code>Live</code> e workflow di verifica;</li>
+<li>l'agente usa una GitHub App o un account di servizio con <em>Contents: write</em> e <em>Pull requests: write</em>, senza <em>Administration</em> e senza bypass; il PO è l'unico code owner e approva le PR verso <code>main</code>.</li>
+</ul>
+<p><strong>Razionale.</strong> Le istruzioni di un agente non sono un controllo: il rifiuto deve venire da GitHub. Con il token del PO l'agente avrebbe i diritti del PO. Il caso svolto mostra il metodo spec-driven su un problema reale.</p>
+<p><strong>Conseguenze.</strong> ⚠️ Niente è stato provato su GitHub: tutti i file sono marcati «non provato». Lo script richiede un'organizzazione con un team di emergenza. Con il piano Free i ruleset funzionano solo nei repository pubblici. <code>integration_id</code> 15368 va controllato. <code>ci.yml</code> richiede una soluzione .NET nella radice. I nomi <code>contoso</code>, <code>release-approver</code> e simili sono esempi.</p>
+<p><strong>Fonti.</strong> <a href="Sources.html#s-171">S-171</a>, <a href="Sources.html#s-172">S-172</a>, <a href="Sources.html#s-173">S-173</a>, <a href="Sources.html#s-174">S-174</a>, <a href="Sources.html#s-175">S-175</a>, <a href="Sources.html#s-176">S-176</a>, <a href="Sources.html#s-177">S-177</a>, <a href="Review-Perplexity.html#registro-degli-esiti">P-13</a>.</p>
+<hr />
+<p><a id="d-040"></a></p>
+<h2 id="d-040--rami-di-feature-con-il-nome-creato-da-spec-kit">D-040 — Rami di Feature con il nome creato da Spec Kit</h2>
+<ul>
+<li><strong>Data:</strong> 2026-11-14 — <strong>Stato:</strong> Proposed — <strong>Decisore:</strong> assistente; il PO deve confermare</li>
+</ul>
+<p><strong>Contesto.</strong> D-035 nominava i rami <code>feature/&lt;epic&gt;-&lt;feature&gt;-&lt;nome&gt;</code>. L'estensione <code>git</code> di Spec Kit 1.4.0 crea <code>feature/&lt;NNN&gt;-&lt;slug&gt;</code> con <code>branch_prefix: "feature"</code>: l'ultimo segmento deve iniziare con il numero. I due formati non coincidono. Spec Kit non ha una corrispondenza ufficiale con Epic, Feature e Task.</p>
+<p><strong>Opzioni considerate.</strong> (1) Il ramo è quello di Spec Kit; <code>feature.md</code> registra ramo e cartella <code>specs/&lt;NNN&gt;-&lt;slug&gt;/</code>; gli ID <code>E&lt;nn&gt;-F&lt;nn&gt;</code> restano nel backlog. (2) Rami con l'ID del backlog, creati a mano, senza l'estensione <code>git</code>. (3) Un template di ramo che contiene i due identificativi.</p>
+<p><strong>Decisione proposta.</strong> Opzione 1. Una cartella <code>specs/&lt;NNN&gt;-&lt;slug&gt;/</code> corrisponde a una Feature del backlog.</p>
+<p><strong>Razionale.</strong> Un solo strumento crea i rami; nessun passo manuale. Il collegamento tra i due identificativi è nel front matter di <code>feature.md</code>.</p>
+<p><strong>Conseguenze.</strong> Il nome del ramo non mostra l'Epic. Se il PO sceglie un'altra opzione cambiano <code>gitflow.md</code>, <code>backlog.md</code>, i modelli e <code>git-config.yml</code>.</p>
+<p><strong>Fonti.</strong> <a href="Sources.html#s-080">S-080</a>, <a href="Review-Perplexity.html#registro-degli-esiti">P-13</a>.</p>
+<hr />
+<p><a id="d-041"></a></p>
+<h2 id="d-041--due-documenti-nuovi-byok-in-github-copilot-e-introduzione-a-litellm">D-041 — Due documenti nuovi: BYOK in GitHub Copilot e introduzione a LiteLLM</h2>
+<ul>
+<li><strong>Data:</strong> 2026-11-14 — <strong>Stato:</strong> Accepted — <strong>Decisore:</strong> PO ("aggiungi nel docs del sito due documenti")</li>
+</ul>
+<p><strong>Contesto.</strong> Il documento 02 descrive la procedura di configurazione. Il PO chiede due documenti di concetto per il sito: una descrizione più dettagliata del BYOK in GitHub Copilot e un'introduzione a LiteLLM con le feature del rilascio stable.</p>
+<p><strong>Opzioni considerate.</strong> (1) Ampliare il documento 02. (2) Due documenti nuovi, <code>06-BYOK-GitHub-Copilot.md</code> e <code>07-LiteLLM-Introduzione.md</code>, collegati da 02 e 05.</p>
+<p><strong>Decisione.</strong> Opzione 2. I due documenti entrano nelle pagine del sito offline.</p>
+<p><strong>Razionale.</strong> Il documento 02 è una procedura: i concetti in documenti separati si leggono senza seguire i passi. Lo scopo è didattico.</p>
+<p><strong>Conseguenze.</strong> ⚠️ La documentazione di LiteLLM non è divisa per versione: il documento 07 elenca le feature della documentazione corrente con la 1.108.2 come riferimento. ⚠️ La prova LTS dura un mese: il documento 07 va riletto prima del talk. Alcune feature raccomandate (SSO) sono Enterprise.</p>
+<p><strong>Fonti.</strong> <a href="Sources.html#s-015">S-015</a>, <a href="Sources.html#s-071">S-071</a>, <a href="Sources.html#s-182">S-182</a>, <a href="Sources.html#s-183">S-183</a>, <a href="Sources.html#s-184">S-184</a>, <a href="Sources.html#s-185">S-185</a>, <a href="Sources.html#s-186">S-186</a>, <a href="Sources.html#s-187">S-187</a>, <a href="Sources.html#s-119">S-119</a>.</p></article>
 <script type="application/json" id="fonts-data">[
   {
     "id": "blexmono",

@@ -19,7 +19,7 @@
   <label>Testo <select id="pref-body"></select></label>
   <label>Codice <select id="pref-code"></select></label>
 </div>
-<nav class="docnav"><a href="../index.html">← Runbook</a><ul><li><a href="01-Installazione.html">01-Installazione</a></li><li><a href="02-Configurazione-Copilot.html">02-Configurazione-Copilot</a></li><li><a href="03-Security-Best-Practices.html">03-Security-Best-Practices</a></li><li><a href="04-Security-Review-OWASP-ISO27001.html">04-Security-Review-OWASP-ISO27001</a></li><li><a href="05-Team-Agenti.html">05-Team-Agenti</a></li><li><a href="Decisions.html">Decisions</a></li><li><a href="Sources.html">Sources</a></li><li><a href="Review-Perplexity.html">Review-Perplexity</a></li></ul></nav><article class="doc"><h1 id="02--configurazione-di-github-copilot-in-visual-studio-code-con-llm-via-api">02 — Configurazione di GitHub Copilot in Visual Studio Code con LLM via API</h1>
+<nav class="docnav"><a href="../index.html">← Runbook</a><ul><li><a href="01-Installazione.html">01-Installazione</a></li><li><a href="02-Configurazione-Copilot.html">02-Configurazione-Copilot</a></li><li><a href="03-Security-Best-Practices.html">03-Security-Best-Practices</a></li><li><a href="04-Security-Review-OWASP-ISO27001.html">04-Security-Review-OWASP-ISO27001</a></li><li><a href="05-Team-Agenti.html">05-Team-Agenti</a></li><li><a href="06-BYOK-GitHub-Copilot.html">06-BYOK-GitHub-Copilot</a></li><li><a href="07-LiteLLM-Introduzione.html">07-LiteLLM-Introduzione</a></li><li><a href="Decisions.html">Decisions</a></li><li><a href="Sources.html">Sources</a></li><li><a href="Review-Perplexity.html">Review-Perplexity</a></li></ul></nav><article class="doc"><h1 id="02--configurazione-di-github-copilot-in-visual-studio-code-con-llm-via-api">02 — Configurazione di GitHub Copilot in Visual Studio Code con LLM via API</h1>
 <p>Questo documento descrive come GitHub Copilot in VS Code usa modelli di provider esterni.
 Confronta due percorsi: <strong>configurazione nativa</strong> (BYOK diretto verso ogni provider) e <strong>gateway LiteLLM</strong> (un solo endpoint locale verso tutti i provider).</p>
 <p>Prerequisiti: <a href="01-Installazione.html">01-Installazione.md</a>. Decisioni di riferimento: <a href="Decisions.html#d-003">D-003</a>, <a href="Decisions.html#d-007">D-007</a>, <a href="Decisions.html#d-008">D-008</a>, <a href="Decisions.html#d-013">D-013</a>, <a href="Decisions.html#d-015">D-015</a>…<a href="Decisions.html#d-021">D-021</a>.</p>
@@ -367,6 +367,9 @@ Run the Playwright tests in `tests/e2e`. Use the template in [test template](./t
 }
 </code></pre>
 <h3 id="24-impostazioni-per-byok">2.4 Impostazioni per BYOK</h3>
+<blockquote>
+<p>Il concetto di BYOK è descritto in dettaglio in <a href="06-BYOK-GitHub-Copilot.html">06-BYOK-GitHub-Copilot.md</a>.</p>
+</blockquote>
 <table>
 <thead>
 <tr>
@@ -724,6 +727,9 @@ Run the Playwright tests in `tests/e2e`. Use the template in [test template](./t
 <hr />
 <h2 id="4-github-copilot-con-litellm-come-gateway">4. GitHub Copilot con LiteLLM come gateway</h2>
 <h3 id="41-quando-usare-un-gateway">4.1 Quando usare un gateway</h3>
+<blockquote>
+<p>LiteLLM e le sue feature sono presentati in <a href="07-LiteLLM-Introduzione.html">07-LiteLLM-Introduzione.md</a>.</p>
+</blockquote>
 <p>LiteLLM proxy espone un solo endpoint locale. Traduce le richieste nei formati dei provider (<a href="Sources.html#s-022">S-022</a>). La scelta tra nativo e gateway dipende dal contesto (<a href="Decisions.html#d-017">D-017</a>).</p>
 <p><strong>Criteri di scelta</strong></p>
 <table>

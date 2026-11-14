@@ -19,7 +19,7 @@
   <label>Testo <select id="pref-body"></select></label>
   <label>Codice <select id="pref-code"></select></label>
 </div>
-<nav class="docnav"><a href="../index.html">← Runbook</a><ul><li><a href="01-Installazione.html">01-Installazione</a></li><li><a href="02-Configurazione-Copilot.html">02-Configurazione-Copilot</a></li><li><a href="03-Security-Best-Practices.html">03-Security-Best-Practices</a></li><li><a href="04-Security-Review-OWASP-ISO27001.html">04-Security-Review-OWASP-ISO27001</a></li><li><a href="05-Team-Agenti.html">05-Team-Agenti</a></li><li><a href="Decisions.html">Decisions</a></li><li><a href="Sources.html">Sources</a></li><li><a href="Review-Perplexity.html">Review-Perplexity</a></li></ul></nav><article class="doc"><h1 id="review-con-perplexity-pro--prompt-di-verifica">Review con Perplexity Pro — prompt di verifica</h1>
+<nav class="docnav"><a href="../index.html">← Runbook</a><ul><li><a href="01-Installazione.html">01-Installazione</a></li><li><a href="02-Configurazione-Copilot.html">02-Configurazione-Copilot</a></li><li><a href="03-Security-Best-Practices.html">03-Security-Best-Practices</a></li><li><a href="04-Security-Review-OWASP-ISO27001.html">04-Security-Review-OWASP-ISO27001</a></li><li><a href="05-Team-Agenti.html">05-Team-Agenti</a></li><li><a href="06-BYOK-GitHub-Copilot.html">06-BYOK-GitHub-Copilot</a></li><li><a href="07-LiteLLM-Introduzione.html">07-LiteLLM-Introduzione</a></li><li><a href="Decisions.html">Decisions</a></li><li><a href="Sources.html">Sources</a></li><li><a href="Review-Perplexity.html">Review-Perplexity</a></li></ul></nav><article class="doc"><h1 id="review-con-perplexity-pro--prompt-di-verifica">Review con Perplexity Pro — prompt di verifica</h1>
 <p>Questo documento contiene i prompt per la review preliminare con un LLM diverso (Perplexity Pro).
 Lo scopo è confermare o confutare le affermazioni di <a href="01-Installazione.html">01-Installazione.md</a> e <a href="02-Configurazione-Copilot.html">02-Configurazione-Copilot.md</a>. I prompt P-11, P-12 e P-13 verificano <a href="05-Team-Agenti.html">05-Team-Agenti.md</a>.</p>
 <h2 id="procedura">Procedura</h2>
@@ -196,7 +196,7 @@ A7. Per C#: quali pratiche garantiscono che un'applicazione non termini per ecce
 </code></pre>
 <hr />
 <h2 id="registro-degli-esiti">Registro degli esiti</h2>
-<p>Risposte ricevute il 2026-11-07. L'assistente ha riletto direttamente le fonti primarie dei punti critici (colonna <strong>Verifica diretta</strong>).</p>
+<p>Risposte a P-01…P-10 ricevute il 2026-11-07; risposte a P-11, P-12 e P-13 ricevute il 2026-11-14. L'assistente ha riletto direttamente le fonti primarie dei punti critici (colonna <strong>Verifica diretta</strong>).</p>
 <table>
 <thead>
 <tr>
@@ -267,7 +267,10 @@ A7. Per C#: quali pratiche garantiscono che un'applicazione non termini per ecce
 </tbody>
 </table>
 <p>| P-09 | 5 confermate, 1 confutata (sandbox attiva di default), 1 parziale | Sandbox <code>off</code> di default: confermato (<a href="Sources.html#s-145">S-145</a>); procedura <code>proxy_admin</code>: confermata (<a href="Sources.html#s-148">S-148</a>) | 03 §3.3 riscritta; baseline con <code>chat.agent.sandbox.enabled: "on"</code>; limiti dell'harness Copilot; content exclusion e BYOK ⚠️; script <code>bootstrap-admin.sh</code> | <a href="Decisions.html#d-025">D-025</a> |
-| P-10 | Titoli ASI confermati; esiste LLM Top 10 2026; mappature Annex A parziali (controlli da aggiungere) | Data 2026-08-03 (<a href="Sources.html#s-146">S-146</a>) ed elenco 2026 (<a href="Sources.html#s-147">S-147</a>): confermati | 04 riscritto: ID 2026 con corrispondenza 2025, 16 controlli Annex A aggiunti, 3 rischi nuovi, Amd 1:2024, ISO/IEC 42001 | <a href="Decisions.html#d-024">D-024</a> |</p>
+| P-10 | Titoli ASI confermati; esiste LLM Top 10 2026; mappature Annex A parziali (controlli da aggiungere) | Data 2026-08-03 (<a href="Sources.html#s-146">S-146</a>) ed elenco 2026 (<a href="Sources.html#s-147">S-147</a>): confermati | 04 riscritto: ID 2026 con corrispondenza 2025, 16 controlli Annex A aggiunti, 3 rischi nuovi, Amd 1:2024, ISO/IEC 42001 | <a href="Decisions.html#d-024">D-024</a> |
+| P-11 | 3 confermate (A1–A3), 4 parziali (A5–A8), 1 non verificabile (A4, formato dell'ID) | <code>chat.agentHost.byokModels.enabled</code> sperimentale; <code>supportsReasoningEffort</code>; harness Local rimosso a febbraio 2027: confermati (<a href="Sources.html#s-071">S-071</a>). Nesting attivo di default nel runtime Copilot, <code>model-policy</code> non inoltrato, <code>github.copilot.chat.cli.customAgents.enabled</code>: non riletti | 05 §5 riscritta: limiti documentati solo per Local, impostazioni richieste, ordine dei modelli, sessione non su Auto; 05 §11 | — |
+| P-12 | Prezzi Anthropic confermati; <code>gpt-5.3-codex</code> deprecato; <code>gpt-5.4-mini</code> generazione precedente; <code>qwen/qwen3-coder</code> confutato come scelta (46,2% τ²-Bench) | Non riletta: i listini OpenAI e OpenRouter non sono stati aperti dall'assistente | 05 §4 con i prezzi; modelli nei file <code>.agent.md</code>; provider OpenRouter fissati per il Reviewer antagonista (modifica del PO) | <a href="Decisions.html#d-037">D-037</a> |
+| P-13 | GitFlow confermato; Spec Kit 1.4.0: rami dall'estensione <code>git</code>; nessuna mappatura ufficiale su Epic/Feature/Task; NUnit 5.0.0 e Pester 6.2.0; nessuna regola «utente specifico» nei ruleset; <code>--admin</code> e bypass saltano le regole; nessuna pratica garantisce l'assenza di terminazioni | Non riletta. Il pacchetto Spec Kit del PO (ruleset, CI, test) è stato letto per intero ma <strong>non provato su GitHub</strong> | 05 §6, §9; <code>gitflow.md</code>; istruzioni del Tester; template con ruleset e CODEOWNERS; <code>examples/speckit-ruleset/</code> | <a href="Decisions.html#d-039">D-039</a>, <a href="Decisions.html#d-040">D-040</a> |</p>
 <p><strong>Punti ancora aperti (⚠️), da provare prima del talk</strong></p>
 <ul>
 <li class="task"><input type="checkbox" disabled> Percorso di <code>chatLanguageModels.json</code> su macOS e Linux.</li>
@@ -281,6 +284,11 @@ A7. Per C#: quali pratiche garantiscono che un'applicazione non termini per ecce
 <li class="task"><input type="checkbox" disabled> Opzione <code>turn_off_message_logging</code> di LiteLLM.</li>
 <li class="task"><input type="checkbox" disabled> Unit systemd con <code>ProtectHome=read-only</code>: avvio di <code>~/.local/bin/litellm</code>.</li>
 <li class="task"><input type="checkbox" disabled> Semantica di <code>chat.agent.sandbox.network.allowedDomains</code> (<code>/sandbox policy</code>).</li>
+<li class="task"><input type="checkbox" disabled> BYOK nell'harness Copilot: <code>chat.agentHost.byokModels.enabled</code>, <code>github.copilot.chat.cli.customAgents.enabled</code>, formato dell'ID nel campo <code>model</code> (P-11).</li>
+<li class="task"><input type="checkbox" disabled> Controllo del costo dei subagent con modelli BYOK; sessione su Auto (P-11).</li>
+<li class="task"><input type="checkbox" disabled> <code>modelOptions.provider</code> di <code>chatLanguageModels.native.json</code> verso OpenRouter (P-12).</li>
+<li class="task"><input type="checkbox" disabled> Ruleset, <code>CODEOWNERS</code>, <code>ci.yml</code>, <code>Set-Rulesets.ps1</code> e rifiuto di <code>gh pr merge --admin</code> in un repository di laboratorio (P-13).</li>
+<li class="task"><input type="checkbox" disabled> Conferma del PO sulla proposta <a href="Decisions.html#d-040">D-040</a>.</li>
 </ul></article>
 <script type="application/json" id="fonts-data">[
   {
