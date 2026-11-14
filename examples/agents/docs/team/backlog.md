@@ -65,8 +65,8 @@ Il file `epic.md` contiene questa tabella.
 
 | ID | Voce | Evidenza richiesta | Chi verifica |
 |---|---|---|---|
-| DoD-E1 | Tutte le Feature dell'Epic hanno la Definition of Done completa | Elenco delle Feature con stato | Organizzatore |
-| DoD-E2 | Ogni risultato misurabile dell'Epic è verificato | Per ogni risultato: test o comando ed esito | Organizzatore, PO |
+| DoD-E1 | Tutte le Feature dell'Epic hanno la Definition of Done completa | Elenco delle Feature con stato | Organizzatore, Reviewer |
+| DoD-E2 | Ogni risultato misurabile dell'Epic è verificato | Per ogni risultato: test o comando ed esito | Organizzatore, Reviewer, PO |
 | DoD-E3 | I test d'integrazione del Tester sono verdi sul ramo `release/*` | Comando, numero di test superati e falliti | Organizzatore, Reviewer |
 | DoD-E4 | Regola di qualità di `main`: nessun rilievo aperto su eccezioni non gestite; il prodotto ha un gestore globale degli errori | Esito del Reviewer antagonista sulla PR verso `main` | Reviewer antagonista |
 | DoD-E5 | Manuale utente, manuale per sviluppatori e log di sviluppo sono aggiornati | Percorsi dei file | Reviewer ottimista |
