@@ -25,7 +25,7 @@ Una frase: cosa può fare l'utente quando la Feature è finita.
 
 ## Definition of Done
 
-Le voci vengono da `docs/team/backlog.md`. Il Pianificatore può aggiungere voci (da `DoD-F10`). Solo il PO può togliere una voce, con una decisione in `decisions.md`.
+Le voci vengono da `docs/team/backlog.md`. Il Pianificatore può aggiungere voci (da `DoD-F10`). Solo il PO può togliere una voce, con una ADR in `decisions.md`.
 
 | ID | Voce | Soddisfatta | Evidenza |
 |---|---|---|---|
@@ -35,7 +35,7 @@ Le voci vengono da `docs/team/backlog.md`. Il Pianificatore può aggiungere voci
 | DoD-F4 | Ogni input non valido ed errore previsto ha un test verde | ☐ | |
 | DoD-F5 | Documentazione scritta secondo le regole di scrittura | ☐ | |
 | DoD-F6 | Controlli di stato della PR verdi | ☐ | |
-| DoD-F7 | I due Reviewer approvano; nessun rilievo `alta` o `media` aperto | ☐ | |
+| DoD-F7 | I due Reviewer approvano; nessun rilievo `alta` o `media` aperto; il PO approva la PR | ☐ | |
 | DoD-F8 | PR unita in `develop` con un merge commit | ☐ | |
 | DoD-F9 | Backlog aggiornato | ☐ | |
 

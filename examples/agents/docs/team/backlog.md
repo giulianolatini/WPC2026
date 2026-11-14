@@ -12,7 +12,7 @@ Il Pianificatore scrive il backlog. L'Organizzatore aggiorna lo stato e le evide
 specs/                                  # specifiche e piani di GitHub Spec Kit (una cartella NNN-<slug> per Feature)
 docs/backlog/
 ├── README.md                           # indice delle Epic con lo stato
-├── decisions.md                        # scelte del PO registrate nel brainstorming
+├── decisions.md                        # registro ADR: scelte del PO, versione di Spec Kit
 └── E01-<nome-epic>/
     ├── epic.md                         # obiettivo, risultati misurabili, Definition of Done, Feature
     └── F01-<nome-feature>/
@@ -21,7 +21,12 @@ docs/backlog/
         └── T02-<nome-task>.md
 ```
 
-I modelli dei tre file sono in [templates/](templates/): [epic.md](templates/epic.md), [feature.md](templates/feature.md), [task.md](templates/task.md). Il Pianificatore copia il modello e non toglie sezioni.
+I modelli sono in [templates/](templates/): [epic.md](templates/epic.md), [feature.md](templates/feature.md), [task.md](templates/task.md), [decisions.md](templates/decisions.md). Il Pianificatore copia il modello e non toglie sezioni.
+
+## Registro delle decisioni (ADR)
+
+`docs/backlog/decisions.md` è un registro ADR che cresce solo in coda. Una decisione accettata non si modifica: una ADR nuova la sostituisce e la vecchia riceve lo stato `Sostituita da ADR-NNN`.
+La ADR-001 registra la versione di Spec Kit. A ogni nuova pianificazione il Pianificatore controlla se esiste una versione più recente e chiede al PO se aggiornare. Se il PO accetta, una ADR nuova sostituisce la ADR della versione precedente e indica la versione di arrivo.
 
 ## Identificativi
 
@@ -54,11 +59,11 @@ Il file `feature.md` contiene questa tabella. L'Organizzatore compila la colonna
 | DoD-F4 | Ogni input non valido e ogni errore previsto dai Task ha un test verde | Nomi dei test di errore | Reviewer antagonista |
 | DoD-F5 | La documentazione della Feature è scritta e rispetta [writing-rules.md](writing-rules.md) | Percorsi dei file: log, riferimento API, manuali | Reviewer ottimista |
 | DoD-F6 | I controlli di stato della PR sono verdi sull'ultimo commit (`build`, `test-dotnet`, `test-powershell`) | Esito di `gh pr checks <numero>` e hash del commit, in un commento della PR | Organizzatore, Reviewer |
-| DoD-F7 | I due Reviewer hanno esito `APPROVA` sull'ultimo commit; nessun rilievo `alta` o `media` è aperto | Esito, data e hash del commit delle due review, in un commento della PR | Organizzatore |
+| DoD-F7 | I due Reviewer hanno esito `APPROVA` sull'ultimo commit, nessun rilievo `alta` o `media` è aperto, e il PO (*code owner*) ha approvato la PR | Esito, data e hash del commit delle due review, in un commento della PR; review di approvazione del PO su GitHub | Organizzatore, PO |
 | DoD-F8 | La PR è unita in `develop` con un merge commit | Numero della PR e hash del merge | Organizzatore |
 | DoD-F9 | Il backlog è aggiornato con una PR che modifica solo `docs/backlog/`: evidenze da DoD-F6 a DoD-F8 compilate | Numero della PR di aggiornamento | Organizzatore, Reviewer ottimista |
 
-Ordine: l'Organizzatore compila in `feature.md` le evidenze da DoD-F1 a DoD-F5 e registra DoD-F6 in un commento della PR, **prima** delle review. Un commit nuovo sul ramo avvia controlli nuovi: per questo DoD-F6 e DoD-F7 non entrano nel ramo prima del merge. I Reviewer controllano solo queste voci (e le voci aggiunte dal Pianificatore). L'Organizzatore chiude DoD-F7 quando ha i due esiti `APPROVA`, poi DoD-F8 e DoD-F9 dopo il merge. Per un'Epic i Reviewer controllano da DoD-E1 a DoD-E5; DoD-E6, DoD-E7 e DoD-E8 si chiudono dopo.
+Ordine: l'Organizzatore compila in `feature.md` le evidenze da DoD-F1 a DoD-F5 e registra DoD-F6 in un commento della PR, **prima** delle review. Un commit nuovo sul ramo avvia controlli nuovi: per questo DoD-F6 e DoD-F7 non entrano nel ramo prima del merge. I Reviewer controllano solo queste voci (e le voci aggiunte dal Pianificatore). L'Organizzatore chiude DoD-F7 quando ha i due esiti `APPROVA` e l'approvazione del PO, poi DoD-F8 e DoD-F9 dopo il merge. Per un'Epic i Reviewer controllano da DoD-E1 a DoD-E5; DoD-E6, DoD-E7 e DoD-E8 si chiudono dopo.
 
 ## Definition of Done di un'Epic
 
@@ -102,6 +107,7 @@ Regole:
 - Una sola figura lo completa.
 - Ha un solo risultato, che si può verificare.
 - Non richiede scelte di prodotto: le scelte sono già in `decisions.md`.
+- Non richiede ricerche: il Pianificatore ha già chiesto al Cercatore i fatti necessari e li ha scritti nel **Contesto** del Task, con le fonti.
 - Per il codice: un task `tester` (test che falliscono) e poi un task `sviluppatore` o `operativo` che dipende dal primo. Il task `tester` è `done` con i test rossi: i criteri di accettazione risultano superati solo alla chiusura del task di implementazione.
 
 ## Stati

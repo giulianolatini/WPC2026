@@ -8,13 +8,14 @@ I documenti [06](../../docs/06-BYOK-GitHub-Copilot.md) e [07](../../docs/07-Lite
 
 | Percorso | Contenuto |
 |---|---|
-| `.github/agents/*.agent.md` | Le 9 figure del team come *custom agents* di VS Code |
+| `.github/agents/*.agent.md` | Le 10 figure del team come *custom agents* di VS Code |
+| `.vscode/mcp.json` | Server MCP `microsoft-learn` per il Cercatore |
 | `docs/team/workflow.md` | Figure, modelli, flusso di lavoro, ciclo TDD |
 | `docs/team/backlog.md` | Epic, Feature, Task; **Definition of Done**; criteri di accettazione |
-| `docs/team/templates/` | Modelli di `epic.md`, `feature.md`, `task.md` |
+| `docs/team/templates/` | Modelli di `epic.md`, `feature.md`, `task.md`, `decisions.md` (registro ADR) |
 | `docs/team/gitflow.md` | Rami GitFlow, regole di merge, protezione dei rami, identità dell'agente |
 | `docs/team/writing-rules.md` | Regole di scrittura e dizionario per lo Scrittore |
-| `.github/rulesets/*.json` | Due ruleset per `main` e `develop` ⚠️ |
+| `.github/rulesets/*.json` | Tre ruleset per `main` e `develop`: PR e controlli, approvazione su `main`, approvazione su `develop` ⚠️ |
 | `.github/CODEOWNERS` | Il PO come unico *code owner* (nome di esempio) ⚠️ |
 | `.github/workflows/ci.yml` | CI con i controlli `build`, `test-dotnet`, `test-powershell` ⚠️ |
 | `scripts/Set-Rulesets.ps1` | Applica i ruleset dai file JSON ⚠️ |
@@ -31,7 +32,8 @@ I nomi `contoso`, `sample-app`, `release-approver`, `release-emergency` e `conto
 - [ ] Configura in VS Code i modelli BYOK di Anthropic, OpenAI e OpenRouter ([02 §3](../../docs/02-Configurazione-Copilot.md#3-configurazione-nativa-verso-i-provider)).
 - [ ] Attiva le impostazioni dell'harness Copilot ([05 §5](../../docs/05-Team-Agenti.md#5-vincoli-tecnici-di-vs-code)).
 - [ ] Controlla il campo `model` di ogni file `.agent.md`: usa l'ID che il completamento di VS Code propone.
-- [ ] Sostituisci i nomi di esempio in `CODEOWNERS` e applica i ruleset ([gitflow.md](docs/team/gitflow.md#protezione-dei-rami-su-github)).
+- [ ] Leggi `.vscode/mcp.json` e avvia il server `microsoft-learn`. In Copilot CLI il comando è `/plugin install microsoftdocs/mcp`.
+- [ ] Sostituisci i nomi di esempio in `CODEOWNERS` e applica i ruleset ([gitflow.md](docs/team/gitflow.md#protezione-dei-rami-su-github)). Con il piano Free leggi [Piani GitHub](docs/team/gitflow.md#piani-github).
 - [ ] Apri la chat con l'agente **Pianificatore** per il brainstorming, poi con l'agente **Organizzatore** per lo sviluppo.
 
 Regola del team: lo sviluppo di una Feature o di un'Epic è concluso solo quando la sua Definition of Done è completa ([backlog.md](docs/team/backlog.md)).
