@@ -1,0 +1,84 @@
+name: CI
+
+# I nomi dei job (build, test-dotnet, test-powershell) sono i "context" richiesti
+# dal ruleset main-develop: non rinominarli senza aggiornare
+# .github/rulesets/main-develop.json nella stessa PR.
+# Niente filtri paths e niente if/needs sui job: un workflow saltato per filtro resta
+# "Pending" e blocca il merge; un job saltato risulta "Success" e aggirerebbe il controllo.
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [main, develop]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+      - name: Restore
+        run: dotnet restore
+      - name: Build
+        run: dotnet build --no-restore --configuration Release
+
+  test-dotnet:
+    name: test-dotnet
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+      - name: Test (NUnit)
+        run: >
+          dotnet test --configuration Release
+          --logger "trx;LogFileName=test-dotnet.trx"
+          --results-directory TestResults
+      - name: Risultati
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: test-dotnet-results
+          path: TestResults/
+
+  test-powershell:
+    name: test-powershell
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Installa Pester 6.2.0
+        shell: pwsh
+        run: Install-Module Pester -RequiredVersion 6.2.0 -Force -Scope CurrentUser
+      - name: Test (Pester), esclusi i test Live
+        shell: pwsh
+        run: |
+          $config = New-PesterConfiguration
+          $config.Run.Path = './tests'
+          $config.Run.Exit = $true
+          $config.Filter.ExcludeTag = 'Live'
+          $config.Output.Verbosity = 'Detailed'
+          $config.TestResult.Enabled = $true
+          $config.TestResult.OutputPath = 'test-powershell.xml'
+          $config.TestResult.OutputFormat = 'NUnitXml'
+          Invoke-Pester -Configuration $config
+      - name: Risultati
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: test-powershell-results
+          path: test-powershell.xml
