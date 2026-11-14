@@ -42,6 +42,15 @@
         "maxOutputTokens": 16000
       },
       {
+        "id": "openrouter-qwen35-review",
+        "name": "LiteLLM · OpenRouter Qwen3.5 397B (review)",
+        "url": "http://localhost:4000/v1/chat/completions",
+        "toolCalling": true,
+        "vision": false,
+        "maxInputTokens": 112000,
+        "maxOutputTokens": 16000
+      },
+      {
         "id": "hf-gpt-oss",
         "name": "LiteLLM · HF gpt-oss",
         "url": "http://localhost:4000/v1/chat/completions",
