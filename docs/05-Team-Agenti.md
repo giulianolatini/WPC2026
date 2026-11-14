@@ -132,6 +132,8 @@ La documentazione descrive molti limiti dei subagent **solo** per l'harness Loca
 | `chat.agentHost.byokModels.enabled` | `true` | `false` (sperimentale); riavvia l'Agent Host | [S-071](Sources.md#s-071), P-11 |
 | `github.copilot.chat.cli.customAgents.enabled` | `true` | `false` | P-11 ⚠️ |
 
+> ⚠️ **Avviso — server MCP in due file.** Il server `microsoft-learn` è dichiarato due volte, perché i due formati non sono intercambiabili: `.mcp.json` nella radice (chiave `mcpServers`) per l'harness Copilot, con l'impostazione sperimentale `chat.mcp.workspaceRootConfig.enabled`; `.vscode/mcp.json` (chiave `servers`) per l'harness Local. Se cambi il server, cambia **tutti e due** i file. Il nome del server deve restare `microsoft-learn`: il Cercatore lo usa nel campo `tools` (`microsoft-learn/*`).
+
 **Server MCP per il Cercatore.** Il file `.agent.md` nomina gli strumenti di un server MCP con `<nome del server>/*`; gli strumenti sono disponibili solo se il server è nella sessione ([S-072](Sources.md#s-072)). Il template dichiara il server `microsoft-learn` (`https://learn.microsoft.com/api/mcp`) in due file, perché i due formati non sono intercambiabili ([02 §2.3](02-Configurazione-Copilot.md#23-elementi-configurabili-e-posizione-nel-filesystem)): `.mcp.json` nella radice, chiave `mcpServers`, per l'harness Copilot (impostazione sperimentale `chat.mcp.workspaceRootConfig.enabled`); `.vscode/mcp.json`, chiave `servers`, per l'harness Local. In Copilot CLI il server si installa con `/plugin install microsoftdocs/mcp` ([S-188](Sources.md#s-188)). ⚠️ Da provare: il nome del server e la sua presenza nelle sessioni dell'harness Copilot.
 
 **Reasoning effort con un modello BYOK.** Il campo `reasoning-effort` del file `.agent.md` ha effetto solo se il modello dichiara `supportsReasoningEffort` (e, se serve, `reasoningEffortFormat`) in `chatLanguageModels.json` ([S-071](Sources.md#s-071), [06 §5](06-BYOK-GitHub-Copilot.md#5-il-file-chatlanguagemodelsjson)).
@@ -295,6 +297,8 @@ Nessuna pratica garantisce che un processo non termini mai: l'evento `AppDomain.
 4. il Reviewer antagonista controlla le evidenze della voce DoD-E4 e assegna severità `alta` a ogni eccezione non gestita in una PR verso `main`; il suo esito entra nella voce DoD-E6.
 
 ## 10. Sicurezza
+
+> ⚠️ **Avviso — rischio indiretto del Cercatore.** Il Cercatore non modifica file e non esegue comandi, ma la sua risposta arriva a figure che lo fanno. Un esempio di codice o un testo preso da una pagina web può quindi arrivare, tramite l'Organizzatore o il Pianificatore, a chi modifica file ed esegue test. Il rischio è accettato dal PO ([D-043](Decisions.md#d-043)) con queste difese: il Cercatore non riporta comandi di download o di installazione; chi riceve un esempio lo confronta con il task e non lo esegue così com'è; la sandbox e l'approvazione manuale dei comandi restano attive; il PO legge il diff prima di approvare la PR.
 
 - **Privilegio minimo.** Ogni figura ha solo gli strumenti necessari: i Reviewer e l'Avversario leggono soltanto; il Pianificatore usa il terminale solo per Spec Kit e per il ramo della pianificazione; solo l'Organizzatore usa `gh` per le PR ([03 §3](03-Security-Best-Practices.md#3-github-copilot-in-vs-code)).
 - **Segreti.** Le istruzioni di ogni figura vietano di leggere `.env`, chiavi e token. Mantieni attiva la sandbox dell'agente ([03 §7](03-Security-Best-Practices.md#7-baseline-di-configurazione)).

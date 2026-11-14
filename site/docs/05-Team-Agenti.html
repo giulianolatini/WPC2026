@@ -426,6 +426,9 @@ I file del team sono in <a href="../../examples/agents/README.md"><code>examples
 </tr>
 </tbody>
 </table>
+<blockquote>
+<p>⚠️ <strong>Avviso — server MCP in due file.</strong> Il server <code>microsoft-learn</code> è dichiarato due volte, perché i due formati non sono intercambiabili: <code>.mcp.json</code> nella radice (chiave <code>mcpServers</code>) per l'harness Copilot, con l'impostazione sperimentale <code>chat.mcp.workspaceRootConfig.enabled</code>; <code>.vscode/mcp.json</code> (chiave <code>servers</code>) per l'harness Local. Se cambi il server, cambia <strong>tutti e due</strong> i file. Il nome del server deve restare <code>microsoft-learn</code>: il Cercatore lo usa nel campo <code>tools</code> (<code>microsoft-learn/*</code>).</p>
+</blockquote>
 <p><strong>Server MCP per il Cercatore.</strong> Il file <code>.agent.md</code> nomina gli strumenti di un server MCP con <code>&lt;nome del server&gt;/*</code>; gli strumenti sono disponibili solo se il server è nella sessione (<a href="Sources.html#s-072">S-072</a>). Il template dichiara il server <code>microsoft-learn</code> (<code>https://learn.microsoft.com/api/mcp</code>) in due file, perché i due formati non sono intercambiabili (<a href="02-Configurazione-Copilot.html#23-elementi-configurabili-e-posizione-nel-filesystem">02 §2.3</a>): <code>.mcp.json</code> nella radice, chiave <code>mcpServers</code>, per l'harness Copilot (impostazione sperimentale <code>chat.mcp.workspaceRootConfig.enabled</code>); <code>.vscode/mcp.json</code>, chiave <code>servers</code>, per l'harness Local. In Copilot CLI il server si installa con <code>/plugin install microsoftdocs/mcp</code> (<a href="Sources.html#s-188">S-188</a>). ⚠️ Da provare: il nome del server e la sua presenza nelle sessioni dell'harness Copilot.</p>
 <p><strong>Reasoning effort con un modello BYOK.</strong> Il campo <code>reasoning-effort</code> del file <code>.agent.md</code> ha effetto solo se il modello dichiara <code>supportsReasoningEffort</code> (e, se serve, <code>reasoningEffortFormat</code>) in <code>chatLanguageModels.json</code> (<a href="Sources.html#s-071">S-071</a>, <a href="06-BYOK-GitHub-Copilot.html#5-il-file-chatlanguagemodelsjson">06 §5</a>).</p>
 <p><strong>Differenze per l'harness Local (riserva).</strong> Nei file <code>.agent.md</code>:</p>
@@ -697,6 +700,9 @@ Copy-Item -Force examples\agents\.gitignore C:\percorso\del\progetto\
 <li>il Reviewer antagonista controlla le evidenze della voce DoD-E4 e assegna severità <code>alta</code> a ogni eccezione non gestita in una PR verso <code>main</code>; il suo esito entra nella voce DoD-E6.</li>
 </ol>
 <h2 id="10-sicurezza">10. Sicurezza</h2>
+<blockquote>
+<p>⚠️ <strong>Avviso — rischio indiretto del Cercatore.</strong> Il Cercatore non modifica file e non esegue comandi, ma la sua risposta arriva a figure che lo fanno. Un esempio di codice o un testo preso da una pagina web può quindi arrivare, tramite l'Organizzatore o il Pianificatore, a chi modifica file ed esegue test. Il rischio è accettato dal PO (<a href="Decisions.html#d-043">D-043</a>) con queste difese: il Cercatore non riporta comandi di download o di installazione; chi riceve un esempio lo confronta con il task e non lo esegue così com'è; la sandbox e l'approvazione manuale dei comandi restano attive; il PO legge il diff prima di approvare la PR.</p>
+</blockquote>
 <ul>
 <li><strong>Privilegio minimo.</strong> Ogni figura ha solo gli strumenti necessari: i Reviewer e l'Avversario leggono soltanto; il Pianificatore usa il terminale solo per Spec Kit e per il ramo della pianificazione; solo l'Organizzatore usa <code>gh</code> per le PR (<a href="03-Security-Best-Practices.html#3-github-copilot-in-vs-code">03 §3</a>).</li>
 <li><strong>Segreti.</strong> Le istruzioni di ogni figura vietano di leggere <code>.env</code>, chiavi e token. Mantieni attiva la sandbox dell'agente (<a href="03-Security-Best-Practices.html#7-baseline-di-configurazione">03 §7</a>).</li>
