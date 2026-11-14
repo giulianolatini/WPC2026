@@ -79,7 +79,7 @@ sudo zypper refresh && sudo zypper install code
 ### S-102 — Installa PowerShell 7
 <!-- step: os=all path=all profile=all -->
 
-Su Windows il servizio e gli script `.ps1` usano PowerShell 7. Su macOS e Linux PowerShell 7 serve solo per la fase F9 (team di agenti): se non esegui la fase F9, salta questo passo ([01 §3.2](../01-Installazione.md#32-powershell-7)).
+Su Windows il servizio e gli script `.ps1` usano PowerShell 7. Su macOS e Linux PowerShell 7 serve solo per la fase F9 (team di agenti): se non esegui la fase F9, salta questo passo ([01 §3.2](../01-Installazione.md#32-powershell-7), [D-046](../Decisions.md#d-046)).
 
 ```powershell os=windows
 winget install --id Microsoft.PowerShell -e
@@ -105,10 +105,14 @@ pwsh -Version
 ```
 
 ```bash os=opensuse
-# Nessun pacchetto zypper ufficiale: global tool di .NET (richiede .NET SDK). ⚠️ da provare (S-194)
+# Nessun pacchetto zypper ufficiale: global tool di .NET. Installa prima .NET SDK (S-195). ⚠️ da provare (S-194)
+dotnet --version
 dotnet tool install --global PowerShell
-"$HOME/.dotnet/tools/pwsh" -Version
+export PATH="$HOME/.dotnet/tools:$PATH"
+pwsh -Version
 ```
+
+- [ ] openSUSE: aggiungi la riga `export PATH="$HOME/.dotnet/tools:$PATH"` a `~/.bashrc`, così `pwsh` è disponibile nei terminali nuovi e nei passi della fase F9.
 
 **Esito atteso:** `pwsh -Version` mostra la versione 7.4 o successiva ([S-190](../Sources.md#s-190), [S-192](../Sources.md#s-192), [S-193](../Sources.md#s-193)).
 

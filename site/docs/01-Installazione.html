@@ -60,6 +60,13 @@
 <td>Docker o <code>uv tool</code></td>
 <td>Docker o <code>uv tool</code></td>
 </tr>
+<tr>
+<td>PowerShell 7</td>
+<td><code>winget</code></td>
+<td><code>brew</code> (<a href="Decisions.html#d-046">D-046</a>)</td>
+<td><code>apt</code> (repository Microsoft)</td>
+<td><em>global tool</em> di .NET (<a href="Decisions.html#d-046">D-046</a>)</td>
+</tr>
 </tbody>
 </table>
 <blockquote>
@@ -307,7 +314,7 @@ docker compose version
 </code></pre>
 <h3 id="32-powershell-7">3.2 PowerShell 7</h3>
 <p>PowerShell 7 (<code>pwsh</code>) serve su <strong>Windows</strong> per il servizio (§6.4) e per la generazione delle chiavi (§4): Windows include solo Windows PowerShell 5.1.
-Serve su <strong>tutti i sistemi</strong> per il team di agenti: script <code>.ps1</code>, test Pester e <code>Set-Rulesets.ps1</code> (<a href="05-Team-Agenti.html">05</a>). Versione minima per il team: 7.4.</p>
+Serve su <strong>tutti i sistemi</strong> per il team di agenti: script <code>.ps1</code>, test Pester e <code>Set-Rulesets.ps1</code> (<a href="05-Team-Agenti.html">05</a>). Versione minima per il team: 7.4. La scelta dei metodi è nella decisione <a href="Decisions.html#d-046">D-046</a>.</p>
 <p><strong>Windows</strong></p>
 <pre class="code"><code class="language-powershell">winget install --id Microsoft.PowerShell -e
 </code></pre>
@@ -329,10 +336,19 @@ sudo apt-get install -y powershell
 </code></pre>
 <p>Il repository <code>packages.microsoft.com</code> è il metodo preferito da Microsoft per Ubuntu LTS (22.04, 24.04, 26.04) e Debian (12, 13) (<a href="Sources.html#s-192">S-192</a>, <a href="Sources.html#s-193">S-193</a>). Su Ubuntu il repository Microsoft contiene anche pacchetti .NET con versioni diverse da quelle di Ubuntu: scegli una sola origine per .NET.</p>
 <p><strong>openSUSE</strong></p>
-<p>Microsoft non pubblica un pacchetto <code>zypper</code> di PowerShell e non supporta openSUSE: la distribuzione è supportata dalla comunità (<a href="Sources.html#s-194">S-194</a>). Con .NET SDK già installato usa il <em>global tool</em>:</p>
+<p>Microsoft non pubblica un pacchetto <code>zypper</code> di PowerShell e non supporta openSUSE: la distribuzione è supportata dalla comunità (<a href="Sources.html#s-194">S-194</a>). Usa il <em>global tool</em> di .NET.</p>
+<ul>
+<li class="task"><input type="checkbox" disabled> Installa prima .NET SDK con <code>zypper</code>, dal repository Microsoft (<a href="Sources.html#s-195">S-195</a>). Il team di agenti lo richiede comunque (<a href="05-Team-Agenti.html#6-installazione-del-team-in-un-repository">05 §6</a>).</li>
+<li class="task"><input type="checkbox" disabled> Installa PowerShell e rendi <code>pwsh</code> disponibile nel terminale corrente:</li>
+</ul>
 <pre class="code"><code class="language-bash">dotnet tool install --global PowerShell
+export PATH=&quot;$HOME/.dotnet/tools:$PATH&quot;
+pwsh -Version
 </code></pre>
-<p>Il comando aggiunge <code>~/.dotnet/tools</code> al <code>PATH</code>: apri un terminale nuovo (<a href="Sources.html#s-191">S-191</a>). ⚠️ Da provare su openSUSE. In alternativa segui la pagina PowerShell del wiki di openSUSE.</p>
+<ul>
+<li class="task"><input type="checkbox" disabled> Rendi il percorso permanente: aggiungi la riga <code>export PATH="$HOME/.dotnet/tools:$PATH"</code> al file <code>~/.bashrc</code> (o al file di configurazione della tua shell). L'installer di .NET aggiunge <code>~/.dotnet/tools</code> al <code>PATH</code>, ma non sempre, e mai nel terminale già aperto (<a href="Sources.html#s-191">S-191</a>).</li>
+</ul>
+<p>⚠️ Da provare su openSUSE. In alternativa segui la pagina PowerShell del wiki di openSUSE.</p>
 <ul>
 <li class="task"><input type="checkbox" disabled> Verifica su ogni sistema: <code>pwsh -Version</code>.</li>
 </ul>

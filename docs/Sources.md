@@ -124,6 +124,7 @@ Gli altri documenti puntano alla fonte con un link del tipo `Sources.md#s-001`.
 | <a id="s-192"></a>S-192 | [Microsoft Learn — Install PowerShell 7 on Ubuntu](https://learn.microsoft.com/en-us/powershell/scripting/install/install-ubuntu) | PRIMARY | 2026-11-14 |
 | <a id="s-193"></a>S-193 | [Microsoft Learn — Install PowerShell 7 on Debian](https://learn.microsoft.com/en-us/powershell/scripting/install/install-debian) | PRIMARY | 2026-11-14 |
 | <a id="s-194"></a>S-194 | [Microsoft Learn — Community support for PowerShell on Linux (SLES e openSUSE)](https://learn.microsoft.com/powershell/scripting/install/community-support) | PRIMARY | 2026-11-14 |
+| <a id="s-195"></a>S-195 | [Microsoft Learn — Install the .NET SDK or the .NET Runtime on openSUSE Leap](https://learn.microsoft.com/dotnet/core/install/linux-opensuse) | PRIMARY | 2026-11-14 ⚠️ (letto solo l'estratto della ricerca) |
 
 ## GitHub Spec Kit
 
