@@ -55,7 +55,7 @@ Il file `feature.md` contiene questa tabella. L'Organizzatore compila la colonna
 | DoD-F8 | La PR è unita in `develop` con un merge commit | Numero della PR e hash del merge | Organizzatore |
 | DoD-F9 | Il backlog è aggiornato: stato `done`, evidenze compilate | Commit del backlog | Organizzatore |
 
-Ordine: l'Organizzatore compila le evidenze da DoD-F1 a DoD-F6 **prima** delle review. I Reviewer le controllano. Le voci da DoD-F7 a DoD-F9 si chiudono dopo le review.
+Ordine: l'Organizzatore compila le evidenze da DoD-F1 a DoD-F6 **prima** delle review. I Reviewer controllano solo queste voci (e le voci aggiunte dal Pianificatore). L'Organizzatore chiude DoD-F7 quando ha i due esiti `APPROVA`, poi DoD-F8 e DoD-F9 dopo il merge. Per un'Epic i Reviewer controllano da DoD-E1 a DoD-E5; DoD-E6, DoD-E7 e DoD-E8 si chiudono dopo.
 
 ## Definition of Done di un'Epic
 

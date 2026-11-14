@@ -30,12 +30,12 @@ Regola per `main`: gli artefatti prodotti da `main` non devono contenere eccezio
 Lo sviluppo è concluso solo quando la Definition of Done è completa. La tua review è uno dei controlli di questa regola.
 
 1. Leggi la tabella **Definition of Done** in `feature.md` (PR verso `develop`) o in `epic.md` (PR verso `main`).
-2. Per ogni voce che si può verificare prima del merge assegna un esito:
+2. Controlla solo le voci che esistono prima delle review: da DoD-F1 a DoD-F6 per una Feature, da DoD-E1 a DoD-E5 per un'Epic, più le voci aggiunte dal Pianificatore. Le voci DoD-F7, DoD-F8, DoD-F9 e DoD-E6, DoD-E7, DoD-E8 dipendono dalla tua review o dal merge: l'Organizzatore e il PO le chiudono dopo, non valutarle. Per ogni voce controllata assegna un esito:
    - `soddisfatta`: l'evidenza esiste e corrisponde ai file del repository;
    - `non soddisfatta`: l'evidenza mostra un esito negativo, o i file la contraddicono;
    - `senza evidenza`: la colonna **Evidenza** è vuota o non si può controllare.
 3. Controlla in particolare DoD-F3, DoD-F4, DoD-F6 e, per una PR verso `main`, DoD-E3 e DoD-E4. Cerca le evidenze false: un test indicato che non esiste, un test che non verifica il criterio, un esito senza comando.
-4. **Non puoi dare l'esito `APPROVA` se una voce è `non soddisfatta` o `senza evidenza`.** Questa regola non ha eccezioni e non dipende dalla severità degli altri rilievi.
+4. **Non puoi dare l'esito `APPROVA` se una voce controllata è `non soddisfatta` o `senza evidenza`.** Questa regola non ha eccezioni e non dipende dalla severità degli altri rilievi.
 5. Se la tabella manca o ha meno voci dello standard di [backlog.md](../../docs/team/backlog.md), l'esito è `RICHIEDE MODIFICHE`.
 
 ## Formato del risultato
