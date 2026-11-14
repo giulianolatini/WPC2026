@@ -1,7 +1,7 @@
 # Review con Perplexity Pro — prompt di verifica
 
 Questo documento contiene i prompt per la review preliminare con un LLM diverso (Perplexity Pro).
-Lo scopo è confermare o confutare le affermazioni di [01-Installazione.md](01-Installazione.md) e [02-Configurazione-Copilot.md](02-Configurazione-Copilot.md).
+Lo scopo è confermare o confutare le affermazioni di [01-Installazione.md](01-Installazione.md) e [02-Configurazione-Copilot.md](02-Configurazione-Copilot.md). I prompt P-11, P-12 e P-13 verificano [05-Team-Agenti.md](05-Team-Agenti.md).
 
 ## Procedura
 
@@ -172,6 +172,54 @@ A2. La mappatura seguente è corretta? Proponi controlli Annex A mancanti o erra
 A3. Come si inserisce l'uso di assistenti di coding AI con BYOK nel risk assessment (6.1.2) e nello Statement of Applicability (6.1.3)? Serve riferirsi a ISO/IEC 42001?
 A4. L'Amendment 1:2024 di ISO/IEC 27001 (cambiamento climatico in 4.1 e 4.2) ha impatti su questo ambito?
 A5. Rischi mancanti nel registro: furto chiavi dal gateway, prompt injection, lettura .env, costi non controllati, codice trattato da provider terzi, script non verificati, indisponibilità del gateway.
+[INCOLLA QUI LE ISTRUZIONI COMUNI]
+```
+
+---
+
+## P-11 — Custom agents, subagent e harness di VS Code
+
+```text
+Agisci da esperto di GitHub Copilot in VS Code (novembre 2026). Verifica sulla documentazione ufficiale.
+A1. Nell'harness Copilot un file .github/agents/<nome>.agent.md con "target: github-copilot" accetta i campi: name, description, model (lista), model-policy, reasoning-effort, tools, user-invocable, disable-model-invocation. Il campo "agents" e gli "handoffs" funzionano solo nell'harness Local.
+A2. L'harness Local è deprecato e sarà rimosso entro febbraio 2027.
+A3. Nell'harness Copilot i modelli BYOK (Anthropic, OpenAI, OpenRouter con chiave propria) funzionano solo con una configurazione sperimentale ("Agent Host BYOK"). Qual è il nome del setting e lo stato attuale?
+A4. Qual è il formato esatto dell'ID nel campo "model" per un modello BYOK nell'harness Copilot (esempio per claude-sonnet-5-5 di Anthropic e per un modello OpenRouter)?
+A5. Un custom agent chiamato come subagent usa il modello del suo campo "model". Se il modello è BYOK, il controllo sulla fascia di costo del modello principale non lo blocca.
+A6. Un subagent non può fare domande all'utente, non riceve la cronologia della conversazione principale e, senza chat.subagents.allowInvocationsFromSubagents, non può chiamare altri subagent. Questi limiti valgono anche nell'harness Copilot (strumento "task")?
+A7. Il campo "reasoning-effort" si applica ai modelli BYOK? Quali valori accetta per i modelli Claude e GPT?
+A8. Con "user-invocable: false" e "disable-model-invocation: false" un agente è nascosto dal selettore ma resta chiamabile come subagent. Senza il campo "agents", esiste un modo nell'harness Copilot per limitare quali subagent un agente può chiamare?
+[INCOLLA QUI LE ISTRUZIONI COMUNI]
+```
+
+---
+
+## P-12 — Modelli e prezzi per il team di agenti
+
+```text
+Agisci da analista dei modelli LLM per lo sviluppo software (novembre 2026). Usa le pagine ufficiali di prezzi e modelli.
+A1. Anthropic: claude-fable-5-2 costa 8/40 USD per 1M token (input/output), claude-sonnet-5-5 2/10, claude-haiku-5-5 da 0,10/0,50. claude-fable-5-2 è il modello più capace e accetta effort "high" o superiore.
+A2. OpenAI: i modelli con nome "Codex" (es. gpt-5.3-codex) sono deprecati o spenti. gpt-6.1-sol è un modello quasi di frontiera a costo ridotto; gpt-5.4-mini è il modello "mini" indicato per coding e subagent. Dai ID esatti e prezzi input/output di: gpt-6-astra, gpt-6.1-sol, gpt-6-luna, gpt-5.4-mini.
+A3. OpenRouter: esistono gli slug deepseek/deepseek-v4.1-flash e qwen/qwen3-coder? Dai prezzo input/output, finestra di contesto, supporto del tool calling.
+A4. Per una review di codice C# e PowerShell in sola lettura, quali 2 modelli economici su OpenRouter (meno di 1 USD per 1M token in input) hanno il tool calling più affidabile? Indica alternative agli slug di A3.
+A5. Per generare codice C# su task atomici e test NUnit, gpt-5.4-mini e claude-haiku-5-5 sono scelte adeguate nella fascia economica? Indica un'alternativa per ciascuno, con prezzo.
+A6. OpenRouter permette di limitare i provider e di escludere quelli che conservano i dati (parametri provider.data_collection, allow_fallbacks, guardrail di account). I parametri si possono impostare a livello di account, senza modificare la richiesta del client?
+[INCOLLA QUI LE ISTRUZIONI COMUNI]
+```
+
+---
+
+## P-13 — GitFlow, Spec Kit e TDD con NUnit e Pester
+
+```text
+Agisci da esperto di processi di sviluppo (.NET, PowerShell, Git). Verifica su fonti ufficiali.
+A1. GitFlow (V. Driessen): feature/* nasce da develop e si chiude in develop; release/* nasce da develop e si chiude in main e poi in develop; hotfix/* nasce da main e si chiude in main e in develop; ogni versione in main ha un tag.
+A2. GitHub Spec Kit (release corrente): quali nomi di ramo crea /speckit-specify? Si possono configurare per usare il prefisso feature/ di GitFlow? Qual è il comando per inizializzare Spec Kit in una cartella esistente con l'integrazione Copilot?
+A3. Spec Kit produce spec.md, plan.md e tasks.md per ogni feature nella cartella specs/. Come si mappa questa struttura su Epic, Feature e Task?
+A4. NUnit (versione corrente) con .NET: comando "dotnet test", attributi [Test], [TestCase], Assert.That, Assert.Throws per le eccezioni attese. Indica la versione corrente e il template "dotnet new nunit".
+A5. Pester (versione corrente) con PowerShell 7: Describe, Context, It, Should -Throw, Mock, comando Invoke-Pester. Indica la versione corrente.
+A6. In un ruleset di GitHub si può: richiedere una PR per main e develop, richiedere l'approvazione di un utente specifico su main, bloccare i push diretti e i force-push, richiedere controlli di stato. Un agente che usa "gh pr merge" con il token dell'utente rispetta il ruleset?
+A7. Per C#: quali pratiche garantiscono che un'applicazione non termini per eccezioni non gestite (gestore globale, validazione degli input, Result pattern)? Indica la documentazione Microsoft Learn.
 [INCOLLA QUI LE ISTRUZIONI COMUNI]
 ```
 
